@@ -1,0 +1,937 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="深入理解 Java 内存模型（JMM），搞懂多线程编程中&quot;可见性、原子性、有序性&quot;三大问题的根源。从线程通信与同步讲起，覆盖 JMM 抽象结构、JVM 实现（线程栈与堆区）、硬件内存架构，再到指令重排序、内存屏障和 happens-before 规则，把并发编程的底层原理一次讲透。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存模型">
+<meta property="og:url" content="https://crazycoding7.github.io/2018/04/05/Java_05%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="深入理解 Java 内存模型（JMM），搞懂多线程编程中&quot;可见性、原子性、有序性&quot;三大问题的根源。从线程通信与同步讲起，覆盖 JMM 抽象结构、JVM 实现（线程栈与堆区）、硬件内存架构，再到指令重排序、内存屏障和 happens-before 规则，把并发编程的底层原理一次讲透。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-05T00:24:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.173Z">
+<meta property="article:tag" content="并发编程">
+<meta property="article:tag" content="并发">
+<meta property="article:tag" content="内存模型">
+<meta property="article:tag" content="JMM">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>内存模型 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="内存模型"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-04-05 08:24" pubdate>
+          2018年4月5日 早上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          36 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">内存模型</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="关于并发编程"><a href="#关于并发编程" class="headerlink" title="关于并发编程"></a>关于并发编程</h2><p>在并发编程领域，有两个关键问题：<strong>线程之间的通信</strong>和<strong>线程之间的同步</strong>。</p>
+<h3 id="线程之间的通信"><a href="#线程之间的通信" class="headerlink" title="线程之间的通信"></a>线程之间的通信</h3><p>线程的通信是指线程之间以何种机制来交换信息。在命令式编程中，线程之间的通信机制有两种：<strong>共享内存</strong>和<strong>消息传递</strong>。</p>
+<ul>
+<li><strong>共享内存</strong>：线程之间共享程序的公共状态，通过写-读内存中的公共状态来隐式进行通信。</li>
+<li><strong>消息传递</strong>：线程之间没有公共状态，必须通过明确的发送消息来显式进行通信。在 Java 中典型的方式就是 <code>wait()</code> 和 <code>notify()</code>。</li>
+</ul>
+<h3 id="线程之间的同步"><a href="#线程之间的同步" class="headerlink" title="线程之间的同步"></a>线程之间的同步</h3><p>同步是指程序用于控制不同线程之间操作发生相对顺序的机制。</p>
+<ul>
+<li>在共享内存并发模型里，同步是<strong>显式</strong>进行的，程序员必须显式指定某个方法或某段代码需要在线程之间互斥执行。</li>
+<li>在消息传递的并发模型里，由于消息的发送必须在接收之前，因此同步是<strong>隐式</strong>进行的。</li>
+</ul>
+<h3 id="Java-的并发采用共享内存模型"><a href="#Java-的并发采用共享内存模型" class="headerlink" title="Java 的并发采用共享内存模型"></a>Java 的并发采用共享内存模型</h3><p>Java 线程之间的通信总是<strong>隐式</strong>进行，整个通信过程对程序员完全透明。如果编写多线程程序的 Java 程序员不理解隐式进行的线程之间通信的工作机制，很可能会遇到各种奇怪的内存可见性问题。</p>
+<h2 id="Java-内存模型（JMM）"><a href="#Java-内存模型（JMM）" class="headerlink" title="Java 内存模型（JMM）"></a>Java 内存模型（JMM）</h2><p>Java 内存模型即 Java Memory Model（简称 JMM），定义了 Java 虚拟机 (JVM) 在计算机内存 (RAM) 中的工作方式。JVM 是整个计算机虚拟模型，所以 JMM 是隶属于 JVM 的。</p>
+<p>JMM 定义了 Java 虚拟机在计算机内存中的工作方式，决定了一个线程对共享变量的写入何时对另一个线程可见。原始的 Java 内存模型效率并不理想，因此 Java 1.5 版本对其进行了重构（JSR-133），Java 8 仍沿用该版本。</p>
+<h3 id="JMM-的抽象关系"><a href="#JMM-的抽象关系" class="headerlink" title="JMM 的抽象关系"></a>JMM 的抽象关系</h3><p>从抽象的角度来看，JMM 定义了线程和主内存之间的抽象关系：</p>
+<ul>
+<li><strong>主内存（Main Memory）</strong>：所有线程共享的变量存储在主内存中。</li>
+<li><strong>本地内存（Local Memory）</strong>：每个线程都有一个私有的本地内存，存储了该线程以读&#x2F;写共享变量的副本。本地内存是 JMM 的一个抽象概念，并不真实存在，它涵盖了缓存、写缓冲区、寄存器以及其他的硬件和编译器优化。</li>
+</ul>
+<p>线程之间的通信必须要经历两个步骤：</p>
+<ol>
+<li>线程 A 把本地内存中更新过的共享变量刷新到主内存中去。</li>
+<li>线程 B 到主内存中去读取线程 A 之前已更新过的共享变量。</li>
+</ol>
+<p>实质上是线程 A 在向线程 B 发送消息，而且这个通信过程必须要经过主内存。JMM 通过控制主内存与每个线程的本地内存之间的交互，来为 Java 程序员提供内存可见性保证。</p>
+<h2 id="JVM-对-Java-内存模型的实现"><a href="#JVM-对-Java-内存模型的实现" class="headerlink" title="JVM 对 Java 内存模型的实现"></a>JVM 对 Java 内存模型的实现</h2><p>在 JVM 内部，Java 内存模型把内存分成了两部分：<strong>线程栈区</strong>和<strong>堆区</strong>。</p>
+<h3 id="线程栈区"><a href="#线程栈区" class="headerlink" title="线程栈区"></a>线程栈区</h3><p>JVM 中运行的每个线程都拥有自己的线程栈，线程栈包含了当前线程执行的方法调用相关信息（调用栈）。随着代码的不断执行，调用栈会不断变化。</p>
+<p>线程栈还包含了当前方法的所有本地变量信息。<strong>一个线程只能读取自己的线程栈</strong>，也就是说，线程中的本地变量对其它线程是不可见的。即使两个线程执行的是同一段代码，它们也会各自在自己的线程栈中创建本地变量。</p>
+<ul>
+<li><strong>原始类型</strong>（boolean, byte, short, char, int, long, float, double）的本地变量都直接保存在线程栈当中，各个线程之间都是独立的。</li>
+<li>一个线程可以传递一个副本给另一个线程，但它们是无法共享的。</li>
+</ul>
+<h3 id="堆区"><a href="#堆区" class="headerlink" title="堆区"></a>堆区</h3><p>堆区包含了 Java 应用创建的<strong>所有对象</strong>信息，不管对象是哪个线程创建的。不管是成员变量还是方法中的本地变量所引用的对象，都会被存储在堆区。</p>
+<p>关于存储位置的规则：</p>
+<ul>
+<li>本地变量如果是<strong>原始类型</strong>，完全存储到栈区。</li>
+<li>本地变量如果是<strong>对象引用</strong>，引用存储在栈中，对象本身仍然存储在堆区。</li>
+<li>对象的<strong>成员方法</strong>中的本地变量，存储在栈区（即使方法所属的对象在堆区）。</li>
+<li>对象的<strong>成员变量</strong>，不管原始类型还是包装类型，都存储到堆区。</li>
+<li><strong>static</strong> 类型的变量以及类本身相关信息，随着类本身存储在堆区。</li>
+</ul>
+<p>堆中的对象可以被多线程共享。如果一个线程获得对象的引用，便可访问这个对象的成员变量。如果两个线程同时调用同一个对象的同一个方法，它们可以同时访问对象的成员变量，但对于本地变量，每个线程都会拷贝一份到自己的线程栈中。</p>
+<h2 id="硬件内存架构"><a href="#硬件内存架构" class="headerlink" title="硬件内存架构"></a>硬件内存架构</h2><p>现代计算机一般都有 2 个以上 CPU，而且每个 CPU 还有可能包含多个核心。如果应用是多线程的，这些线程可能会在各个 CPU 核心中并行运行。</p>
+<p>在 CPU 内部有一组 <strong>CPU 寄存器</strong>，也就是 CPU 的存储器。CPU 操作寄存器的速度要比操作主存快得多。在主存和 CPU 寄存器之间还存在一个 <strong>CPU 缓存</strong>，速度介于两者之间。某些 CPU 可能有多个缓存层（一级缓存和二级缓存）。</p>
+<p>当一个 CPU 需要访问主存时：</p>
+<ul>
+<li><strong>读操作</strong>：先读取部分主存数据到 CPU 缓存，再读取到寄存器。</li>
+<li><strong>写操作</strong>：先 flush 寄存器到 CPU 缓存，然后在某些节点把缓存数据 flush 到主存。</li>
+</ul>
+<h2 id="JMM-与硬件架构的桥接"><a href="#JMM-与硬件架构的桥接" class="headerlink" title="JMM 与硬件架构的桥接"></a>JMM 与硬件架构的桥接</h2><p>Java 内存模型和硬件内存架构并不一致。硬件内存架构中并没有区分栈和堆，从硬件上看，不管是栈还是堆，大部分数据都会存到主存中，当然一部分栈和堆的数据也有可能会存到 CPU 寄存器中。</p>
+<p>当对象和变量存储到计算机的各个内存区域时，必然会面临两个最主要的问题：</p>
+<ol>
+<li><strong>共享对象对各个线程的可见性</strong></li>
+<li><strong>共享对象的竞争现象</strong></li>
+</ol>
+<h3 id="共享对象的可见性"><a href="#共享对象的可见性" class="headerlink" title="共享对象的可见性"></a>共享对象的可见性</h3><p>当多个线程同时操作同一个共享对象时，如果没有合理的使用 <code>volatile</code> 和 <code>synchronization</code> 关键字，一个线程对共享对象的更新有可能导致其它线程不可见。</p>
+<p>想象一下：共享对象存储在主存，一个 CPU 中的线程读取主存数据到 CPU 缓存，然后对共享对象做了更改，但 CPU 缓存中的更改后的对象还没有 flush 到主存，此时线程对共享对象的更改对其它 CPU 中的线程是不可见的。最终每个线程都会拷贝共享对象，而且拷贝的对象位于不同的 CPU 缓存中。</p>
+<p>要解决这个问题，可以使用 Java 的 <code>volatile</code> 关键字。volatile 可以保证变量会直接从主存读取，而对变量的更新也会直接写到主存。volatile 原理是基于 CPU 内存屏障指令实现的。</p>
+<h3 id="竞争现象"><a href="#竞争现象" class="headerlink" title="竞争现象"></a>竞争现象</h3><p>如果多个线程共享一个对象，并且同时修改这个共享对象，这就产生了竞争现象。</p>
+<p>例如：线程 A 和线程 B 共享一个对象 obj。假设线程 A 从主存读取 <code>obj.count</code> 到自己的 CPU 缓存，同时线程 B 也读取了 <code>obj.count</code> 到它的 CPU 缓存，并且两个线程都对 <code>obj.count</code> 做了加 1 操作。如果这两个加 1 操作是串行执行的，<code>obj.count</code> 会在原始值上加 2。然而如果两个加 1 操作是并行的，不管是线程 A 还是线程 B 先 flush 计算结果到主存，最终 <code>obj.count</code> 只会增加 1 次。</p>
+<p>要解决这个问题，可以使用 <code>synchronized</code> 代码块。synchronized 可以保证同一个时刻只有一个线程进入代码竞争区，也能保证代码块中所有变量都将会从主存中读，当线程退出代码块时，对所有变量的更新将会 flush 到主存。</p>
+<h3 id="volatile-和-synchronized-区别"><a href="#volatile-和-synchronized-区别" class="headerlink" title="volatile 和 synchronized 区别"></a>volatile 和 synchronized 区别</h3><ul>
+<li><strong>volatile</strong>：仅保证可见性，不保证原子性。适用于”一写多读”场景。</li>
+<li><strong>synchronized</strong>：既保证可见性，又保证原子性。适用于”多写”竞争场景。</li>
+</ul>
+<h2 id="支撑-Java-内存模型的基础原理"><a href="#支撑-Java-内存模型的基础原理" class="headerlink" title="支撑 Java 内存模型的基础原理"></a>支撑 Java 内存模型的基础原理</h2><h3 id="指令重排序"><a href="#指令重排序" class="headerlink" title="指令重排序"></a>指令重排序</h3><p>在执行程序时，为了提高性能，编译器和处理器会对指令做重排序。但是，JMM 确保在不同的编译器和不同的处理器平台之上，通过插入特定类型的 Memory Barrier 来禁止特定类型的编译器重排序和处理器重排序，为上层提供一致的内存可见性保证。</p>
+<p>重排序分为三种：</p>
+<ol>
+<li><strong>编译器优化重排序</strong>：编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序。</li>
+<li><strong>指令级并行的重排序</strong>：如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。</li>
+<li><strong>内存系统的重排序</strong>：处理器使用缓存和读写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。</li>
+</ol>
+<h4 id="数据依赖性"><a href="#数据依赖性" class="headerlink" title="数据依赖性"></a>数据依赖性</h4><p>如果两个操作访问同一个变量，其中一个为写操作，此时这两个操作之间存在数据依赖性。编译器和处理器<strong>不会</strong>改变存在数据依赖性关系的两个操作的执行顺序。</p>
+<h4 id="as-if-serial-语义"><a href="#as-if-serial-语义" class="headerlink" title="as-if-serial 语义"></a>as-if-serial 语义</h4><p>不管怎么重排序，<strong>单线程下的执行结果不能被改变</strong>。编译器、Runtime 和处理器都必须遵守 as-if-serial 语义。</p>
+<h3 id="内存屏障（Memory-Barrier）"><a href="#内存屏障（Memory-Barrier）" class="headerlink" title="内存屏障（Memory Barrier）"></a>内存屏障（Memory Barrier）</h3><p>通过内存屏障可以禁止特定类型处理器的重排序，从而让程序按预想的流程去执行。内存屏障（又称内存栅栏）是一条 CPU 指令，它的作用：</p>
+<ol>
+<li>保证特定操作的执行顺序。</li>
+<li>影响某些数据（或某条指令的执行结果）的内存可见性。</li>
+</ol>
+<p>编译器和 CPU 能够重排序指令来优化性能，但插入一条 Memory Barrier 会告诉编译器和 CPU：<strong>任何指令都不能和这条 Memory Barrier 指令重排序</strong>。</p>
+<p>Memory Barrier 所做的另一件事是强制刷出各种 CPU cache。如一个 Write-Barrier 将刷出所有在 Barrier 之前写入 cache 的数据，因此任何 CPU 上的线程都能读取到这些数据的最新版本。</p>
+<p><strong>与 Java 的关系</strong>：Java 中 <code>volatile</code> 就是基于 Memory Barrier 实现的。</p>
+<p>如果一个变量是 <code>volatile</code> 修饰的，JMM 会：</p>
+<ul>
+<li>在<strong>写入</strong>这个字段之后插入一个 <strong>Write-Barrier</strong> 指令。</li>
+<li>在<strong>读取</strong>这个字段之前插入一个 <strong>Read-Barrier</strong> 指令。</li>
+</ul>
+<p>这意味着：</p>
+<ol>
+<li>一个线程写入变量后，任何线程访问该变量都会拿到最新值。</li>
+<li>在写入变量之前的写入操作，其更新的数据对于其他线程也是可见的（因为 Memory Barrier 会刷出 cache 中所有先前的写入）。</li>
+</ol>
+<h3 id="happens-before"><a href="#happens-before" class="headerlink" title="happens-before"></a>happens-before</h3><p>从 JDK 5 开始，Java 使用新的 JSR-133 内存模型，基于 <strong>happens-before</strong> 的概念来阐述操作之间的内存可见性。</p>
+<p>在 JMM 中，如果一个操作的执行结果需要对另一个操作可见，那么这两个操作之间必须要存在 happens-before 关系。这两个操作既可以在同一个线程，也可以在不同的两个线程中。</p>
+<p>与程序员密切相关的 happens-before 规则如下：</p>
+<ol>
+<li><strong>程序顺序规则</strong>：一个线程中的每个操作，happens-before 于该线程中任意的后续操作。</li>
+<li><strong>监视器锁规则</strong>：对一个锁的解锁操作，happens-before 于随后对这个锁的加锁操作。</li>
+<li><strong>volatile 域规则</strong>：对一个 volatile 域的写操作，happens-before 于任意线程后续对这个 volatile 域的读。</li>
+<li><strong>传递性规则</strong>：如果 A happens-before B，且 B happens-before C，那么 A happens-before C。</li>
+</ol>
+<blockquote>
+<p><strong>注意</strong>：两个操作之间具有 happens-before 关系，并不意味着前一个操作必须要在后一个操作之前执行！仅仅要求前一个操作的执行结果对于后一个操作是可见的，且前一个操作按顺序排在后一个操作之前。</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" class="print-no-link">#并发编程</a>
+      
+        <a href="/tags/%E5%B9%B6%E5%8F%91/" class="print-no-link">#并发</a>
+      
+        <a href="/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" class="print-no-link">#内存模型</a>
+      
+        <a href="/tags/JMM/" class="print-no-link">#JMM</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>内存模型</div>
+      <div>https://crazycoding7.github.io/2018/04/05/Java_05内存模型/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2018年4月5日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/04/10/Android_01%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6_03Launcher%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/" title="Launcher启动原理">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Launcher启动原理</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/02/20/Android_01%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6_02Binder%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/" title="Binder进程通信机制">
+                        <span class="hidden-mobile">Binder进程通信机制</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

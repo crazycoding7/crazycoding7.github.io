@@ -1,0 +1,976 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Android 里几乎所有系统服务调用都走 Binder，这篇从进程通信的基础讲起，把管道、共享内存、Socket 这些传统方式过了一遍，然后重点拆 Binder 的一次拷贝原理和 AIDL 实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Binder进程通信机制">
+<meta property="og:url" content="https://crazycoding7.github.io/2018/02/20/Android_01%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6_02Binder%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="Android 里几乎所有系统服务调用都走 Binder，这篇从进程通信的基础讲起，把管道、共享内存、Socket 这些传统方式过了一遍，然后重点拆 Binder 的一次拷贝原理和 AIDL 实现。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/binder_overview.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process.ipc.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process.pipe.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process_share_memory.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process_message_queue.gif">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process_android_type.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process_binder.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process_binder_exec.jpeg">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/process_aidl.png">
+<meta property="article:published_time" content="2018-02-20T09:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.170Z">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Android框架">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://crazycoding7.github.io/img/android/binder_overview.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Binder进程通信机制 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Binder进程通信机制"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-02-20 17:00" pubdate>
+          2018年2月20日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Binder进程通信机制</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="Binder进程通信机制"><a href="#Binder进程通信机制" class="headerlink" title="Binder进程通信机制"></a>Binder进程通信机制</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/carson_ho/article/details/73560642">牛逼文章</a></p>
+<p><img src="/../img/android/binder_overview.png" srcset="/img/loading.gif" lazyload alt="示意图"></p>
+<h3 id="1-进程间通信理论基础"><a href="#1-进程间通信理论基础" class="headerlink" title="1. 进程间通信理论基础"></a>1. 进程间通信理论基础</h3><h4 id="1-基础通信模型"><a href="#1-基础通信模型" class="headerlink" title="1. 基础通信模型"></a><strong>1. 基础通信模型</strong></h4><p>每个进程各自有不同的用户空间，任何一个进程的全局变量在另一个进程中是不可见的，所以进程之间要交换数据<strong>必须通过内核</strong>，在内核中开辟一块缓冲区，进程1把数据从用户空间拷到内核缓冲区，进程2从内核缓冲区把数据读走，内核提供的这种机制称为(IPC,InterProcess Communication)。如下图所示：</p>
+<p><img src="/../img/android/process.ipc.png" srcset="/img/loading.gif" lazyload alt="ipc"></p>
+<h4 id="2-进程隔离"><a href="#2-进程隔离" class="headerlink" title="2. 进程隔离"></a><strong>2. 进程隔离</strong></h4><p>进程和进程之间内存不是共享的。</p>
+<h4 id="3-进程空间划分：用户空间-user-space-内核空间-kernel-spce"><a href="#3-进程空间划分：用户空间-user-space-内核空间-kernel-spce" class="headerlink" title="3. 进程空间划分：用户空间(user space)&#x2F;内核空间(kernel spce)"></a><strong>3. 进程空间划分：用户空间(user space)&#x2F;内核空间(kernel spce)</strong></h4><p>例如4G的内存，linux最多分配1G字节供内核空间使用，其他供各进程使用。</p>
+<h4 id="4-系统调用：用户态和内核态"><a href="#4-系统调用：用户态和内核态" class="headerlink" title="4. 系统调用：用户态和内核态"></a><strong>4. 系统调用：用户态和内核态</strong></h4><p>虽然从逻辑上进行了用户空间和内核空间的划分，但不可避免的用户空间需要访问内核资源，比如文件操作、访问网络等等。为了突破隔离限制，就需要借助<strong>系统调用</strong>来实现。系统调用是用户空间访问内核空间的唯一方式，保证了所有的资源访问都是在内核的控制下进行的，避免了用户程序对系统资源的越权访问，提升了系统安全性和稳定性。	Linux 使用两级保护机制：0 级供系统内核使用，3 级供用户程序使用。</p>
+<p>当一个任务（进程）执行系统调用而陷入内核代码中执行时，称进程处于<strong>内核运行态（内核态）</strong>。此时处理器处于特权级最高的（0级）内核代码中执行。当进程处于内核态时，执行的内核代码会使用当前进程的内核栈。每个进程都有自己的内核栈。</p>
+<p>当进程在执行用户自己的代码的时候，我们称其处于<strong>用户运行态（用户态）</strong>。此时处理器在特权级最低的（3级）用户代码中运行。</p>
+<p>系统调用主要通过如下两个函数来实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">copy_from_user() <span class="hljs-comment">//将数据从用户空间拷贝到内核空间</span><br>copy_to_user() <span class="hljs-comment">//将数据从内核空间拷贝到用户空间</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-传统通讯方式？"><a href="#2-传统通讯方式？" class="headerlink" title="2. 传统通讯方式？"></a>2. 传统通讯方式？</h3><p>目前linux支持的IPC包括传统的管道、SystemV IPC(即消息队列&#x2F;共享内存&#x2F;信号量)，以及socket。</p>
+<h4 id="1-管道Pipe"><a href="#1-管道Pipe" class="headerlink" title="1. 管道Pipe"></a><strong>1. 管道Pipe</strong></h4><blockquote>
+<p>管道可用于具有亲缘关系进程间的通信，有名管道克服了管道没有名字的限制，因此，除具有管道所具有的功能外，它还允许无亲缘关系进程间的通信。</p>
+</blockquote>
+<p>管道(半双工管道)是一种基本的IPC机制，分为无名管道和有名管道，<strong>本质上是一种特殊的文件</strong>[无名管道可以看做一个公用内存，是无名无形的；有名管道只是磁盘上的一个节点，而文件存储再内存缓冲页面中，与普通管道一样]。调用pipe&#x2F;fifo函数是会创建一块内核缓冲区(管道)用于通信，它有一个读端有一个写端。</p>
+<p>[流程如下图]：</p>
+<p>父进程创建管道文件，得到两个文件描述符指向管道的两端；</p>
+<p>fork子进程，那么子进程也具有值两个文件描述符；</p>
+<p>父进程关闭读端，子进程关闭写端；父进程写数据，子进程读数据，管道使用<strong>环形队列</strong>实现的，数据从写端流入读端，这样实现了进程间通讯。</p>
+<p><img src="/../img/android/process.pipe.png" srcset="/img/loading.gif" lazyload alt="process_pipe"></p>
+<p>[无名管道限制]：</p>
+<p>(1) 半双工的，数据只能单向流动；</p>
+<p>(2) 它们只能在具有公共祖先的进程之间使用,通常为父子进程(有名管道已解决)；</p>
+<p>(3) 数据大小有限制。</p>
+<h4 id="2-信号量"><a href="#2-信号量" class="headerlink" title="2. 信号量"></a><strong>2. 信号量</strong></h4><p>信号量(Semaphore)可以被看成一种具有原子操作的计数器，它控制多个进程对<strong>共享资源</strong>的访问，通常描述临界资源当中，表示临界资源的数目，常常被当做<strong>锁</strong>(lock)来使用，防止一个进程访问另外一个进程正在使用的资源。</p>
+<p>信号量不具备数据交换功能，主要目的是包含临界资源。</p>
+<p>[工作原理]：</p>
+<p>P(sv)：如果sv的值大于零，就给它减1；如果它为零，就挂起该进程的执行；</p>
+<p>V(sv)：如果其他进程因sv而被挂起，就让他恢复运行，如果没有进程因等待sv而挂起，就给它加1。</p>
+<p>举个例子，就是两个进程共享信号量sv，一旦其中一个进程执行了P(sv)操作，它将得到信号量，并可以进入临界区，使sv减1。而第二个进程将被阻止进入临界区，因为当它试图执行P(sv)时，sv为0，它会被挂起以等待第一个进程离开临界区域并执行V(sv)释放信号量，这时第二个进程就可以恢复执行。</p>
+<h4 id="3-共享内存"><a href="#3-共享内存" class="headerlink" title="3. 共享内存"></a><strong>3. 共享内存</strong></h4><p>共享内存指：把所有需要使用的共享数据都存放在共享内存(IPC shared memory region)区域中,任何想要访问这些共享数据的进程都必须在自己的进程地址空间中新增加一块内存区域,用来映射存放共享数据的物理内存页面;也就是说,任何想要访问这些共享数据的进程都必须把存放共享数据的物理内存页面的全部地址空间都映射到自己的进程地址空间中;这就是System V共享内存的实现机制;</p>
+<p><img src="/../img/android/process_share_memory.png" srcset="/img/loading.gif" lazyload alt="process_share_memory"></p>
+<p>[优点]：传输速度最快，无数据大小限制，不需要复制；</p>
+<p>[缺点]：没有提供同步机制，需要与信号量配合使用；</p>
+<h4 id="4-消息队列"><a href="#4-消息队列" class="headerlink" title="4. 消息队列"></a><strong>4. 消息队列</strong></h4><p>消息队列的本质就是由内核创建的用于存放消息的<strong>链表或链表</strong>，由于是存放消息的，所以我们就把这个链表称为了消息队列。通信的进程通过共享操作同一个消息队列，就能实现进程间通信。</p>
+<p><img src="/../img/android/process_message_queue.gif" srcset="/img/loading.gif" lazyload alt="process_message_queue"></p>
+<p>[优势]：</p>
+<p>消息队列与管道以及有名管道相比，具有更大的灵活性，适合分布式场景。首先，它提供有格式字节流，有利于减少开发人员的工作量；其次，消息具有类型，在实际应用中，可作为优先级使用。这两点是管道以及有名管道所不能比的。同样，消息队列可以在几个进程间复用，而不管这几个进程是否具有亲缘关系，这一点与有名管道很相似；但消息队列是随内核持续的，与有名管道（随进程持续）相比，生命力更强，应用空间更大。</p>
+<h4 id="5-Socket"><a href="#5-Socket" class="headerlink" title="5. Socket"></a><strong>5. Socket</strong></h4><p>Socket API原本是为网络通讯设计的，后来在socket框架上发展出一种IPC机制，就是UNIX Domain Socket。更有效率，不需要经过网络协议栈，不需要打包拆包、计算校验等，只是将应用层数据从一个进程copy到另一个进程。是全双工的。</p>
+<h3 id="3-Android-进程通信比较"><a href="#3-Android-进程通信比较" class="headerlink" title="3. Android 进程通信比较"></a>3. Android 进程通信比较</h3><p><img src="/../img/android/process_android_type.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>其中 Intent、AIDL、Messenger、COntentProvider都是基于Binder实现。</strong></p>
+<h3 id="4-Binder通信机制"><a href="#4-Binder通信机制" class="headerlink" title="4. Binder通信机制"></a>4. Binder通信机制</h3><h4 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a><strong>1. 介绍</strong></h4><blockquote>
+<p>来源：Android之父团队研发，后来开源OpenBinder。</p>
+<p><strong>Binder 是来自OpenBinder框架的一个用于本地IPC的技术。它使用了linux 的mmap机制把进程的用户空间的内存映射到一个叫做 <code>/dev/binder</code> 驱动设备上，使得进程间传递数据只需要复制就能完成。</strong></p>
+</blockquote>
+<p>Binder 框架是一个完整的RPC框架，本地的IPC支持只是它其中的一个功能点。和一个普通的RPC不太一样的是，OpenBinder 的设计目标就是在针对系统的，它不会被应用层直接使用，而是需要被内置到系统里面。</p>
+<p>内部使用mmap机制提高性能。简单来说，就是能够把一个文件的内容，映射到内存里面，使得进程之间对这个内存空间的操作能够同步到那个文件上，同时文件里面的改动也能同步到内存里面。需要注意的是，这里说的<code>文件</code>，指的是linux上广义的文件。在linux上，一切皆文件。</p>
+<p>这其中”内存映射” 这个过程，是在B进程启动的时候，就已经做过映射的。这里映射的，是一个驱动 <code>/dev/binder</code>，这个驱动也是一个 “文件”。每一个进程启动后，都会在自己的进程内部指定一块内存，用来接收来自启动程序的数据。这一块内存区域会和内核空间的文件 <code>/dev/binder</code> 进行映射。</p>
+<p>当有IPC要发生的时候，进程A之间把数据复制到内核中，也就是写到 <code>/dev/binder</code> 里面对应的位置，正好这一段位置就是进程B的用户空间。</p>
+<p>我们可以看到，binder 驱动在这个机制中担任了核心的位置，它是一个虚拟的驱动，并没有真实的设备，在IPC的时候把它当作一个文件来和用户空间的内存进行一个映射。也就是这个内存映射的存在，使得数据的复制次数降低到了1，也就是所谓的”一次拷贝”。</p>
+<p>主要包含四个部分：</p>
+<ul>
+<li><p><strong>Client进程</strong></p>
+<p>使用服务的进程。客户端要想访问Binder的远程服务，就必须获取远程服务的Binder对象在binder驱动层对应的binder驱动层对应的mRemote引用。当获取到mRemote对象的引用后，就可以调用相应Binde对象的服务了。</p>
+</li>
+<li><p><strong>Server进程</strong></p>
+<p>提供服务的进程。一个Binder服务器就是一个Binder类的对象。当创建一个Binder对象后，内部就会开启一个线程，这个线程用户接收binder驱动发送的消息，收到消息后，会执行相关的服务代码。</p>
+</li>
+<li><p><strong>ServiceManager进程</strong></p>
+<p>将字符形式的Binder名字转化为Client中对该Binder的引用，使得Client能够通过Binder名称获取对应Serview的Binder实体的引用。需要注意的是此处的Service Manager是指Native层的ServiceManager（C++），并非指framework层的ServiceManager(Java)。</p>
+</li>
+<li><p><strong>Binder驱动</strong></p>
+<p>驱动负责进程之间Binder通信的建立，Binder在进程之间的传递，Binder引用计数管理，数据包在进程之间的传递和交互等一系列底层支持。当服务端成功创建一个Binder对象后，Binder驱动也会相应创建一个mRemote对象，该对象的类型也是Binder类，客户就可以借助这个mRemote对象来访问远程服务。</p>
+</li>
+</ul>
+<p><img src="/../img/android/process_binder.png" srcset="/img/loading.gif" lazyload></p>
+<p>图中的Client,Server,Service Manager之间交互都是虚线表示，是由于它们彼此之间不是直接交互的，而是都通过与<a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=http://gityuan.com/2015/11/01/binder-driver/">Binder驱动</a>进行交互的，从而实现IPC通信方式。其中Binder驱动位于内核空间，Client,Server,Service Manager位于用户空间。Binder驱动和Service Manager可以看做是Android平台的基础架构，而Client和Server是Android的应用层，开发人员只需自定义实现client、Server端，借助Android的基本平台架构便可以直接进行IPC通信。</p>
+<h4 id="2-优劣势"><a href="#2-优劣势" class="headerlink" title="2. 优劣势"></a><strong>2. 优劣势</strong></h4><ul>
+<li><p>性能</p>
+<p>传统通信方式问题：</p>
+<ol>
+<li>性能低下，一次数据传递需要经历：用户缓存区-&gt;内核缓存区-&gt;用户缓存区，需要经历2次拷贝；</li>
+<li>接受数据的缓存区由数据接受者提供，但它不知道需要多大空间，只能尽量开辟大点空间或先获取消息头来获取消息大小，浪费空间或时间。</li>
+</ol>
+<p><strong>Binder内存映射</strong></p>
+<blockquote>
+<p>内存映射是通过mmap()实现，mmap()是操作系统中一种内存映射的方法。内存映射简单的讲，<strong>就是将用户空间的一块内存区域映射到内核缓存区</strong>。映射关系建立后，用户对这块区域的修改可以直接反应到内核空间；反之内核空间对这段数据的修改立即反应到用户空间。</p>
+<p>内存映射能减少数据拷贝次数，实现用户空间和内核空间的高效互动。两个空间各自的修改能直接反映在映射的内存区域，从而被对方空间及时感知。也正因为如此，内存映射能够提供对进程间通信的支持。</p>
+</blockquote>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>IPC方式</th>
+<th>数据拷贝次数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>共享内存(控制复杂，难以使用)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Binder</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Socket&#x2F;管道&#x2F;消息队列(2次copy，socket开销大)</td>
+<td>2</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>稳定性，低功耗</p>
+<p>基于Client-Server结构，架构清晰、职责明确。</p>
+</li>
+<li><p>安全性</p>
+<p>为每个app分配UID，进程的UID是鉴别进程身份的重要标志。同时 Binder 既支持实名 Binder，又支持匿名 Binder，安全性高。</p>
+</li>
+</ul>
+<h4 id="3-程序调用"><a href="#3-程序调用" class="headerlink" title="3. 程序调用"></a><strong>3. 程序调用</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//获取WindowManager服务引用</span><br><span class="hljs-type">WindowManager</span> <span class="hljs-variable">wm</span> <span class="hljs-operator">=</span> (WindowManager)getSystemService(getApplication().WINDOW_SERVICE);  <br><span class="hljs-comment">//布局参数layoutParams相关设置略...</span><br><span class="hljs-type">View</span> <span class="hljs-variable">view</span><span class="hljs-operator">=</span>LayoutInflater.from(getApplication()).inflate(R.layout.float_layout, <span class="hljs-literal">null</span>);  <br><span class="hljs-comment">//添加view</span><br>wm.addView(view, layoutParams);<br></code></pre></td></tr></table></figure>
+
+<p><strong>注册服务(addService)：</strong>在Android开始过程中，Android会初始化系统的各种Service，并将这些Service向ServiceManager注册(即让其管理)。这一步是系统自动完成的。</p>
+<p><strong>获取服务(getService)：</strong>客户端想要得到具体的Service直接向ServiceManager要即可。客户端首先向ServiceManager查询得到具体的Service的引用，通常是Service引用的代理对象，对数据进行一些处理操作。</p>
+<p><strong>使用服务：</strong>通过这个引用向具体的服务器发送请求，服务器完成后就返回。</p>
+<p>具体执行过程：</p>
+<p><img src="/../img/android/process_binder_exec.jpeg" srcset="/img/loading.gif" lazyload alt="exec"></p>
+<h4 id="5-Aidl实现"><a href="#5-Aidl实现" class="headerlink" title="5. Aidl实现"></a><strong>5. Aidl实现</strong></h4><p>Aidl基于底层binder机制实现，使用Proxy&#x2F;Stub模式(Stub 跟 Proxy 是一对，俗称”代理-桩”，一般用在远程方法调用,如遥控器、售货机、取款机等)。当我们创建一个AIdl文件，会生成一个接口文件,最重要的是三个部分，<code>Proxy</code>，<code>Stub</code>和<code>asInterface</code>。</p>
+<p><img src="/../img/android/process_aidl.png" srcset="/img/loading.gif" lazyload alt="aidl"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * This file is auto-generated.  DO NOT MODIFY.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">package</span> com.wandoujia.baymax.aidl;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">IMultiply</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">android</span>.os.IInterface &#123;<br>  <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Stub</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">android</span>.os.Binder <span class="hljs-keyword">implements</span> <span class="hljs-title class_">com</span>.wandoujia.baymax.aidl.IMultiply &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> java.lang.<span class="hljs-type">String</span> <span class="hljs-variable">DESCRIPTOR</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;com.wandoujia.baymax.aidl.IMultiply&quot;</span>;<br><br>    <span class="hljs-type">public</span> <span class="hljs-title function_">Stub</span><span class="hljs-params">()</span> &#123;<br>      <span class="hljs-built_in">this</span>.attachInterface(<span class="hljs-built_in">this</span>, DESCRIPTOR);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> com.wandoujia.baymax.aidl.<span class="hljs-type">IMultiply</span> <span class="hljs-title function_">asInterface</span><span class="hljs-params">(android.os.IBinder obj)</span> &#123;<br>      <span class="hljs-keyword">if</span> ((obj == <span class="hljs-literal">null</span>)) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>      &#125;<br>      android.os.<span class="hljs-type">IInterface</span> <span class="hljs-variable">iin</span> <span class="hljs-operator">=</span> obj.queryLocalInterface(DESCRIPTOR);<br>      <span class="hljs-keyword">if</span> (((iin != <span class="hljs-literal">null</span>) &amp;&amp; (iin <span class="hljs-keyword">instanceof</span> com.wandoujia.baymax.aidl.IMultiply))) &#123;<br>        <span class="hljs-keyword">return</span> ((com.wandoujia.baymax.aidl.IMultiply) iin);<br>      &#125;<br>      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">com</span>.wandoujia.baymax.aidl.IMultiply.Stub.Proxy(obj);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> android.os.<span class="hljs-type">IBinder</span> <span class="hljs-title function_">asBinder</span><span class="hljs-params">()</span> &#123;<br>      <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">onTransact</span><span class="hljs-params">(<span class="hljs-type">int</span> code, android.os.Parcel data, android.os.Parcel reply, <span class="hljs-type">int</span> flags)</span> <span class="hljs-keyword">throws</span> android.os.RemoteException &#123;<br>      <span class="hljs-keyword">switch</span> (code) &#123;<br>        <span class="hljs-keyword">case</span> INTERFACE_TRANSACTION: &#123;<br>          reply.writeString(DESCRIPTOR);<br>          <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>        &#125;<br>        <span class="hljs-keyword">case</span> TRANSACTION_multiply: &#123;<br>          data.enforceInterface(DESCRIPTOR);<br>          <span class="hljs-type">long</span> _arg0;<br>          _arg0 = data.readLong();<br>          <span class="hljs-type">long</span> _arg1;<br>          _arg1 = data.readLong();<br>          <span class="hljs-type">long</span> <span class="hljs-variable">_result</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.multiply(_arg0, _arg1);<br>          reply.writeNoException();<br>          reply.writeLong(_result);<br>          <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>        &#125;<br>      &#125;<br>      <span class="hljs-keyword">return</span> <span class="hljs-built_in">super</span>.onTransact(code, data, reply, flags);<br>    &#125;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Proxy</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">com</span>.wandoujia.baymax.aidl.IMultiply &#123;<br>      <span class="hljs-keyword">private</span> android.os.IBinder mRemote;<br><br>      Proxy(android.os.IBinder remote) &#123;<br>        mRemote = remote;<br>      &#125;<br><br>      <span class="hljs-meta">@Override</span><br>      <span class="hljs-keyword">public</span> android.os.<span class="hljs-type">IBinder</span> <span class="hljs-title function_">asBinder</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> mRemote;<br>      &#125;<br><br>      <span class="hljs-keyword">public</span> java.lang.<span class="hljs-type">String</span> <span class="hljs-title function_">getInterfaceDescriptor</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> DESCRIPTOR;<br>      &#125;<br><br>      <span class="hljs-meta">@Override</span><br>      <span class="hljs-keyword">public</span> <span class="hljs-type">long</span> <span class="hljs-title function_">multiply</span><span class="hljs-params">(<span class="hljs-type">long</span> left, <span class="hljs-type">long</span> right)</span> <span class="hljs-keyword">throws</span> android.os.RemoteException &#123;<br>        android.os.<span class="hljs-type">Parcel</span> <span class="hljs-variable">_data</span> <span class="hljs-operator">=</span> android.os.Parcel.obtain();<br>        android.os.<span class="hljs-type">Parcel</span> <span class="hljs-variable">_reply</span> <span class="hljs-operator">=</span> android.os.Parcel.obtain();<br>        <span class="hljs-type">long</span> _result;<br>        <span class="hljs-keyword">try</span> &#123;<br>          _data.writeInterfaceToken(DESCRIPTOR);<br>          _data.writeLong(left);<br>          _data.writeLong(right);<br>          mRemote.transact(Stub.TRANSACTION_multiply, _data, _reply, <span class="hljs-number">0</span>);<br>          _reply.readException();<br>          _result = _reply.readLong();<br>        &#125; <span class="hljs-keyword">finally</span> &#123;<br>          _reply.recycle();<br>          _data.recycle();<br>        &#125;<br>        <span class="hljs-keyword">return</span> _result;<br>      &#125;<br>    &#125;<br>    <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">TRANSACTION_multiply</span> <span class="hljs-operator">=</span> (android.os.IBinder.FIRST_CALL_TRANSACTION + <span class="hljs-number">0</span>);<br>  &#125;<br><br>  <span class="hljs-keyword">public</span> <span class="hljs-type">long</span> <span class="hljs-title function_">multiply</span><span class="hljs-params">(<span class="hljs-type">long</span> left, <span class="hljs-type">long</span> right)</span> <span class="hljs-keyword">throws</span> android.os.RemoteException;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>参考</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/baronzhang/p/8784458.html">binder参考文章1</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/augfun/article/details/82343249">binder参考文章2</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lzlltmf/p/5836903.html">红茶一杯话Binder</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/137812696">知乎binder</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/huangjialin/p/7738104.html">aidl使用方式</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9a13f1afbc6e/">aidl原理</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/BaronZ88/HelloBinder">自定义aidl进程通信实例</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Android/%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6/" class="category-chain-item">基础机制</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/Android%E6%A1%86%E6%9E%B6/" class="print-no-link">#Android框架</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Binder进程通信机制</div>
+      <div>https://crazycoding7.github.io/2018/02/20/Android_01基础机制_02Binder进程通信机制/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2018年2月20日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/04/05/Java_05%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" title="内存模型">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">内存模型</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/01/15/Android_01%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6_01Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" title="Android系统启动流程">
+                        <span class="hidden-mobile">Android系统启动流程</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

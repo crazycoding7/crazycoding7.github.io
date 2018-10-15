@@ -1,0 +1,1080 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Java 集合框架全面解析。从 HashMap 的存储结构、扩容机制、hash 冲突解决，到 ConcurrentHashMap、HashSet、TreeSet 等核心容器的对比，再延伸到 ArrayMap 和 SparseArray 的 Android 场景应用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="集合">
+<meta property="og:url" content="https://crazycoding7.github.io/2018/07/15/Java_02%E9%9B%86%E5%90%88/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="Java 集合框架全面解析。从 HashMap 的存储结构、扩容机制、hash 冲突解决，到 ConcurrentHashMap、HashSet、TreeSet 等核心容器的对比，再延伸到 ArrayMap 和 SparseArray 的 Android 场景应用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://crazycoding7.github.io/2018/07/15/img/java/java%E9%9B%86%E5%90%88.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/java/hashmap_put%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/java/%E9%9B%86%E5%90%88-arraymap.png">
+<meta property="article:published_time" content="2018-07-15T02:48:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.172Z">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://crazycoding7.github.io/2018/07/15/img/java/java%E9%9B%86%E5%90%88.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>集合 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="集合"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2018-07-15 10:48" pubdate>
+          2018年7月15日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          9.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          79 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">集合</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h3><h4 id="1-Java集合框架？"><a href="#1-Java集合框架？" class="headerlink" title="1. Java集合框架？"></a>1. Java集合框架？</h4><h5 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h5><ul>
+<li><p>Map、Collection接口是所有集合框架的父类接口。</p>
+</li>
+<li><p>Collection接口的子接口包括：Set和List接口；</p>
+</li>
+<li><p>Map(<strong>kv</strong>)接口的实现类主要有：HashMap、TreeMap、HashTable、ConcurrentHashMap以及Propreties等。</p>
+</li>
+<li><p>List(<strong>有序可重复</strong>)接口的实现类主要有：ArrayList、LinkedList、Vetor、Stack等。</p>
+</li>
+<li><p>Set(<strong>不可重复</strong>)接口的实现类主要有：HashSet、TreeSet、LinkedHashSet等。</p>
+<img src="../img/java/java集合.png" srcset="/img/loading.gif" lazyload alt="java集合" style="zoom:40%;" /></li>
+</ul>
+<h4 id="2-HashMap原理？"><a href="#2-HashMap原理？" class="headerlink" title="2. HashMap原理？"></a>2. HashMap原理？</h4><h5 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h5><p>​	采用<strong>链表散列</strong>的数据结构，即数组和链表组成的，当链表长度大于8，采用红黑树存储。</p>
+<p>​	注意：初始容量为16，扩容方式为2N。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * HashMap数据结构</span><br><span class="hljs-comment"> * &quot;链表散列&quot;的数据结构，内部实现是一个桶数组，每个桶中存放着一个单链表的头结点。</span><br><span class="hljs-comment"> *  链表长度大于8，采用红黑树存储。</span><br><span class="hljs-comment"> */</span><br> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">float</span> <span class="hljs-variable">DEFAULT_LOAD_FACTOR</span> <span class="hljs-operator">=</span> <span class="hljs-number">0.75f</span>;  <span class="hljs-comment">// 默认负载因子！</span><br> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">DEFAULT_INITIAL_CAPACITY</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">4</span>; <span class="hljs-comment">// aka 16   默认容量！</span><br><br> <span class="hljs-keyword">transient</span> Node&lt;K,V&gt;[] table; <span class="hljs-comment">// extned Entry&lt;K,V&gt;</span><br> <span class="hljs-keyword">transient</span> <span class="hljs-type">int</span> size;<br> <span class="hljs-type">int</span> threshold;			<span class="hljs-comment">// 阈值 table.size * loadFactor</span><br> <span class="hljs-keyword">final</span> <span class="hljs-type">float</span> loadFactor;<br><br> <span class="hljs-comment">// 计算hash</span><br> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-title function_">hash</span><span class="hljs-params">(Object key)</span> &#123;<br>    <span class="hljs-type">int</span> h;<br>    <span class="hljs-keyword">return</span> (key == <span class="hljs-literal">null</span>) ? <span class="hljs-number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="hljs-number">16</span>);<br> &#125;<br> <span class="hljs-comment">// 获得key索引</span><br> tab[index = (tableSize - <span class="hljs-number">1</span>) &amp; hash];<br><br> <span class="hljs-comment">// 大于阈值后，2倍扩容</span><br> newCap = oldCap &lt;&lt; <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h5><ol>
+<li><p>putVal逻辑？</p>
+<p><img src="/../img/java/hashmap_put%E6%B5%81%E7%A8%8B%E5%9B%BE.png" srcset="/img/loading.gif" lazyload alt="put"></p>
+</li>
+<li><p>为什么要自己计算hash?</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-title function_">hash</span><span class="hljs-params">(Object key)</span> &#123;<br>        <span class="hljs-type">int</span> h;<br>  			<span class="hljs-comment">// 把高16位和低16位做异或运算，更好保留高位数特征。避免后面计算index时，高位数没有参与运算。</span><br>        <span class="hljs-keyword">return</span> (key == <span class="hljs-literal">null</span>) ? <span class="hljs-number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="hljs-number">16</span>);<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>为了让key的高低位数据都参与运算，防止计算槽位是丢失高位特征。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zxporz/p/11204233.html">参考！！</a></p>
+</li>
+<li><p>为什么容量总是2的次幂？</p>
+<ul>
+<li>为了让哈希后的结果更加均匀</li>
+<li>当n为2次幂时，满足公式：<code>(n - 1) &amp; hash = hash % n</code>，与运算效率更高。</li>
+</ul>
+<p>索引位置计算公式： <code>tab[(n - 1) &amp; hash]</code>。</p>
+<p>因为 n 永远是2的次幂，所以 n-1 通过 二进制表示，永远都是尾端以连续1的形式表示（00001111，00000011）。当(n - 1) 和 hash 做与运算时，会保留hash中 后 x 位的 1(且索引合法)，<br>例如 00001111 &amp; 10000011 &#x3D; 00000011</p>
+<p>好处：</p>
+<ul>
+<li>&amp;(与)运算符比%(取模)运算速度快；</li>
+<li>能保证索引值不会超出长度；</li>
+<li>当n为2次幂时，满足公式：<code>(n - 1) &amp; hash = hash % n</code></li>
+</ul>
+<p><strong>说了这么多点，上面提到的所有问题，最终目的还是为了让哈希后的结果更均匀的分部，减少哈希碰撞，提升hashmap的运行效率。</strong></p>
+</li>
+<li><p>为什么hash计算公式是<code>(key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code>?</p>
+<p>实质上是把一个数的低16位和高16位做异或运算，因为前面计算索引公式，只有hash的低x位参与到运算。使高16位也参到hash的运算能减少hash冲突。</p>
+</li>
+<li><p>为什么默认加载引子选择0.75？</p>
+<p><strong>提高空间利用率和减少查询成本的折中，主要是泊松分布，0.75的话碰撞最小。</strong></p>
+<p>加载因子过高，例如为1，虽然减少了空间开销，提高了空间利用率，但同时也增加了查询时间成本；</p>
+<p>加载因子过低，例如0.5，虽然可以减少查询时间成本，但是空间利用率很低，同时提高了rehash操作的次数。</p>
+</li>
+<li><p>HashMap扩容机制<code>resize()</code>？</p>
+<ul>
+<li><p>Bucket 只有一个Node，重新计算位置；</p>
+</li>
+<li><p>Buket是Node链表，循环遍历，采用高低位链进行扩容；</p>
+<p><strong>通过e.hash &amp; oldCap来判断节点位置通过再次hash算法后，是否会发生改变，如果为0表示不会发生改变(newIndex &#x3D; oldIndex)，如果为1表示会发生改变(newIndex &#x3D; oldIndex+oldCap)。</strong></p>
+<p>遍历链表添加，通过计算位置添加。</p>
+</li>
+<li><p>Buket是TreeNode，采用红黑树挪移元素；</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">final</span> <span class="hljs-type">Node</span>&lt;K,V&gt;[] <span class="hljs-title function_">resize</span><span class="hljs-params">()</span> &#123;<br>   ...<br>    <span class="hljs-comment">/**构造新表，初始化表中数据*/</span><br>    <span class="hljs-type">Node</span>&lt;K,V&gt;[] <span class="hljs-variable">newTab</span> <span class="hljs-operator">=</span> (Node&lt;K,V&gt;[])<span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>[newCap];<br>    <span class="hljs-comment">//将刚创建的新表赋值给table</span><br>    table = newTab;<br>    <span class="hljs-keyword">if</span> (oldTab != <span class="hljs-literal">null</span>) &#123;<br>        <span class="hljs-comment">//遍历将原来table中的数据放到扩容后的新表中来</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">j</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; j &lt; oldCap; ++j) &#123;<br>            Node&lt;K,V&gt; e;<br>            <span class="hljs-keyword">if</span> ((e = oldTab[j]) != <span class="hljs-literal">null</span>) &#123;<br>                oldTab[j] = <span class="hljs-literal">null</span>;<br>                <span class="hljs-comment">//1. 没有链表Node节点，直接放到新的table中下标为【e.hash &amp; (newCap - 1)】位置即可</span><br>                <span class="hljs-keyword">if</span> (e.next == <span class="hljs-literal">null</span>)<br>                    newTab[e.hash &amp; (newCap - <span class="hljs-number">1</span>)] = e;<br>                <span class="hljs-comment">//2. 如果是treeNode节点，则树上的节点放到newTab中</span><br>                <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (e <span class="hljs-keyword">instanceof</span> TreeNode)<br>                    ((TreeNode&lt;K,V&gt;)e).split(<span class="hljs-built_in">this</span>, newTab, j, oldCap);<br>                <span class="hljs-comment">//3. 如果e后面还有链表节点，则遍历e所在的链表，</span><br>                <span class="hljs-keyword">else</span> &#123; <span class="hljs-comment">// 保证顺序</span><br>                    <span class="hljs-type">Node</span>&lt;K,V&gt; <span class="hljs-variable">loHead</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>, loTail = <span class="hljs-literal">null</span>;<br>                    <span class="hljs-type">Node</span>&lt;K,V&gt; <span class="hljs-variable">hiHead</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>, hiTail = <span class="hljs-literal">null</span>;<br>                    Node&lt;K,V&gt; next;<br>                    <span class="hljs-keyword">do</span> &#123;<br>                        <span class="hljs-comment">//记录下一个节点</span><br>                        next = e.next;<br>                        <span class="hljs-comment">/**</span><br><span class="hljs-comment">                         * newTab的容量是以前旧表容量的两倍,因为数组table下标并不是根据循环逐步递增</span><br><span class="hljs-comment">                         * 的，而是通过（table.length-1）&amp; hash计算得到，因此扩容后，存放的位置就</span><br><span class="hljs-comment">                         * 可能发生变化，那么到底发生怎样的变化呢，就是由下面的算法得到.</span><br><span class="hljs-comment">                         *</span><br><span class="hljs-comment">                         * 通过e.hash &amp; oldCap来判断节点位置通过再次hash算法后，是否会发生改变，如</span><br><span class="hljs-comment">                         * 果为0表示不会发生改变，如果为1表示会发生改变。到底怎么理解呢，举个例子：</span><br><span class="hljs-comment">                         * e.hash = 13 二进制：0000 1101</span><br><span class="hljs-comment">                         * oldCap = 32 二进制：0001 0000</span><br><span class="hljs-comment">                         *  &amp;运算：  0  二进制：0000 0000</span><br><span class="hljs-comment">                         * 结论：元素位置在扩容后不会发生改变</span><br><span class="hljs-comment">                         */</span><br>                        <span class="hljs-keyword">if</span> ((e.hash &amp; oldCap) == <span class="hljs-number">0</span>) &#123;<br>                            <span class="hljs-keyword">if</span> (loTail == <span class="hljs-literal">null</span>)<br>                                loHead = e;<br>                            <span class="hljs-keyword">else</span><br>                                loTail.next = e;<br>                            loTail = e;<br>                        &#125;<br>                        <span class="hljs-comment">/**</span><br><span class="hljs-comment">                         * e.hash = 18 二进制：0001 0010</span><br><span class="hljs-comment">                         * oldCap = 16 二进制：0001 0000</span><br><span class="hljs-comment">                         * &amp;运算：  16 二进制：0001 0000</span><br><span class="hljs-comment">                         * 结论：元素位置在扩容后会发生改变，那么如何改变呢？</span><br><span class="hljs-comment">                         * newCap = 32 二进制：0010 0000</span><br><span class="hljs-comment">                         * 通过(newCap-1)&amp;hash</span><br><span class="hljs-comment">                         * 即0001 1111 &amp; 0001 0010 得0001 0010，32+2 = 18</span><br><span class="hljs-comment">                         */</span><br>                        <span class="hljs-keyword">else</span> &#123;<br>                            <span class="hljs-keyword">if</span> (hiTail == <span class="hljs-literal">null</span>)<br>                                hiHead = e;<br>                            <span class="hljs-keyword">else</span><br>                                hiTail.next = e;<br>                            hiTail = e;<br>                        &#125;<br>                    &#125; <span class="hljs-keyword">while</span> ((e = next) != <span class="hljs-literal">null</span>);<br>                    <span class="hljs-keyword">if</span> (loTail != <span class="hljs-literal">null</span>) &#123;<br>                        loTail.next = <span class="hljs-literal">null</span>;<br>                        <span class="hljs-comment">/**</span><br><span class="hljs-comment">                         * 若(e.hash &amp; oldCap) == 0，下标不变，将原表某个下标的元素放到扩容表同样</span><br><span class="hljs-comment">                         * 下标的位置上</span><br><span class="hljs-comment">                         */</span><br>                        newTab[j] = loHead;<br>                    &#125;<br>                    <span class="hljs-keyword">if</span> (hiTail != <span class="hljs-literal">null</span>) &#123;<br>                        hiTail.next = <span class="hljs-literal">null</span>;<br>                        <span class="hljs-comment">/**</span><br><span class="hljs-comment">                         * 若(e.hash &amp; oldCap) != 0，将原表某个下标的元素放到扩容表中</span><br><span class="hljs-comment">                         * [下标+增加的扩容量]的位置上 !!!</span><br><span class="hljs-comment">                         */</span><br>                        newTab[j + oldCap] = hiHead;<br>                    &#125;<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> newTab;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>HashMap在JDK1.7和1.8中区别？</p>
+<table>
+<thead>
+<tr>
+<th>不同</th>
+<th>JDK1.7</th>
+<th>JDK1.8</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存储结构</td>
+<td>数组+链表</td>
+<td>数组+链表+红黑树</td>
+</tr>
+<tr>
+<td>初始化方式</td>
+<td>单独函数：<code>inflateTable()</code></td>
+<td>直接集成到了扩容函数<code>resize()</code>中</td>
+</tr>
+<tr>
+<td>hash值计算方式</td>
+<td>扰动处理 &#x3D; 9次扰动 &#x3D; 4次位运算 + 5次异或运算</td>
+<td>扰动处理 &#x3D; 2次扰动 &#x3D; 1次位运算 + 1次异或运算</td>
+</tr>
+<tr>
+<td>存放数据的规则</td>
+<td>无冲突时，存放数组；冲突时，存放链表</td>
+<td>无冲突时，存放数组；冲突 &amp; 链表长度 &lt; 8：存放单链表；冲突 &amp; 链表长度 &gt; 8：树化并存放红黑树</td>
+</tr>
+<tr>
+<td>插入数据方式</td>
+<td>头插法（先讲原位置的数据移到后1位，再插入数据到该位置）</td>
+<td>尾插法（直接插入到链表尾部&#x2F;红黑树）</td>
+</tr>
+<tr>
+<td>扩容后存储位置的计算方式</td>
+<td><strong>全部按照原来方法进行计算</strong>（即hashCode -&gt;&gt; 扰动函数 -&gt;&gt; (h&amp;length-1)）</td>
+<td>按照扩容后的规律计算（即扩容后的位置&#x3D;<strong>原位置 or 原位置 + 旧容量</strong>）</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>HashMap如何解决hash冲突？</p>
+<ul>
+<li><p>链表法(目前使用)</p>
+</li>
+<li><p>开放寻址法</p>
+<p>核心思想：如果出现冲突，重新探测一个空闲位置，再将元素插入。</p>
+<ol>
+<li><p>线性探测法；</p>
+<p>往后逐个或n个一次查找空闲位置存储；</p>
+</li>
+<li><p>线性补偿探测法：</p>
+<p>如果冲突，根据规则重新生成一个新的hash值。</p>
+</li>
+</ol>
+<p>缺点：1.容易造成堆聚现象，添加元素越多，堆聚现象越严重。 </p>
+<p>​      2.删除元素特别困难，当位置为空时，无法判断元素的位置</p>
+</li>
+<li><p>双重散列法</p>
+<p>假设第二个散列函数值为T<br>- 线性探测法：逐个检查冲突位置的下一个位置<br>- 双重散列表：每隔T个位置检查一次</p>
+</li>
+<li><p>建立公共溢出区域</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="3-hashmap和hashtable区别？"><a href="#3-hashmap和hashtable区别？" class="headerlink" title="3. hashmap和hashtable区别？"></a>3. hashmap和hashtable区别？</h4><ol>
+<li>HashTable是线程安全的；</li>
+<li>HashTable不允许K&#x2F;V为null;</li>
+<li>HashMap继承自AbstractMap类，而HashTable继承自Dictionary类;</li>
+<li>hash计算方式不同，hashmap自己计算，hashtable直接使用hashCode()函数值；</li>
+<li>计算索引方式不同(hashmap效率更高，但必须是2容量必须为2的幂)，<code>index = (n - 1) &amp; hash</code>和<code>(hash &amp; 0x7FFFFFFF) % tab.length</code>;</li>
+<li>扩容方式不同： 默认容量 16、11，扩容2n,2n+1;</li>
+<li>存储方式不同，hashtable只用链表存储，hashmap大于8后使用红黑树存储。</li>
+</ol>
+<h4 id="4-ConcurrentHashMap和HashTable的区别？"><a href="#4-ConcurrentHashMap和HashTable的区别？" class="headerlink" title="4. ConcurrentHashMap和HashTable的区别？"></a>4. ConcurrentHashMap和HashTable的区别？</h4><p>​	ConcurrentHashMap 结合了 HashMap 和 HashTable 二者的优势。HashMap 没有考虑同步，HashTable 考虑了同步的问题。但是 HashTable 在每次同步执行时都要锁住整个结构。 ConcurrentHashMap 锁的方式是稍微细粒度的。</p>
+<p>​	在<strong>JDK1.8中，放弃了Segment臃肿的设计，取而代之的是采用Node + CAS + Synchronized来保证并发安全进行实现。</strong></p>
+<h4 id="5-HashSet如何保证数据不可重复的？"><a href="#5-HashSet如何保证数据不可重复的？" class="headerlink" title="5. HashSet如何保证数据不可重复的？"></a>5. HashSet如何保证数据不可重复的？</h4><p>底层使用HashMap存储，数值存储在HashMap的key中，key本身就不允许重复。</p>
+<h4 id="6-Array和ArrayList的区别？"><a href="#6-Array和ArrayList的区别？" class="headerlink" title="6. Array和ArrayList的区别？"></a>6. Array和ArrayList的区别？</h4><ol>
+<li>Array中可以包含基本类型和对象类型，ArrayList中只能包含对象类型；</li>
+<li>Array大小固定，ArrayList支持动态变化；</li>
+</ol>
+<h4 id="7-ArrayList和LinkedList的区别？"><a href="#7-ArrayList和LinkedList的区别？" class="headerlink" title="7. ArrayList和LinkedList的区别？"></a>7. ArrayList和LinkedList的区别？</h4><ol>
+<li>LinkedList实现了List和Deque接口，一般称双向链表。ArrayList实现了List接口，动态数组；</li>
+<li>LinkedList在插入或删除数据时更加高效，ArrayList在查找时更加高效；</li>
+<li>LinkedList比ArrayList需要更多的内存。</li>
+</ol>
+<h4 id="8-ArrayList和Vector的区别？"><a href="#8-ArrayList和Vector的区别？" class="headerlink" title="8. ArrayList和Vector的区别？"></a>8. ArrayList和Vector的区别？</h4><ol>
+<li>都是基于数组实现，扩从使用<code>Arrays.copyOf(original,newLength)</code>;</li>
+<li>Vector是线程安全的；</li>
+<li>ArrayList 每次扩容1.5倍；Vector每次扩容2倍。</li>
+</ol>
+<h4 id="9-String、StringBuffer、StringBuilder区别？"><a href="#9-String、StringBuffer、StringBuilder区别？" class="headerlink" title="9. String、StringBuffer、StringBuilder区别？"></a>9. String、StringBuffer、StringBuilder区别？</h4><ol>
+<li><p>String 适合存储常量，不易频繁修改；</p>
+</li>
+<li><p>StringBuffer 适合存储可变数据，线程安全；</p>
+</li>
+<li><p>StringBulider 适合存储可变数据，执行效率高于StringBuffer，非线程安全,单线程场景使用；</p>
+<p>执行效率： StringBuilder &lt; StringBuffer &lt; String &lt; +.</p>
+</li>
+</ol>
+<h4 id="10-equals、-和hashcode的区别？"><a href="#10-equals、-和hashcode的区别？" class="headerlink" title="10. equals、&#x3D;&#x3D;和hashcode的区别？"></a>10. equals、&#x3D;&#x3D;和hashcode的区别？</h4><ul>
+<li><p>区别</p>
+<ol>
+<li><p>&#x3D;&#x3D;   基本数据类型，比较的是它们的<code>值</code>；引用类型，比较的是<code>内存地址</code>,即同一个对象才为true;</p>
+</li>
+<li><p>equals  默认比较的是<code>内存地址</code>，String类型默认比较的是字符串内容; 如果类覆盖了equals方法，那就根据代码进行比较。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * Object类默认equals方法，比较内存地址</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">equals</span><span class="hljs-params">(Object obj)</span> &#123;<br>        <span class="hljs-keyword">return</span> (<span class="hljs-built_in">this</span> == obj);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * String类equals方法，比较字符串每个字符是否相等</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">equals</span><span class="hljs-params">(Object anObject)</span> &#123;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">this</span> == anObject) &#123;<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (anObject <span class="hljs-keyword">instanceof</span> String) &#123;<br>            <span class="hljs-type">String</span> <span class="hljs-variable">anotherString</span> <span class="hljs-operator">=</span> (String)anObject;<br>            <span class="hljs-type">int</span> <span class="hljs-variable">n</span> <span class="hljs-operator">=</span> value.length;<br>            <span class="hljs-keyword">if</span> (n == anotherString.value.length) &#123;<br>                <span class="hljs-type">char</span> <span class="hljs-variable">v1</span>[] <span class="hljs-operator">=</span> value;<br>                <span class="hljs-type">char</span> <span class="hljs-variable">v2</span>[] <span class="hljs-operator">=</span> anotherString.value;<br>                <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>                <span class="hljs-keyword">while</span> (n-- != <span class="hljs-number">0</span>) &#123;<br>                    <span class="hljs-keyword">if</span> (v1[i] != v2[i])<br>                        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>                    i++;<br>                &#125;<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>    &#125;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * Integer类equals方法，比较数值相等</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">equals</span><span class="hljs-params">(Object obj)</span> &#123;<br>        <span class="hljs-keyword">if</span> (obj <span class="hljs-keyword">instanceof</span> Integer) &#123;<br>            <span class="hljs-keyword">return</span> value == ((Integer)obj).intValue();<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>hashcode</p>
+<blockquote>
+<p>在集合中添加新元素是，通过hashcode比较，大大减少需要equals次数。还可以提升查找效率。</p>
+<p>将对象放入到集合中时，首先判断要放入对象的hashcode值与集合中的任意一个元素的hashcode值是否相等，如果不相等直接将该对象放入集合中。如果hashcode值相等，然后再通过equals方法判断要放入对象与集合中的任意一个对象是否相等，如果equals判断不相等，直接将该元素放入到集合中，否则不放入。</p>
+</blockquote>
+<p>1、如果两个对象equals，Java运行时环境会认为他们的hashcode一定相等。<br>2、如果两个对象不equals，他们的hashcode有可能相等。<br>3、如果两个对象hashcode相等，他们不一定equals。<br>4、如果两个对象hashcode不相等，他们一定不equals。</p>
+</li>
+</ol>
+</li>
+<li><p>涉及知识点</p>
+<ol>
+<li><p>比较结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 例如</span><br><span class="hljs-type">Integer</span> <span class="hljs-variable">a1</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;  <span class="hljs-comment">// java在编译的时候,被翻译成-&gt; Integer b1 = Integer.valueOf(127);</span><br><span class="hljs-type">Integer</span> <span class="hljs-variable">b1</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;<br><span class="hljs-type">Integer</span> <span class="hljs-variable">s1</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;<br><span class="hljs-type">Integer</span> <span class="hljs-variable">s2</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;<br>System.out.println(<span class="hljs-string">&quot;a1==b1&quot;</span> + (a1==b1)); <span class="hljs-comment">// true  ？</span><br>System.out.println(<span class="hljs-string">&quot;s1==s2&quot;</span> + (s1==s2)); <span class="hljs-comment">// false</span><br><span class="hljs-comment">/**</span><br><span class="hljs-comment">* 看一下源码大家都会明白，对于-128到127之间的数，会进行缓存。</span><br><span class="hljs-comment">*/</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">Integer</span> <span class="hljs-title function_">valueOf</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> &#123;  <br>        <span class="hljs-keyword">assert</span> IntegerCache.high &gt;= <span class="hljs-number">127</span>;  <br>        <span class="hljs-keyword">if</span> (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)  <br>            <span class="hljs-keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];  <br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Integer</span>(i);  <br>    &#125;  <br>     <br></code></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>int和integer比较时候，integer会自动拆箱为int.</p>
+</li>
+<li><p>为什么覆盖equals时总要覆盖hashcode方法？</p>
+<p>会违反Object.hashcode的通俗约定，从而导致该类无法结合所有基于散列的集合一起正常运作，这样的集合包括HashMap、HashSet和Hashtable。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="11-HashSet、LinkedHashSet、TreeSet区别？"><a href="#11-HashSet、LinkedHashSet、TreeSet区别？" class="headerlink" title="11. HashSet、LinkedHashSet、TreeSet区别？"></a>11. HashSet、LinkedHashSet、TreeSet区别？</h4><ul>
+<li><p>数据结构</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * HashSet数据结构</span><br><span class="hljs-comment"> * 1. 基于HashMap实现，key存数据，value存统一个空对象；</span><br><span class="hljs-comment"> * 2. 存储唯一、无序的对象；</span><br><span class="hljs-comment"> * 3. 非线程安全；</span><br><span class="hljs-comment"> * 4. 可以存储一个null;</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">transient</span> HashMap&lt;E,Object&gt; map;<br><span class="hljs-comment">// Dummy value to associate with an Object in the backing Map</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Object</span> <span class="hljs-variable">PRESENT</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * TreeSet数据结构</span><br><span class="hljs-comment"> * 1. 基于TreeMap实现，key存数据，value存统一个空对象；</span><br><span class="hljs-comment"> * 2. 存储元素唯一、有序的对象；</span><br><span class="hljs-comment"> * 3. 非线程安全；</span><br><span class="hljs-comment"> * 4. 不可存储null;</span><br><span class="hljs-comment"> */</span><br> <span class="hljs-type">public</span> <span class="hljs-title function_">TreeSet</span><span class="hljs-params">()</span> &#123;<span class="hljs-built_in">this</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">TreeMap</span>&lt;E,Object&gt;());&#125;<br> <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Object</span> <span class="hljs-variable">PRESENT</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * LinkedHashSet数据结构</span><br><span class="hljs-comment"> * 1. 继承自HashSet，基于LinkedHashMap实现；区别是：插入或遍历对象顺序一致；</span><br><span class="hljs-comment"> */</span><br>HashSet(<span class="hljs-type">int</span> initialCapacity, <span class="hljs-type">float</span> loadFactor, <span class="hljs-type">boolean</span> dummy) &#123;<br>   map = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedHashMap</span>&lt;&gt;(initialCapacity, loadFactor);<br>&#125; <br></code></pre></td></tr></table></figure>
+</li>
+<li><p>使用场景</p>
+<ol>
+<li><p>三者都实现Set接口，特性是元素唯一；</p>
+</li>
+<li><p>HashSet 查询速度快，用HashTable实现，它的元素是无序的；</p>
+<p>LinkedHashSet 继承HashSet,用LinkedHashMap实现，它的元素是有序的；</p>
+<p>TreeSet  底层实现是红黑树(自平衡二叉树)，可以对数据进行排序；不但能保证元素唯一，还能元素保证有序;</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="12-ArrayMap原理"><a href="#12-ArrayMap原理" class="headerlink" title="12. ArrayMap原理"></a>12. ArrayMap原理</h4><h5 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h5><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/23329871?from_voters_page=true">参考</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ArrayMap</span>&lt;K, V&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Map</span>&lt;K, V&gt; &#123;<br>	 <span class="hljs-type">int</span>[] mHashes;    <span class="hljs-comment">// 存储key的hash值，方便二分查找(如果碰撞，两边继续查找)</span><br>   Object[] mArray;  <span class="hljs-comment">// 存放key和value值</span><br>   <span class="hljs-type">int</span> mSize;<br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p><img src="/../img/java/%E9%9B%86%E5%90%88-arraymap.png" srcset="/img/loading.gif" lazyload alt="arraymap"></p>
+<h5 id="作用和特点"><a href="#作用和特点" class="headerlink" title="作用和特点"></a>作用和特点</h5><p>ArrayMap是Android特有的api，用在移动端，它主要是提升内存效率；</p>
+<p>ArrayMap比传统的HashMap慢，所以ArrayMap不适合包含大数据的处理，因为添加和删除元素的时候需要使用二分搜索来查找元素；</p>
+<p>ArrayMap会在remove item的时候收缩数组；</p>
+<p>线程不安全的。</p>
+<p>它可以避免在将数据插入Map中时额外的空间消耗（对比<code>HashMap</code>）。<br>而且它扩容的更合适，<strong>扩容时只需要数组拷贝工作，不需要重建哈希表</strong>。</p>
+<h4 id="13-SparseArray原理"><a href="#13-SparseArray原理" class="headerlink" title="13. SparseArray原理"></a>13. SparseArray原理</h4><blockquote>
+<p>SparseArray类似于ArrayMap,在Key为整数时可以考虑替代HashMap提供更有效的空间利用。</p>
+<p>使用二分查找，大数据的时候查找慢，但效率高，在千级数据量内可以取代Hashmap。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-type">int</span>[] mKeys; <span class="hljs-comment">// 二分查找</span><br><span class="hljs-keyword">private</span> Object[] mValues;<br><span class="hljs-keyword">private</span> <span class="hljs-type">int</span> mSize;<br><br><span class="hljs-comment">// 几种列席</span><br>SparseArray          &lt;<span class="hljs-type">int</span>, Object&gt;<br>LongSparseArray      &lt;<span class="hljs-type">long</span>, Object&gt;<br>SparseBooleanArray   &lt;<span class="hljs-type">int</span>, <span class="hljs-type">boolean</span>&gt;<br>SparseIntArray       &lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt;<br>SparseLongArray      &lt;<span class="hljs-type">int</span>, <span class="hljs-type">long</span>&gt;<br></code></pre></td></tr></table></figure>
+
+<h4 id="14-BlockingQueue-阻塞队列-？"><a href="#14-BlockingQueue-阻塞队列-？" class="headerlink" title="14. BlockingQueue(阻塞队列)？"></a>14. BlockingQueue(阻塞队列)？</h4><blockquote>
+<p>多用于并发模型，条件不足会是调用线程阻塞，满足条件后唤醒调用线程。</p>
+<p>put&#x2F;take() 会阻塞当前线程；offer&#x2F;pool()方法不阻塞。</p>
+</blockquote>
+<p>分类：</p>
+<ul>
+<li><p>ArrayBlockingQueue</p>
+<p>基于数组实现，大小固定，公用一个锁对象，意味着放入或消费无法并发运行。</p>
+</li>
+<li><p>LinkedBlockingQueue</p>
+<p>基于链表实现，默认大小int最大值，读写锁分离，效率更高。</p>
+</li>
+<li><p>DelayQueue(延迟)</p>
+</li>
+<li><p>PriorityBlockingQueue(优先级)</p>
+</li>
+<li><p>SynchronousQueue(无缓存队列)</p>
+</li>
+</ul>
+<h4 id="15-TreeMap实现原理"><a href="#15-TreeMap实现原理" class="headerlink" title="15. TreeMap实现原理"></a>15. TreeMap实现原理</h4><p>​	基于红黑树<strong>（Red-Black tree）</strong>实现。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="print-no-link">#数据结构</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>集合</div>
+      <div>https://crazycoding7.github.io/2018/07/15/Java_02集合/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2018年7月15日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/08/20/Android_01%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6_06View%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B/" title="View绘制流程">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">View绘制流程</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2018/07/10/Android_01%E5%9F%BA%E7%A1%80%E6%9C%BA%E5%88%B6_05Window%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" title="Window加载机制">
+                        <span class="hidden-mobile">Window加载机制</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
