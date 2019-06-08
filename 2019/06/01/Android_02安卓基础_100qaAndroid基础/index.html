@@ -1,0 +1,1030 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="这篇是 Android 基础知识的综合总结，从系统架构、Launcher 原理、Activity 启动、Handler 机制、View 绘制、事件分发到屏幕适配和生命周期，把核心知识点都梳理了一遍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android基础知识总结">
+<meta property="og:url" content="https://crazycoding7.github.io/2019/06/01/Android_02%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80_100qaAndroid%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="这篇是 Android 基础知识的综合总结，从系统架构、Launcher 原理、Activity 启动、Handler 机制、View 绘制、事件分发到屏幕适配和生命周期，把核心知识点都梳理了一遍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/androidframworkold.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/androidframe.jpeg">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/android_boot_process.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/launcher.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/appstart.jpg">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/androidview%E5%B1%82%E7%BA%A7.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/androideventhandler.jpg">
+<meta property="og:image" content="https://crazycoding7.github.io/2019/06/01/img/android/activity_life.png">
+<meta property="og:image" content="https://crazycoding7.github.io/2019/06/01/img/android/fragment_life.png">
+<meta property="article:published_time" content="2019-06-01T12:50:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.190Z">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Android框架">
+<meta property="article:tag" content="UI组件">
+<meta property="article:tag" content="移动端">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://crazycoding7.github.io/img/android/androidframworkold.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Android基础知识总结 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Android基础知识总结"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-06-01 20:50" pubdate>
+          2019年6月1日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          69 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Android基础知识总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>Android 知识总结。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/u/435577feb147">参考1</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jdsjlzx/article/details/97793159">参考2</a></p>
+<p><img src="/../img/android/androidframworkold.png" srcset="/img/loading.gif" lazyload alt="android framework"></p>
+<p><img src="/../img/android/androidframe.jpeg" srcset="/img/loading.gif" lazyload alt="frame"></p>
+<h4 id="1-Android系统架构？"><a href="#1-Android系统架构？" class="headerlink" title="1. Android系统架构？"></a>1. Android系统架构？</h4><p>采用分层架构思想，包括应用程序层、应用框架层、系统库和Android运行环境、linux内核。</p>
+<ul>
+<li><p>Jvm、Dalvik虚拟机、art虚拟机区别</p>
+<p>(1) Jvm基于栈，运行的是字节码文件，Jvm会为每一个类装载字节码；</p>
+<p>(2)Dalvik虚拟机:基于寄存器，运行dex字节码文件，一个应用程序对应一个Dalvik实例，独立运行；</p>
+<p> 适应于低内存、低处理器的移动设备，依赖于linux内核。</p>
+<p>(3)Android4.4引入art虚拟机，<strong>应用在第一次安装的时候，字节码就会预先编译成机器码，使其成为真正的本地应用，这个过程叫做预编译（AOT,Ahead-Of-Time）。</strong></p>
+<p>Dalvik每次都要编译再运行，Art只会首次启动编译；</p>
+<p>Art占用空间比Dalvik大（原生代码占用的存储空间更大），就是用”空间换时间”;</p>
+<p>Art减少编译，减少了CPU使用频率，使用明显改善电池续航;</p>
+<p>Art应用启动更快、运行更快、体验更流畅;</p>
+</li>
+<li><p>启动过程</p>
+<p><img src="/../img/android/android_boot_process.png" srcset="/img/loading.gif" lazyload alt="boot"></p>
+</li>
+</ul>
+<h4 id="2-Launcher原理？"><a href="#2-Launcher原理？" class="headerlink" title="2. Launcher原理？"></a>2. Launcher原理？</h4><blockquote>
+<p>Launcher是系统初始化后启动的第一个应用程序，负责展示系统中所有app到桌面，并进行响应。单单从应用角度来讲，Launcher是其他的应用一样，也是packages&#x2F;apps&#x2F;下面的一个apk。</p>
+<p>主要包含： LauncherActivity、LauncherAppsService等</p>
+</blockquote>
+<ul>
+<li>启动原理分析</li>
+</ul>
+<p>  (1)系统启动时，Zygote进程fork出SystemServer进程，执行SystemServer.java类；</p>
+<p>  (2)SystemServer会启动AMS、PMS以及其他service;</p>
+<p>  (3)PMS解析本地应用，并把数据信息保存起来(包括launcher app)；</p>
+<p>  (4)然后会启动SystemManager管理的一个服务LauncherAppsService,协助launcher管理本地package；</p>
+<p>  (5)AMS触发systemReady(…)方法，其中执行了startHomeActivity(…)，这个方法最终会启动Launcher app.</p>
+<p>  <img src="/../img/android/launcher.png" srcset="/img/loading.gif" lazyload alt="launcher"></p>
+<ul>
+<li>例子</li>
+</ul>
+<p>(1)单击桌面淘宝图标，Launcher通知AMS启动淘宝APP(清单文件中的入口类);<br>(2)AMS记录要启动的Activity信息，并且通知Launcher进入pause状态;<br>(3)Launcher进入pause状态后，通知AMS已经paused了，可以启动淘宝了;<br>(4)淘宝app未开启过，所以AMS启动新的进程，并且在新进程中创建ActivityThread对象，执行其中的main函数方法;<br>(5)淘宝app主线程启动完毕后通知AMS，并传入applicationThread以便通讯;<br>(6)AMS通知淘宝绑定Application并启动MainActivity;<br>(7)淘宝启动MainActivitiy，并且创建和关联Context,最后调用onCreate方法。</p>
+<h4 id="3-Activity启动原理？"><a href="#3-Activity启动原理？" class="headerlink" title="3. Activity启动原理？"></a>3. Activity启动原理？</h4><blockquote>
+<p>大致流程：Zygote fork APP进程-&gt;ActivityThread执行main方法(handler loop)-&gt;attach applicationThread-&gt;接收AMS消息。</p>
+</blockquote>
+<ul>
+<li><p>核心类</p>
+<p>(1)ActivityThread：app入口类，主要就是做消息循环，一旦退出消息循环，那么你的程序也就可以退出了。<br>从消息队列中取消息可能会阻塞，取到消息会做出相应的处理。如果某个消息处理时间过长，就可能会影响UI线程的刷新速率，造成卡顿的现象。</p>
+<p>(2)ApplicationThread:AT的成员变量，它就是作为服务端，接收ActivityManagerService的指令并执行.是ActivityThread与AMS连接的桥梁。</p>
+<pre><code class="hljs">  (3)final H mH = new H();   这个H是继承自Handler的,它是个私有的内部类，其实就是主线程的Handler，通  过这个Handler就可以往主线程的消息队列发消息如：启动Activity、service，接收广播等等,很多重要的工作.
+</code></pre>
+<p> <img src="/../img/android/appstart.jpg" srcset="/img/loading.gif" lazyload alt="appstart"></p>
+</li>
+</ul>
+<h4 id="4-Handler原理？"><a href="#4-Handler原理？" class="headerlink" title="4. Handler原理？"></a>4. Handler原理？</h4><p><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000019766810">参考1</a></p>
+<blockquote>
+<p>处理跨线程通讯问题。</p>
+</blockquote>
+<ul>
+<li><p>为什么用handler？</p>
+<p>Android系统不允许在子线程更新UI的原因，本质上是<strong>线程安全问题</strong>，从而引出了handler。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AcitvityThread</span>&#123;<br>  <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>  <span class="hljs-comment">//创建Looper和MessageQueue对象，用于处理主线程的消息</span><br>   Looper.prepareMainLooper();<br>   <span class="hljs-comment">//创建ActivityThread对象</span><br>   <span class="hljs-type">ActivityThread</span> <span class="hljs-variable">thread</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ActivityThread</span>(); <br>   <span class="hljs-comment">//建立Binder通道 (创建新线程)</span><br>   thread.attach(<span class="hljs-literal">false</span>);<br>   Looper.loop(); <span class="hljs-comment">//消息循环运行</span><br>   <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;Main thread loop unexpectedly exited&quot;</span>);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>原理？</p>
+<ol>
+<li>四个参与类： Message、MessageQueue、Looper、Handler。</li>
+</ol>
+<p>以主线程为例： </p>
+<p>主线程执行ActivityMain.main方法时， 会默认调用<code>Looper.prepareMainLooper();</code>为当前线程创建一个Lopper对象(负责监视MQ)、MessageQueue对象(存储消息)，然后再调用<code>Looper.loop()</code>循环读队列；</p>
+<p>然后我们再主线程Activity创建Handler并重写handlerMessage()方法，Handler负责将Message发送至当前线程的MessageQueue中，looper取出message并分发给对应Handler的handlerMessage去处理。</p>
+</li>
+<li><p>设计知识点</p>
+<p>(1) 四个类的对应关系？</p>
+<p>Looper、MessageQueue是1:1关系，一个线程只能存在一组；</p>
+<p>new Handler(looper,callback)构造的时候与Looper产生关联，默认为当前线程looper；</p>
+<p>主线程初始化是默认创建并Looper、MessageQueue对象，并启动loop循环；子线程需要这样</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ThreadHandlerActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Activity</span>&#123;     <br>     <span class="hljs-comment">//创建子线程</span><br>     <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyThread</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Thread</span>&#123;<br>         <span class="hljs-keyword">private</span> Looper looper;<span class="hljs-comment">//取出该子线程的Looper</span><br>         <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br> <br>             Looper.prepare();<span class="hljs-comment">//1. 创建该子线程的Looper</span><br>             looper = Looper.myLooper();<span class="hljs-comment">//2. 取出该子线程的Looper</span><br>             Looper.loop();<span class="hljs-comment">//3. 只要调用了该方法才能不断循环取出消息</span><br>         &#125;<br>     &#125;<br> <br>     <span class="hljs-keyword">private</span> Handler mHandler;<span class="hljs-comment">//将mHandler指定轮询的Looper</span><br>     <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> &#123;<br>             <span class="hljs-built_in">super</span>.onCreate(savedInstanceState);<br>             setContentView(R.layout.main);<br>             thread = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MyThread</span>();<br>             thread.start();<span class="hljs-comment">//千万别忘记开启这个线程</span><br>             <span class="hljs-comment">//4. 下面是主线程发送消息(thread.looper!!!)</span><br>          mHandler = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Handler</span>(thread.looper)&#123;<br>              <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">handleMessage</span><span class="hljs-params">(android.os.Message msg)</span> &#123;<br>                <span class="hljs-comment">//5. 子线程执行</span><br>           Log.d(<span class="hljs-string">&quot;当前子线程是-----&gt;&quot;</span>,Thread.currentThread()+<span class="hljs-string">&quot;&quot;</span>);<br>                 &#125;;<br>             &#125;;<br>             mHandler.sendEmptyMessage(<span class="hljs-number">1</span>);<br>     &#125;<br> &#125;<br></code></pre></td></tr></table></figure>
+
+<p>(2) Message.obtain()原理？</p>
+<p>内部使用链表数据结构存储多个消息对象，最大长度为50，目的是为了重用Message对象。</p>
+<p>(3) 主线程中的Looper.loop()一直无限循环为什么不会造成ANR?</p>
+<p>造成ANR的原因有两种：</p>
+<ol>
+<li>当前的事件没有机会得到处理（即主线程正在处理前一个事件，没有及时的完成或者looper被某种原因阻塞住了）；</li>
+<li>前的事件正在处理，但没有及时完；</li>
+</ol>
+<p>原因：</p>
+<p>ActivityThread的main方法主要就是做消息循环一旦退出循环，那么应用就退出了；</p>
+<p>而且主线程Looper从消息队列读取消息，当读完所有消息时，主线程阻塞。子线程往消息队列发送消息，并且往管道文件写数据，主线程即被唤醒，从管道文件读取数据，主线程被唤醒只是为了读取消息，当消息读取完毕，再次睡眠。因此loop的循环并不会对CPU性能有过多的消耗。</p>
+<p>(4) 如何防止handler内存泄漏？</p>
+<p>将Handler声明为静态类，静态类不持有外部类的对象，所以Activity可以被随意回收。此处使用了弱引用WeakReference，也就是说当在内存不足时，系统会销毁弱&#x2F;回收引用引用的对象，从而达到优化内存的目的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Main4Activity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AppCompatActivity</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">UPDATE</span> <span class="hljs-operator">=</span> <span class="hljs-number">0x1</span>;<br>    TextView tv;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> &#123;<br>        <span class="hljs-built_in">super</span>.onCreate(savedInstanceState);<br>        setContentView(R.layout.activity_main2);<br>        tv = (TextView) findViewById(R.id.tv);<br>        begin();<span class="hljs-comment">//开启倒计时并跳转页面的方法</span><br>    &#125;<br>    <span class="hljs-comment">//Handler静态内部类</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyHandler</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Handler</span> &#123;<br>        <span class="hljs-comment">//弱引用</span><br>        WeakReference&lt;Main4Activity&gt; weakReference;<br>        <span class="hljs-type">public</span> <span class="hljs-title function_">MyHandler</span><span class="hljs-params">(Main4Activity activity)</span> &#123;<br>            weakReference = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WeakReference</span>&lt;Main4Activity&gt;(activity);<br>        &#125;<br>        <span class="hljs-meta">@Override</span><br>        <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">handleMessage</span><span class="hljs-params">(Message msg)</span> &#123;<br>            <span class="hljs-type">Main4Activity</span> <span class="hljs-variable">activity</span> <span class="hljs-operator">=</span> weakReference.get();<br>            <span class="hljs-keyword">if</span> (activity != <span class="hljs-literal">null</span>) &#123;<br>                activity.tv.setText(String.valueOf(msg.arg1));<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">MyHandler</span> <span class="hljs-variable">handler</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">MyHandler</span>(<span class="hljs-built_in">this</span>);<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">begin</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Runnable</span>() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br>                    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>; i &gt; <span class="hljs-number">0</span>; i--) &#123;<br>                        <span class="hljs-type">Message</span> <span class="hljs-variable">msg</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Message</span>();<br>                        msg.what = UPDATE;<br>                        msg.arg1 = i;<br>                        handler.sendMessage(msg);<br>                        <span class="hljs-keyword">try</span> &#123;<br>                            Thread.sleep(<span class="hljs-number">1000</span>);<span class="hljs-comment">//休眠1秒</span><br>                        &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                            e.printStackTrace();<br>                        &#125;<br>                        Log.i(<span class="hljs-string">&quot;tag&quot;</span>, Main4Activity.<span class="hljs-built_in">this</span> + <span class="hljs-string">&quot;-&quot;</span> + i);<br>                    &#125;<br>                    <span class="hljs-comment">//计时结束后跳转到其他界面</span><br>                    startActivity(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Intent</span>(Main4Activity.<span class="hljs-built_in">this</span>, Main3Activity.class));<br>                    <span class="hljs-comment">//添加finish方法在任务栈中销毁倒计时界面，使新开界面在回退时直接退出而不是再次返回该界面</span><br>                    finish();<br>                &#125;<br>        &#125;).start();<br>    &#125;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">onDestroy</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-built_in">super</span>.onDestroy();<br>        handler.removeCallbacksAndMessages(<span class="hljs-literal">null</span>);<br>        Log.i(<span class="hljs-string">&quot;tag&quot;</span>, <span class="hljs-string">&quot;destory&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="5-Binder机制原理？"><a href="#5-Binder机制原理？" class="headerlink" title="5. Binder机制原理？"></a>5. Binder机制原理？</h4><blockquote>
+<p>IPC是Inter-Process Communication的缩写，含义就是跨进程通信。</p>
+<p>Android系统中，每个应用程序是由Android的Activity，Service，Broadcast，ContentProvider这四大组件的中一个或多个组合而成，这四大组件所涉及的多进程间的通信底层都是依赖于Binder IPC机制。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b5cc1ef9f917">参考1</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b35e0716bce1">参考2</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/nwpushuai/article/details/79662155">参考3</a></p>
+<h4 id="6-View的绘制流程和原理？"><a href="#6-View的绘制流程和原理？" class="headerlink" title="6. View的绘制流程和原理？"></a>6. View的绘制流程和原理？</h4><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/andy-songwei/p/10955062.html">参考1</a></p>
+<ul>
+<li><p>View绘制的三个流程</p>
+<p>(1)onMeasure(): 测量。系统会先根据xml布局文件和代码中对控件属性的设置，来获取或者计算出每个View和ViewGrop的尺寸，并将这些尺寸保存下来。</p>
+<p>(2)onLayout():布局。根据测量结果以及对应的参数，来确定每一个控件应该显示的位置。</p>
+<p>(3)onDraw():绘制。确认好位置后，就将这些控件绘制到屏幕上。</p>
+</li>
+<li><p>View视图层级</p>
+<p><code>Activity -&gt; PhoneWindow - &gt; DecorView  -&gt; statusBar、（LinearLayout-&gt;FrameLayout-&gt;[content、titleBar]）。</code></p>
+<p><img src="/../img/android/androidview%E5%B1%82%E7%BA%A7.png" srcset="/img/loading.gif" lazyload alt="view"></p>
+</li>
+<li><p>绘制过程</p>
+<p>ActivityThread(handlerResumeActivity方法)-&gt;WindowManagerImpl(addView方法)-&gt;WindowManagerGlobal(addView方法)-&gt;ViewRootImpl(prefromTraversals方法)。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><br><span class="hljs-comment">// =====================ViewRootImpl.java=================</span><br><span class="hljs-keyword">private</span> <span class="hljs-type">void</span> <span class="hljs-title function_">performTraversals</span><span class="hljs-params">()</span> &#123;<br>   ......<br>   <span class="hljs-type">int</span> <span class="hljs-variable">childWidthMeasureSpec</span> <span class="hljs-operator">=</span> getRootMeasureSpec(mWidth, lp.width);<br>   <span class="hljs-type">int</span> <span class="hljs-variable">childHeightMeasureSpec</span> <span class="hljs-operator">=</span> getRootMeasureSpec(mHeight, lp.height);      <br>   ......<br>   <span class="hljs-comment">// Ask host how big it wants to be</span><br>   performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);<br>   ......<br>   performLayout(lp, mWidth, mHeight);<br>   ......<br>   performDraw();<br>&#125;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>Activity、Window、PhoneWindow、DecorVIew直接关系</p>
+<p>每个Activity都持有一个Window对象，但是Window都是一个抽象类，PhoneWindow是其唯一实现。也就是说Activity中的Window实例就是一个PhoneWindow对象。</p>
+<p>PhoneWindow对象持有一个非常重要的View对象DecorView。</p>
+<p>现在的关系很明确了，每一个 Activity 持有一个 PhoneWindow 的对象，而一个 PhoneWindow 对象持有一个 DecorView 的实例，<strong>所以 Activity 中 View 相关的操作其实大都是通过 DecorView 来完成</strong>。</p>
+</li>
+</ul>
+<h4 id="7-事件传递机制？"><a href="#7-事件传递机制？" class="headerlink" title="7. 事件传递机制？"></a>7. 事件传递机制？</h4><ul>
+<li><p>事件分发三对象：</p>
+<p>Activity:接受Down点击事件，传递给PhoneWindow和DecorView；</p>
+<p>ViewGroup：拦截事件，或者继续传递事件给子View；</p>
+<p>View：决定消费这个事件或者不消费从而返回给上一级。</p>
+</li>
+<li><p>事件分发三个方法：</p>
+<p>(1)dispatchTouchEvent()：分发(传递)点击事件，当单击事件传递给当前View时，该方法就会被调用，return false 事件停止向子View传递和分发；</p>
+<p>(2)onTouchEvent(): 处理点击事件， 在dispatch方法内部调用，return false是不消费事件，并让事件往父控件方向流动，return ture是消费事件；</p>
+<p>(3)onInterceptTouchEvent() 判断是否拦截了某个事件，<strong>只存在于ViewGroup，普通View无该方法</strong>，在ViewGroup的dispatch内部调用。 return false是不拦截事件，允许事件向子View传递，return true是拦截事件，不在向子View传递事件。</p>
+<p><img src="/../img/android/androideventhandler.jpg" srcset="/img/loading.gif" lazyload alt="event"></p>
+</li>
+</ul>
+<h4 id="8-屏幕适配"><a href="#8-屏幕适配" class="headerlink" title="8. 屏幕适配"></a>8. 屏幕适配</h4><ul>
+<li><p>屏幕适配发展</p>
+<p>(1) dp直接适配</p>
+<p>利用dp + 自适应布局 + weight 实现；</p>
+<p>缺点：dpi的不同存在一些差异，特殊手机需要单独适配，要将px转dp。</p>
+<p>(2)宽高限定符适配</p>
+<p>利用values-480×320,values-1280×720实现；</p>
+<p>确定：需要精准命中；</p>
+<p>(3)UI适配框架Autolayout</p>
+<p>核心功能就是在绘制的时候在onMeasure里面做变换，重新计算px；</p>
+<p>确定：有些自定义控件需要单独适配，不可靠。</p>
+</li>
+<li><p>最好的适配方案</p>
+<p>(1)SmallestWidth适配(sw限定符适配)</p>
+<p>利用屏幕宽度dp，然后识别不同的资源文件。values-sw360dp。它有较好的容错机制，找不到找一个最接近的资源文件。</p>
+<p>缺点：apk变大；</p>
+<p>利用：  设计师按宽度为 375px设计界面， 在360dp文件夹中 1px&#x3D;0.96dp、375px&#x3D;360dp;</p>
+<p> xml直接以px为单位就像了。</p>
+</li>
+</ul>
+<h4 id="9-生命周期"><a href="#9-生命周期" class="headerlink" title="9. 生命周期"></a>9. 生命周期</h4><img src="../img/android/activity_life.png" srcset="/img/loading.gif" lazyload style="zoom:60%;" />
+
+<img src="../img/android/fragment_life.png" srcset="/img/loading.gif" lazyload style="zoom:70%;" />
+
+<h4 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h4><table>
+<thead>
+<tr>
+<th>类名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Init进程</strong></td>
+<td>系统内核启动完成后，就会创建用户空间的第一个进程；后面所有的进程，都是它孵化出来的。</td>
+</tr>
+<tr>
+<td><strong>Zygote进程</strong></td>
+<td>是系统创建新进场的核心，在init进程启动后就会创建zygote进程；zygote进程在内部会先启动Dalvik虚拟机，继而加载一些必要的系统资源和系统类，最后进入一种监听状态。在之后的运作中，当其他系统模块（比如AMS）希望创建新进程时，只需向zygote进程发出请求，zygote进程监听到该请求后，会相应地fork出新的进程，于是这个新进程在初生之时，就先天具有了自己的Dalvik虚拟机以及系统资源</td>
+</tr>
+<tr>
+<td><strong>SystemServer进程</strong></td>
+<td>并称<strong>Android世界的三极。</strong>SS是由Zygote通过Zygote.forkSystemServer函数fork诞生出来的。与Zygote生死与共.SS诞生后,便和生父Zygote分道扬镳,它有了自己的历史使命。即加载各种Service()<br />作用:<br />init1()是native函数,启动了 c++运行时库,如：sqllite,OpenGL ES等,然后把调用线程加入Binder通信中。<br />init2在Java层,就是单独创建一个线程,用以启动系统各项服务,如：ActivityManagerService,PowerManagerService…注意这些服务都是线程,在SystemServer进程中.</td>
+</tr>
+<tr>
+<td><strong>AcitvityThread</strong></td>
+<td>它的main方法，是整个应用程序的入口，管理者四大组件。</td>
+</tr>
+</tbody></table>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Android/%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80/" class="category-chain-item">安卓基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/Android%E6%A1%86%E6%9E%B6/" class="print-no-link">#Android框架</a>
+      
+        <a href="/tags/UI%E7%BB%84%E4%BB%B6/" class="print-no-link">#UI组件</a>
+      
+        <a href="/tags/%E7%A7%BB%E5%8A%A8%E7%AB%AF/" class="print-no-link">#移动端</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Android基础知识总结</div>
+      <div>https://crazycoding7.github.io/2019/06/01/Android_02安卓基础_100qaAndroid基础/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2019年6月1日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/06/15/Android_02%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80_Rxjava/" title="RxJava">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RxJava</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/05/15/Android_02%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80_%E5%8D%8F%E7%A8%8B/" title="协程特性">
+                        <span class="hidden-mobile">协程特性</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
