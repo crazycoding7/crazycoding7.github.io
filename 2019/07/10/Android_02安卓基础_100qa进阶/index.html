@@ -1,0 +1,984 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="这篇是 Android 进阶知识的综合总结，涵盖性能优化（布局、绘制、内存泄漏、响应速度）、MVP&#x2F;MVVM 架构对比、Jetpack 组件、进程通信、Java 注解等核心内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android进阶知识总结">
+<meta property="og:url" content="https://crazycoding7.github.io/2019/07/10/Android_02%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80_100qa%E8%BF%9B%E9%98%B6/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="这篇是 Android 进阶知识的综合总结，涵盖性能优化（布局、绘制、内存泄漏、响应速度）、MVP&#x2F;MVVM 架构对比、Jetpack 组件、进程通信、Java 注解等核心内容。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/mvvm.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/ipc_info.jpeg">
+<meta property="article:published_time" content="2019-07-10T12:20:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.191Z">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="移动端">
+<meta property="article:tag" content="性能优化">
+<meta property="article:tag" content="设计模式">
+<meta property="article:tag" content="Jetpack">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://crazycoding7.github.io/img/android/mvvm.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Android进阶知识总结 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Android进阶知识总结"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-07-10 20:20" pubdate>
+          2019年7月10日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          72 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Android进阶知识总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>Android 知识总结。</p>
+</blockquote>
+<h4 id="1-性能优化"><a href="#1-性能优化" class="headerlink" title="1. 性能优化"></a>1. 性能优化</h4><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lixiansheng/p/11382341.html">参考1</a></p>
+<h5 id="1布局优化"><a href="#1布局优化" class="headerlink" title="1布局优化"></a>1布局优化</h5><p>(1) 删除布局中无用的控件和层次，选择性能较低的ViewGroup。如：层级相同情况下：RL &gt; LL。</p>
+<p>(2) 采用ViewStub、include、merge标签：</p>
+<ul>
+<li><include/> 标签 提高布局的复用性；</li>
+<li><ViewStub/> 标签 延迟加载；原理是 加载了一个宽高都为0的View，默认是不可见的。只能通过setVisibilty或inflate函数才能加载目标布局；</li>
+<li><Merge/> 标签 直接将子元素加载到parent布局(其实就是减少include的层级)。</li>
+</ul>
+<p>(3) 避免过度绘制</p>
+<p>Overdraw是指屏幕上一个像素点绘制了多次，多个控件叠加。</p>
+<p>查看方法： 开发者选项-&gt;调试GPU过度绘制；</p>
+<p>解决办法：1. 移除Window默认的backgroup(背景色处理) 2. 减少布局嵌套和view深度。</p>
+<h5 id="2绘制优化"><a href="#2绘制优化" class="headerlink" title="2绘制优化"></a>2绘制优化</h5><p>Android系统每隔16ms发出VSYNC信号，触发对UI进行渲染，如果每次渲染都成功，这样就能够达到流畅的画面所需要的60fps，为了能够实现60fps，这意味着程序的大多数操作都必须在16ms内完成。</p>
+<ul>
+<li>onDraw中不要创建新的局部对象；</li>
+<li>onDraw中不要做耗时任务，也不能有大量循环。</li>
+</ul>
+<h5 id="3内存泄漏"><a href="#3内存泄漏" class="headerlink" title="3内存泄漏"></a>3内存泄漏</h5><p>优化方面：</p>
+<ol>
+<li>在开发过程中避免写出内存泄漏的代码；</li>
+<li>通过一些分析工具比如MAT、LeakCanary来找出潜在的内存泄漏，然后解决；</li>
+</ol>
+<p>内存泄漏种类：</p>
+<ol>
+<li>集合类内存泄漏；</li>
+<li>单例&#x2F;静态变量造成的内存泄漏；</li>
+<li>匿名内部类&#x2F;非静态内部类;(例如Handler使用)</li>
+<li>资源未关闭；</li>
+</ol>
+<h5 id="4响应速度"><a href="#4响应速度" class="headerlink" title="4响应速度"></a>4响应速度</h5><p>响应速度优化的核心思想就是避免在主线程中做耗时操作。</p>
+<p>Activity 5s、BoradcastReceiver 10s内未完成报ANR。</p>
+<h5 id="5线程优化"><a href="#5线程优化" class="headerlink" title="5线程优化"></a>5线程优化</h5><p>线程优化的思想就是采用线程池，避免程序中存在大量的Thread。</p>
+<h5 id="6ListView-RecycleView-Bitmap优化"><a href="#6ListView-RecycleView-Bitmap优化" class="headerlink" title="6ListView&#x2F;RecycleView&#x2F;Bitmap优化"></a>6ListView&#x2F;RecycleView&#x2F;Bitmap优化</h5><ol>
+<li>使用ViewHolder模式提示效率；</li>
+<li>耗时操作异步加载(如图片加载和设置缓存);</li>
+<li>分页加载或滑动停止时加载；</li>
+<li><strong>对图片进行压缩或缓存</strong>。</li>
+</ol>
+<h5 id="7其他"><a href="#7其他" class="headerlink" title="7其他"></a>7其他</h5><ol>
+<li>避免过度创建对象；</li>
+<li>不要使用枚举；</li>
+<li>常量请使用static final来修饰；</li>
+<li>使用一些Android特有的数据结构，比如SparseArray和Pair等</li>
+<li>适当采用软引用和弱引用；</li>
+<li>采用内存缓存和磁盘缓存；</li>
+<li>尽量使用静态内部类；</li>
+</ol>
+<h4 id="2-框架"><a href="#2-框架" class="headerlink" title="2.框架"></a>2.框架</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/smile_Running/article/details/94724540">参考1</a></p>
+<h5 id="1-目录结构"><a href="#1-目录结构" class="headerlink" title="1. 目录结构"></a>1. 目录结构</h5><p><strong>base</strong>存放app的基类</p>
+<p><strong>common</strong>存放一些常量,接口,公用的东西</p>
+<p><strong>contract</strong>连接V层和P层的一个契约包</p>
+<p><strong>model</strong>M层,数据库,网络请求,服务等业务操作</p>
+<p><strong>presenter</strong>P层,负责连接V层和M层,中心管理器</p>
+<p><strong>ui</strong>V层,负责UI的展示</p>
+<p><strong>utils</strong>存放工具类</p>
+<p><strong>widget</strong>存放自定义的一些组件</p>
+<h5 id="2-MVP"><a href="#2-MVP" class="headerlink" title="2. MVP"></a>2. MVP</h5><blockquote>
+<p>model（模型），负责访问网络数据、访问数据库数据，提供数据源</p>
+<p>view（视图），负责更新界面、响应用户界面操作</p>
+<p>controller（控制器），负责业务逻辑控制，处理数据</p>
+</blockquote>
+<ul>
+<li><p>好处</p>
+<p><code>易于维护</code>，<code>易于测试</code>，<code>松耦合</code>，<code>复用性高</code></p>
+<p>分离了视图逻辑和业务逻辑，降低了耦合；</p>
+<p>Activity只处理声明周期的任务，代码更加简洁；</p>
+<p>视图逻辑和业务逻辑分别抽象到了View和Presenter的接口中，提高代码的阅读性。</p>
+<p>Presenter被抽象成接口，可以有多种具体的实现，所以方便进行单元测试。</p>
+</li>
+<li><p>缺点</p>
+<p>(1)activity 内存泄漏</p>
+<p><code>解决办法就是让Presenter 持有Activity的弱引用。</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BasePresenter</span> &lt;V <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ImvpBaseView</span>&gt; &#123;  <br>  <span class="hljs-keyword">protected</span> Reference&lt;V&gt;mViewRef;  <br><span class="hljs-comment">//建立关联 </span><br>  <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">attachView</span><span class="hljs-params">(V view)</span>&#123;           <br>     mViewRef=<span class="hljs-keyword">new</span> <span class="hljs-title class_">WeakReference</span>&lt;V&gt;(view);  <br>  &#125; <br><span class="hljs-comment">//获取view </span><br>  <span class="hljs-keyword">protected</span> <span class="hljs-type">V</span> <span class="hljs-title function_">getView</span><span class="hljs-params">()</span>&#123;  <br>      <span class="hljs-keyword">return</span> mViewRef.get(); <br>   &#125;    <br><span class="hljs-comment">//判断是否与View建立了关联</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isViewAttached</span><span class="hljs-params">()</span>&#123;  <br>      <span class="hljs-keyword">return</span> mViewRef!=<span class="hljs-literal">null</span> &amp;&amp; mViewRef.get()!=<span class="hljs-literal">null</span>; <br>   &#125;   <br><br> <span class="hljs-comment">//该方法在activity或者Fragment的onDestory中调用 </span><br>   <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">detachView</span><span class="hljs-params">()</span>&#123;  <br>      <span class="hljs-keyword">if</span>(mViewRef!=<span class="hljs-literal">null</span>)&#123;    <br>        mViewRef.clear();     <br>       mViewRef=<span class="hljs-literal">null</span>;     <br>   &#125;   <br>&#125;&#125;<br></code></pre></td></tr></table></figure>
+
+<p>(2) 一个Activity对应多个P?</p>
+<p>有一定p重复实现，极少。</p>
+<p>(3) 接口过于复杂？</p>
+<p>建立Base类，抽common接口实现。</p>
+</li>
+<li><p>….</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">IBaseView</span> &#123;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">IBasePresenter</span>&lt;V <span class="hljs-keyword">extends</span> <span class="hljs-title class_">IBaseView</span>&gt; &#123;<br>    <span class="hljs-type">void</span> <span class="hljs-title function_">attachView</span><span class="hljs-params">(V view)</span>;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BaseActivity</span>&lt;P <span class="hljs-keyword">extends</span> <span class="hljs-title class_">IBasePresenter</span>&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AppCompatActivity</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">IBaseView</span>&#123;<br>    <span class="hljs-keyword">protected</span> P mPresenter;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">onCreate</span><span class="hljs-params">(<span class="hljs-meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;<br>        <span class="hljs-built_in">super</span>.onCreate(savedInstanceState);<br>        setContentView(getLayoutId());<br>        <span class="hljs-comment">//初始化mPresenter</span><br>        initPresenter();<br>        <span class="hljs-keyword">if</span>(mPresenter != <span class="hljs-literal">null</span>)&#123;<br>            mPresenter.attachView(<span class="hljs-built_in">this</span>);<br>        &#125;<br>        <span class="hljs-comment">//初始化</span><br>        initView();<br>    &#125;<br>    <br>    <span class="hljs-comment">// 初始化mPresenter</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> <span class="hljs-type">void</span> <span class="hljs-title function_">initPresenter</span><span class="hljs-params">()</span>;<br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> <span class="hljs-type">void</span> <span class="hljs-title function_">initView</span><span class="hljs-params">()</span>;<br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">abstract</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getLayoutId</span><span class="hljs-params">()</span>;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BasePresenter</span>&lt;V <span class="hljs-keyword">extends</span> <span class="hljs-title class_">IBaseView</span>&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title class_">IBasePresenter</span>&lt;V&gt; &#123;<br>    <span class="hljs-keyword">protected</span> DataManager mDataManager;<br>    <span class="hljs-keyword">protected</span> V mView;<br>    <span class="hljs-type">public</span> <span class="hljs-title function_">BasePresenter</span><span class="hljs-params">()</span>&#123;<br>         <span class="hljs-type">AppDbHelper</span> <span class="hljs-variable">appDbHelper</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">DbHelper</span>();<br>         <span class="hljs-type">AppPreferenceHelper</span> <span class="hljs-variable">appPreferenceHelper</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">PreferenceHelper</span>();<br>         <span class="hljs-type">AppApiHelper</span> <span class="hljs-variable">appApiHelper</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ApiHelper</span>();<br>         mDataManager = <span class="hljs-keyword">new</span> <span class="hljs-title class_">DataManager</span>(appDbHelper, appApiHelper, appPreferenceHelper);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">attachView</span><span class="hljs-params">(V view)</span> &#123;<br>        <span class="hljs-built_in">this</span>.mView = view;<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">MainContract</span> &#123;<br>    <span class="hljs-keyword">interface</span> <span class="hljs-title class_">View</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">IBaseView</span>&#123;<br>        <span class="hljs-type">void</span> <span class="hljs-title function_">testGetMview</span><span class="hljs-params">()</span>;<br>    &#125;<br>    <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Presenter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">IBasePresenter</span>&lt;View&gt;&#123;<br>        <span class="hljs-type">void</span> <span class="hljs-title function_">testGetMpresenter</span><span class="hljs-params">()</span>;<br>        <span class="hljs-type">void</span> <span class="hljs-title function_">testDb</span><span class="hljs-params">()</span>;<br>        <span class="hljs-type">void</span> <span class="hljs-title function_">testRequestNetwork</span><span class="hljs-params">()</span>;<br>        <span class="hljs-type">void</span> <span class="hljs-title function_">testPreference</span><span class="hljs-params">()</span>;<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MainActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">BaseActivity</span>&lt;MainPresenter&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title class_">MainContract</span>.View &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">initPresenter</span><span class="hljs-params">()</span> &#123;<br>        mPresenter = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MainPresenter</span>();<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">initView</span><span class="hljs-params">()</span> &#123;<br>        mPresenter.testGetMpresenter();<br>        mPresenter.testDb();<br>        mPresenter.testRequestNetwork();<br>        mPresenter.testPreference();<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getLayoutId</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> R.layout.activity_main;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">testGetMview</span><span class="hljs-params">()</span> &#123;<br>        Log.d(<span class="hljs-string">&quot;print&quot;</span>, <span class="hljs-string">&quot;我是V层的引用&quot;</span>);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MainPresenter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">BasePresenter</span>&lt;MainContract.View&gt; <span class="hljs-keyword">implements</span> <span class="hljs-title class_">MainContract</span>.Presenter&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">testGetMpresenter</span><span class="hljs-params">()</span> &#123;<br>        Log.d(<span class="hljs-string">&quot;print&quot;</span>, <span class="hljs-string">&quot;我是P层的引用&quot;</span>);<br>        mView.testGetMview();<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">testDb</span><span class="hljs-params">()</span> &#123;<br>        mDataManager.testDb();<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">testRequestNetwork</span><span class="hljs-params">()</span> &#123;<br>        mDataManager.testRequestNetwork();<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">testPreference</span><span class="hljs-params">()</span> &#123;<br>        mDataManager.testPreference();<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<h5 id="3-MVVM"><a href="#3-MVVM" class="headerlink" title="3.MVVM"></a>3.MVVM</h5><p><a target="_blank" rel="noopener" href="https://www.e-learn.cn/content/qita/615073">参考1</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/loaderman/p/10076529.html">参考2</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/antoniolg/androidmvvm">gitdemo</a></p>
+<blockquote>
+<p><strong>关键字： MVVM、Databinding、ViewModel、LiveData、Lifecycle。</strong></p>
+<p>MVP中的P替换为VM。</p>
+</blockquote>
+<p><img src="/../img/android/mvvm.png" srcset="/img/loading.gif" lazyload alt="mvvm"></p>
+<ul>
+<li><p><code>DataBinding</code>用来实现<code>View</code>层与<code>ViewModel</code>数据的双向绑定(但实际上在<code>Android Jetpack</code>中<code>DataBinding</code>只存在于布局和布局生命周期控制器之间,当数据变化绑定到布局生命周期控制器时再转发给<code>ViewModel</code>,布局控制器可以持有<code>DataBinding</code>但<code>ViewModel</code>不应该持有<code>DataBinding</code>)</p>
+</li>
+<li><p><code>ViewModel</code>与<code>Presenter</code>大致相同,都是负责处理数据和实现业务逻辑,但是<code>ViewModel</code>层不应该直接或者间接地持有<code>View</code>层的任何引用,因为一个<code>ViewModel</code>不应该直达自己具体是和哪一个<code>View</code>进行交互的.<code>ViewModel</code>主要的工作就是将<code>Model</code>提供来的数据直接翻译成<code>View</code>层能够直接使用的数据,并将这些数据暴露出去,同时<code>ViewModel</code>也可以发布事件,供<code>View</code>层订阅.</p>
+<p>MVVM的核心思想是观察者模式,它通过事件和转移View层数据持有权来实现View层与ViewModel层的解耦.</p>
+<p>在MVVM中View不是数据的实际持有者,它只负责数据如何呈现以及点击事件的传递,不做的数据处理工作,而数据的处理者和持有者变成ViewModel,它通过接收View层传递过来的时间改变自身状态,发出事件或者改变自己持有的数据触发View的更新.</p>
+<p>MVVM解决了MVP中的存在的一些问题,比如它无需定义接口,ViewModel与View层彻底无关更好复用,并且有Google的Android Jetpack作为强力后援.</p>
+<p>但是MVVM也有自己的缺点,那就是使用MVVM的情况下ViewModel与View层的通信变得更加困难了,所以在一些极其简单的页面中请酌情使用,否则就会有一种脱裤子放屁的感觉,在使用MVP这个道理也依然适用.</p>
+<h5 id="4-Jetpack"><a href="#4-Jetpack" class="headerlink" title="4.Jetpack"></a>4.Jetpack</h5><blockquote>
+<p><strong>Jetpack可以有效减少OOM和No Pointer Exception</strong></p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://developer.android.google.cn/jetpack">官网文档</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/KunMinX/Jetpack-MVVM-Best-Practice">github</a></p>
+</li>
+</ul>
+<h4 id="3-进程通信方式和机制"><a href="#3-进程通信方式和机制" class="headerlink" title="3.进程通信方式和机制"></a>3.进程通信方式和机制</h4><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/16daa35de724">参考1</a></p>
+<blockquote>
+<p><strong>进程间通信 Inter-Process Communication（IPC）：是在多任务操作系统或联网的计算机之间运行的程序和进程所用的通信技术。有两种类型的进程间通信（IPC）。</strong><br><strong>1 本地过程调用（LPC）：LPC用在多任务操作系统中，使得同时运行的任务能互相会话。这些任务共享内存空间使任务同步和互相发送信息。</strong><br><strong>2 远程过程调用（RPC）：RPC类似于LPC，只是在网上工作RPC开始是出现在Sun微系统公司和HP公司的运行UNIX操作系统的计算机中。</strong></p>
+</blockquote>
+<p><img src="/../img/android/ipc_info.jpeg" srcset="/img/loading.gif" lazyload alt="ipc"></p>
+<ul>
+<li><p>Messenger AIDI区别</p>
+<p>Messenger的本质也是AIDL，只不过对其进行了封装，在操作的时候不需要写.aidl问题；</p>
+<p>在server端，messenger处理任务是单线程的，aidl多多线程的；</p>
+<p>在client端，aidl是同步的，messenger是异步的。</p>
+</li>
+<li><p><strong>都是基于Binder机制通信！！！</strong></p>
+<p>AIDL、Messenger、ContentProvider。</p>
+</li>
+<li><p>为什么SystemServer进程与Zygote进程通讯采用Socket而不是Binder?</p>
+<p>fork只能拷贝当前线程，不支持多线程的fork。</p>
+<p>如果zygote使用binder的多线程模型与system_server进程进行通讯的话，fork()出的App进程的binder通讯没法用，那么只能再使用exec()启动一个新进程。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39037047/article/details/88066589">参考</a></p>
+</li>
+</ul>
+<h4 id="4-Flutter-ReactNative"><a href="#4-Flutter-ReactNative" class="headerlink" title="4.Flutter&#x2F;ReactNative"></a>4.Flutter&#x2F;ReactNative</h4><h4 id="5-AMS、PMS源码学习"><a href="#5-AMS、PMS源码学习" class="headerlink" title="5.AMS、PMS源码学习"></a>5.AMS、PMS源码学习</h4><h4 id="6-Java注解"><a href="#6-Java注解" class="headerlink" title="6.Java注解"></a>6.Java注解</h4><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/yangming1996/p/9295168.html">参考</a></p>
+<p><strong>「注解的本质就是一个继承了 Annotation 接口的接口」</strong>。</p>
+<p><strong>原理</strong></p>
+<p>应用层面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// java内置Override注解</span><br><span class="hljs-meta">@Target(ElementType.METHOD)</span><br><span class="hljs-meta">@Retention(RetentionPolicy.SOURCE)</span><br><span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> Override &#123;<br><br>&#125;<br><span class="hljs-comment">// 本质是</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Override</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Annotation</span>&#123;<br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>虚拟机层面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">	* 虚拟机编译时生成了代理类(注解类的所有方法都会被代理)。</span><br><span class="hljs-comment">	* 然后可以通过方法名获取注解属性值。</span><br><span class="hljs-comment">	*/</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">$Proxy1</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Proxy</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">HelloWorldAnn</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Method m1;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Method m2;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Method m4;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Method m0;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Method m3;<br><br>    <span class="hljs-type">public</span> <span class="hljs-title function_">$Proxy1</span><span class="hljs-params">(InvocationHandler var1)</span> <span class="hljs-keyword">throws</span>  &#123;<br>        <span class="hljs-built_in">super</span>(var1);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">equals</span><span class="hljs-params">(Object var1)</span> <span class="hljs-keyword">throws</span>  &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">return</span> (Boolean)<span class="hljs-built_in">super</span>.h.invoke(<span class="hljs-built_in">this</span>, m1, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[]&#123;var1&#125;);<br>        &#125; <span class="hljs-keyword">catch</span> (RuntimeException | Error var3) &#123;<br>            <span class="hljs-keyword">throw</span> var3;<br>        &#125; <span class="hljs-keyword">catch</span> (Throwable var4) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UndeclaredThrowableException</span>(var4);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span>  &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">return</span> (String)<span class="hljs-built_in">super</span>.h.invoke(<span class="hljs-built_in">this</span>, m2, (Object[])<span class="hljs-literal">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (RuntimeException | Error var2) &#123;<br>            <span class="hljs-keyword">throw</span> var2;<br>        &#125; <span class="hljs-keyword">catch</span> (Throwable var3) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UndeclaredThrowableException</span>(var3);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Class</span> <span class="hljs-title function_">annotationType</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span>  &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">return</span> (Class)<span class="hljs-built_in">super</span>.h.invoke(<span class="hljs-built_in">this</span>, m4, (Object[])<span class="hljs-literal">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (RuntimeException | Error var2) &#123;<br>            <span class="hljs-keyword">throw</span> var2;<br>        &#125; <span class="hljs-keyword">catch</span> (Throwable var3) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UndeclaredThrowableException</span>(var3);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-title function_">hashCode</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span>  &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">return</span> (Integer)<span class="hljs-built_in">super</span>.h.invoke(<span class="hljs-built_in">this</span>, m0, (Object[])<span class="hljs-literal">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (RuntimeException | Error var2) &#123;<br>            <span class="hljs-keyword">throw</span> var2;<br>        &#125; <span class="hljs-keyword">catch</span> (Throwable var3) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UndeclaredThrowableException</span>(var3);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-title function_">value</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span>  &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">return</span> (String)<span class="hljs-built_in">super</span>.h.invoke(<span class="hljs-built_in">this</span>, m3, (Object[])<span class="hljs-literal">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (RuntimeException | Error var2) &#123;<br>            <span class="hljs-keyword">throw</span> var2;<br>        &#125; <span class="hljs-keyword">catch</span> (Throwable var3) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">UndeclaredThrowableException</span>(var3);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">static</span> &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            m1 = Class.forName(<span class="hljs-string">&quot;java.lang.Object&quot;</span>).getMethod(<span class="hljs-string">&quot;equals&quot;</span>, Class.forName(<span class="hljs-string">&quot;java.lang.Object&quot;</span>));<br>            m2 = Class.forName(<span class="hljs-string">&quot;java.lang.Object&quot;</span>).getMethod(<span class="hljs-string">&quot;toString&quot;</span>);<br>            m4 = Class.forName(<span class="hljs-string">&quot;com.company.MainTest$HelloWorldAnn&quot;</span>).getMethod(<span class="hljs-string">&quot;annotationType&quot;</span>);<br>            m0 = Class.forName(<span class="hljs-string">&quot;java.lang.Object&quot;</span>).getMethod(<span class="hljs-string">&quot;hashCode&quot;</span>);<br>            m3 = Class.forName(<span class="hljs-string">&quot;com.company.MainTest$HelloWorldAnn&quot;</span>).getMethod(<span class="hljs-string">&quot;value&quot;</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (NoSuchMethodException var2) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">NoSuchMethodError</span>(var2.getMessage());<br>        &#125; <span class="hljs-keyword">catch</span> (ClassNotFoundException var3) &#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">NoClassDefFoundError</span>(var3.getMessage());<br>        &#125;<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Android/%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80/" class="category-chain-item">安卓基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%E7%A7%BB%E5%8A%A8%E7%AB%AF/" class="print-no-link">#移动端</a>
+      
+        <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" class="print-no-link">#性能优化</a>
+      
+        <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" class="print-no-link">#设计模式</a>
+      
+        <a href="/tags/Jetpack/" class="print-no-link">#Jetpack</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Android进阶知识总结</div>
+      <div>https://crazycoding7.github.io/2019/07/10/Android_02安卓基础_100qa进阶/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2019年7月10日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/07/15/%E7%AE%97%E6%B3%95_03%E5%A0%86%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/" title="堆栈和队列">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">堆栈和队列</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/06/20/%E7%AE%97%E6%B3%95_02%E6%95%B0%E7%BB%84%E5%92%8C%E9%93%BE%E8%A1%A8/" title="数组和链表">
+                        <span class="hidden-mobile">数组和链表</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,987 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="这篇通过实际案例深入分析了 Android UI 体系的核心机制，包括 Launcher 启动过程、DatePicker 委托模式、Window&#x2F;DecorView&#x2F;ViewRoot 的协作关系、UI 显示流程，以及热修复原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android案例分析">
+<meta property="og:url" content="https://crazycoding7.github.io/2019/07/20/Android_02%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80_Android%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="这篇通过实际案例深入分析了 Android UI 体系的核心机制，包括 Launcher 启动过程、DatePicker 委托模式、Window&#x2F;DecorView&#x2F;ViewRoot 的协作关系、UI 显示流程，以及热修复原理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/app_launch.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/ui_act_decor_window_diff.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/UI_show_wms_viewroot_aidl.png">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/ui_window_create.png">
+<meta property="article:published_time" content="2019-07-20T11:22:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.192Z">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Android框架">
+<meta property="article:tag" content="UI组件">
+<meta property="article:tag" content="移动端">
+<meta property="article:tag" content="工程化">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://crazycoding7.github.io/img/android/app_launch.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Android案例分析 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Android案例分析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-07-20 19:22" pubdate>
+          2019年7月20日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          16k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          133 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Android案例分析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h4 id="案例分析"><a href="#案例分析" class="headerlink" title="案例分析"></a>案例分析</h4><h5 id="1-进程间通讯Binder机制"><a href="#1-进程间通讯Binder机制" class="headerlink" title="1. 进程间通讯Binder机制"></a>1. 进程间通讯Binder机制</h5><h5 id="2-Launcher启动过程"><a href="#2-Launcher启动过程" class="headerlink" title="2. Launcher启动过程"></a>2. Launcher启动过程</h5><p><img src="/../img/android/app_launch.png" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h6 id="ActivityThread"><a href="#ActivityThread" class="headerlink" title="ActivityThread"></a>ActivityThread</h6><p>​	是主线程或UI线程，main方法是app的入口。</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-comment">//ActivityThread的main方法</span><br>   public <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span>(<span class="hljs-title class_">String</span>[] args) &#123;<br>       ...<br>       <span class="hljs-title class_">Looper</span>.<span class="hljs-title function_">prepareMainLooper</span>();<br>       <span class="hljs-title class_">ActivityThread</span> thread = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ActivityThread</span>();<br>       <span class="hljs-comment">//在attach方法中会完成Application对象的初始化，然后调用Application的onCreate()方法</span><br>       thread.<span class="hljs-title function_">attach</span>(<span class="hljs-keyword">false</span>);<br><br>       <span class="hljs-keyword">if</span> (sMainThreadHandler == <span class="hljs-keyword">null</span>) &#123;<br>           sMainThreadHandler = thread.<span class="hljs-title function_">getHandler</span>();<br>       &#125;<br>       ...<br>       <span class="hljs-title class_">Looper</span>.<span class="hljs-title function_">loop</span>();<br>       <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;Main thread loop unexpectedly exited&quot;</span>);<br>   &#125;<br></code></pre></td></tr></table></figure>
+
+<p>1 点击桌面APP图标时，Launcher的startActivity()方法，通过Binder通信，调用system_server进程中AMS服务的startActivity方法，发起启动请求 </p>
+<p>2 system_server进程接收到请求后，向Zygote进程发送创建进程的请求 </p>
+<p>3 Zygote进程fork出App进程，并执行ActivityThread的main方法，创建ActivityThread线程，初始化MainLooper，主线程Handler，同时初始化ApplicationThread用于和AMS通信交互 </p>
+<p>4 App进程，通过Binder向sytem_server进程发起attachApplication请求，这里实际上就是APP进程通过Binder调用sytem_server进程中AMS的attachApplication方法，上面我们已经分析过，AMS的attachApplication方法的作用是将ApplicationThread对象与AMS绑定 </p>
+<p>5 system_server进程在收到attachApplication的请求，进行一些准备工作后，再通过binder IPC向App进程发送handleBindApplication请求（初始化Application并调用onCreate方法）和scheduleLaunchActivity请求（创建启动Activity） </p>
+<p>6 App进程的binder线程（ApplicationThread）在收到请求后，通过handler向主线程发送BIND_APPLICATION和LAUNCH_ACTIVITY消息，这里注意的是AMS和主线程并不直接通信，而是AMS和主线程的内部类ApplicationThread通过Binder通信，ApplicationThread再和主线程通过Handler消息交互。 ( 这里猜测这样的设计意图可能是为了统一管理主线程与AMS的通信，并且不向AMS暴露主线程中的其他公开方法，大神可以来解析下) </p>
+<p>7 主线程在收到Message后，创建Application并调用onCreate方法，再通过反射机制创建目标Activity，并回调Activity.onCreate()等方法 </p>
+<p>8 到此，App便正式启动，开始进入Activity生命周期，执行完onCreate&#x2F;onStart&#x2F;onResume方法，UI渲染后显示APP主界面。</p>
+<p> 通过attach方法，实现与ActivityServiceMananger之间的绑定，使用Binder通讯。而AMS与Zygote之间是通过Socket通信。</p>
+<h5 id="1-DatePicker控件"><a href="#1-DatePicker控件" class="headerlink" title="1. DatePicker控件"></a>1. DatePicker控件</h5><h6 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h6><ul>
+<li><p>自定义控件</p>
+<p>通过自定义DataPicker类对xml进行封装，<code>使用简单、可进行UI定制。</code></p>
+</li>
+<li><p>委托设计模式(Delegate)</p>
+<blockquote>
+<p>委托模式：接受请求的对象将请求委托给另一个对象来处理。</p>
+<p>三要素：事件、事件接受者、事件委托者；</p>
+<p>两种方式： 直接委托、<strong>接口委托</strong>。</p>
+<p>优势： 隐藏实现细节，方便复用，容易扩展，松耦合,用<strong>聚合</strong>来替代<strong>继承</strong>。</p>
+</blockquote>
+<p>DatePicker利用DatePickerSpinnerDelegate类实现UI细节。</p>
+</li>
+</ul>
+<h6 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h6><p>利用接口代理方式，将实现细节封装到另一个类。<code>就算以后UI实现类变了也不影响上层代码。</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * DataPicker 控件</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DataPicker</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">FrameLayout</span>&#123;<br>  <span class="hljs-comment">//1. 委托者(接口)，定义委托事件</span><br>  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> DatePickerDelegate mDelegate;<br>  <span class="hljs-comment">// 通过委托处理事件</span><br>  <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getYear</span><span class="hljs-params">()</span>&#123;<br>    <span class="hljs-keyword">return</span> mDelegate.getYear();<br>  &#125;<br>  <br>  <span class="hljs-comment">//2. 委托接口</span><br>  <span class="hljs-keyword">interface</span> <span class="hljs-title class_">DatePickerDelegate</span>&#123;<br>    <span class="hljs-type">void</span> <span class="hljs-title function_">init</span><span class="hljs-params">(<span class="hljs-type">int</span> year...)</span>;<br>    <span class="hljs-type">void</span> <span class="hljs-title function_">getYear</span><span class="hljs-params">()</span>;<br>    ...<br>  &#125;<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * DatePickerSpinnerDelegate 委托者</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">DatePickerSpinnerDelegate</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AbstractDatePickerDelegate</span> &#123;<br>  DatePickerSpinnerDelegate()&#123;<br>    <span class="hljs-comment">// 初始化xml</span><br>    <span class="hljs-keyword">final</span> <span class="hljs-type">View</span> <span class="hljs-variable">view</span> <span class="hljs-operator">=</span> inflater.inflate(R.layout.date_picker_legacy, mDelegator, <span class="hljs-literal">true</span>);<br>    view.setSaveFromParentEnabled(<span class="hljs-literal">false</span>);<br>  &#125;<br>  <br>  <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getYear</span><span class="hljs-params">()</span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">2020</span>;<br>  &#125;<br>&#125;  <br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="2-Android-UI基本概念梳理"><a href="#2-Android-UI基本概念梳理" class="headerlink" title="2.Android UI基本概念梳理"></a>2.Android UI基本概念梳理</h5><h6 id="1-Window"><a href="#1-Window" class="headerlink" title="1. Window"></a>1. Window</h6><p>​	Window是一个抽象类，具体实现是PhoneWindow。Android中所以的视图都是通过Window来呈现的。</p>
+<p><code>每一个Window对应一个DecorView和ViewRootImpl</code>,Window和View通过ViewRootImpl来建立联系，Window并不是实际存在的，View才是Window存在的实体(View不能单独存在，必须依附在Window上)。</p>
+<h6 id="2-Window和WindowManager"><a href="#2-Window和WindowManager" class="headerlink" title="2. Window和WindowManager"></a>2. Window和WindowManager</h6><p>​	<strong>WindowManager是外界访问Window的入口，</strong> WindowManager继承ViewManager，常用的有三个功能：</p>
+<ul>
+<li>创建一个Window并增加View(addView)；</li>
+<li>更新Window中的View；</li>
+<li>删除一个View；</li>
+</ul>
+<h6 id="3-Window的创建过程"><a href="#3-Window的创建过程" class="headerlink" title="3. Window的创建过程"></a>3. Window的创建过程</h6><p>​	ActivityThread中的<code>performLaunchActivity()</code>来完成启动过程，并调用<code>attach</code>方法，在<code>attach</code>中完成PhoneWindow的创建：</p>
+<p><code>mWindow = new PhoneWindow(this, window, activityConfigCallback);</code></p>
+<h6 id="4-DecorView"><a href="#4-DecorView" class="headerlink" title="4. DecorView"></a>4. DecorView</h6><p>​	DecorView是一个FrameLayout，是Activity中顶级View，一般包括标题栏和内容栏，但随着主题的变化而变化；内容栏是一定存在的，完整的id为android.R.id.content;在Activity中的setContentView设置布局文件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">setContentView</span><span class="hljs-params">(<span class="hljs-type">int</span> layoutResID)</span> &#123;<br>       <span class="hljs-comment">// 如果mContentParent为空，就去创建一个DecorView</span><br>       <span class="hljs-keyword">if</span> (mContentParent == <span class="hljs-literal">null</span>) &#123;<br>           installDecor();<br>       &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) &#123;<br>       <span class="hljs-comment">//如果不为空，就删除其中的View</span><br>           mContentParent.removeAllViews();<br>       &#125;<br><br>       <span class="hljs-keyword">if</span> (hasFeature(FEATURE_CONTENT_TRANSITIONS)) &#123;<br>           <span class="hljs-keyword">final</span> <span class="hljs-type">Scene</span> <span class="hljs-variable">newScene</span> <span class="hljs-operator">=</span> Scene.getSceneForLayout(mContentParent, layoutResID,<br>                   getContext());<br>           transitionTo(newScene);<br>       &#125; <span class="hljs-keyword">else</span> &#123;<br>       <span class="hljs-comment">//把布局文件添加到mContentParent中</span><br>           mLayoutInflater.inflate(layoutResID, mContentParent);<br>       &#125;<br>       mContentParent.requestApplyInsets();<br>       <span class="hljs-keyword">final</span> <span class="hljs-type">Callback</span> <span class="hljs-variable">cb</span> <span class="hljs-operator">=</span> getCallback();<br>       <span class="hljs-keyword">if</span> (cb != <span class="hljs-literal">null</span> &amp;&amp; !isDestroyed()) &#123;<br>       <span class="hljs-comment">//回调通知，内容发生改变了</span><br>           cb.onContentChanged();<br>       &#125;<br>       mContentParentExplicitlySet = <span class="hljs-literal">true</span>;<br>   &#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 生成DecorView</span><br><span class="hljs-keyword">protected</span> <span class="hljs-type">DecorView</span> <span class="hljs-title function_">generateDecor</span><span class="hljs-params">(<span class="hljs-type">int</span> featureId)</span> &#123;<br>        ......<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">DecorView</span>(context, featureId, <span class="hljs-built_in">this</span>, getAttributes());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这里的mContentParent实际上是前面提到的id为content的FrameLayout.</p>
+<p>​	而generateLayout()主要就是先获取主题的样式，然后根据样式加载对应的布局到DecorView中，然后再获取mContentParent并返回，就可以把布局文件添加到mContentParent中了，即Activity所需要展示的布局.<br>到这为止，Activity的布局文件已经成功添加到了DecorView的mContentParent中，<strong>但是DecorView还没有被WindowManager添加到Window中，即用户还不能看到视图.！！！</strong></p>
+<h6 id="5-DecorView的展示"><a href="#5-DecorView的展示" class="headerlink" title="5. DecorView的展示"></a>5. DecorView的展示</h6><p>​	在ActivityThread的<code>handleResumeActivity</code>方法中，会首先调用Activity的onResume方法，接着调用Activity的<strong>makeVisible()</strong>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">void</span> <span class="hljs-title function_">makeVisible</span><span class="hljs-params">()</span> &#123;<br>  <span class="hljs-keyword">if</span> (!mWindowAdded) &#123;<br>    <span class="hljs-type">ViewManager</span> <span class="hljs-variable">wm</span> <span class="hljs-operator">=</span> getWindowManager();<br>    wm.addView(mDecor, getWindow().getAttributes());<br>    mWindowAdded = <span class="hljs-literal">true</span>;<br>  &#125;<br>  mDecor.setVisibility(View.VISIBLE);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>到此DecorView真正完成添加和显示两个过程，视图可见了。</p>
+<p>​	我们来看下addView方法，WindowManager是个接口，具体实现类是WindowManagerImpl：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params,</span><br><span class="hljs-params">           Display display, Window parentWindow)</span> &#123;<br>       ......<br>       ViewRootImpl root;<br>       root = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ViewRootImpl</span>(view.getContext(), display);<br>       view.setLayoutParams(wparams);<br><br>       mViews.add(view);<br>       mRoots.add(root);<br>       mParams.add(wparams);<br>      ......<br>      <span class="hljs-keyword">try</span> &#123;<br>      	  <span class="hljs-comment">//将DecorView交给ViewRootImpl</span><br>         root.setView(view, wparams, panelParentView);<br>      &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;<br>       &#125;<br>   &#125;<br></code></pre></td></tr></table></figure>
+
+<p>这是实例化了<strong>ViewRootImpl</strong>对象，然后调用<code>setView</code>方法，经过一系列处理后最终调用<code>performTraversals()</code>方法，开始进行View的measure、layout、draw，把界面显示出来。</p>
+<h6 id="6-ViewRoot"><a href="#6-ViewRoot" class="headerlink" title="6. ViewRoot"></a>6. ViewRoot</h6><p>​	ViewRoot对应于ViewRootImpl类(不真实存在)，是连接<strong>DecorView</strong>和<strong>WindowManager</strong>的纽带，View的三大流程操作都是有ViewRoot完成。在ActivityThread中，Activity对象创建成功后，会将DecorView添加到Window中，并创建ViewRootImpl对象，并将DecorView和ViewRootImpl进行关联。</p>
+<p>​	<code>ViewRootImpl负责和WMS通讯，和WMS通讯的AIDL WindowSession虽然不是ViewRootImpl自己创建的，但是WindowManagerGlobal在和WMS联通之后，把WindowSession传递给了ViewRootImpl的。WMS和window通讯的AIDL IWindow也是ViewRootImpl创建的，可见ViewRootImpl是负责通讯的。</code></p>
+<p>​	<code>除了通信外，ViewRootImpl负责整个window窗口所有UI视图的Measure、Layout、Draw，ViewRootImpl.performTraversals()是整个视图树的起点。</code></p>
+<h6 id="7-WindowManagerService"><a href="#7-WindowManagerService" class="headerlink" title="7. WindowManagerService"></a>7. WindowManagerService</h6><p>​	运作在Android系统自己的进程中，用于屏幕显示的逻辑控制，Window只是持有每个Activity的UI内容，但是如何显示，和其他Window如何交互，都是有WMS完成的。</p>
+<p>​	WMS中除了可以增加、删除Window外，还通过<strong>Z-order</strong>概念管理Window的负责关系，Z-order大的会覆盖在小的上面。利用他可以</p>
+<h6 id="8-Surface"><a href="#8-Surface" class="headerlink" title="8. Surface"></a>8. Surface</h6><blockquote>
+<p>​	一个Surface就是一个对象，该对象持有一群像素（pixels），这些像素是要被组合到一起显示到屏幕上的。你在手机屏幕上看到的每一个window（如对话框、全屏的activity、状态栏）都有唯一一个自己的surface，window将自己的内容（content）绘制到该surface中。Surface Flinger根据各个surface在Z轴上的顺序（Z-order）将它们渲染到最终的显示屏上。</p>
+<p>​	另一种解释：在Android系统中，窗口是独占一个Surface实例的显示区域，每个窗口的Surface由WindowManagerService分配。我们可以把Surface看作一块画布，应用可以通过Canvas或OpenGL在其上面作画。画好之后，通过SurfaceFlinger将多块Surface按照特定的顺序（即Z-order）进行混合，而后输出到FrameBuffer中，这样用户界面就得以显示。</p>
+</blockquote>
+<p>​	其中，SurfaceFlinger是Android一个服务进程，负责管理Surface。</p>
+<h5 id="3-AndroidUI视图结构"><a href="#3-AndroidUI视图结构" class="headerlink" title="3. AndroidUI视图结构"></a>3. AndroidUI视图结构</h5><p><img src="/../img/android/ui_act_decor_window_diff.png" srcset="/img/loading.gif" lazyload alt="ppt_ui"></p>
+<h6 id="设计思想-1"><a href="#设计思想-1" class="headerlink" title="设计思想"></a>设计思想</h6><h6 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h6><ol>
+<li><p><strong>一个Activity对应一个Window</strong></p>
+<p>Activity并不负责视图控制，它只控制生命周期和处理事件。真正控制视图的事Window。一个Activity包含一个Window，在attach()方法中创建。</p>
+</li>
+<li><p><strong>一个PhoneWindow持有一个DecorView实例</strong></p>
+<p>Window内部持有一个DecorView，而这个DecorView才是View的根布局；</p>
+<p>Window是一个抽象类，PhoneWinow是实现类。通过创建DecorView来加载用户布局；</p>
+<p>Window通过WindowManager将DecorView加载其中，并将DecorView交给ViewRoot，进行视图绘制和其他交互。</p>
+</li>
+<li><p><strong>DecorView</strong></p>
+<p>DecorView是FrameLayout的子类，是Android的根视图节点；</p>
+<p>一般情况包含一个竖向的LinearLayout，<strong>它包含上中下三部分，上面是ViewStub,延迟加载的视图(根据Theme的ActionBar)，中间是标题栏，下面是内容栏。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 具体实现与Android版本有关</span><br>&lt;LinearLayout xmlns:android=<span class="hljs-string">&quot;http://schemas.android.com/apk/res/android&quot;</span><br>    android:fitsSystemWindows=<span class="hljs-string">&quot;true&quot;</span><br>    android:orientation=<span class="hljs-string">&quot;vertical&quot;</span>&gt;<br>    &lt;!-- Popout bar <span class="hljs-keyword">for</span> action modes --&gt;<br>    &lt;ViewStub<br>        android:id=<span class="hljs-string">&quot;@+id/action_mode_bar_stub&quot;</span><br>        android:layout_width=<span class="hljs-string">&quot;match_parent&quot;</span><br>        android:layout_height=<span class="hljs-string">&quot;wrap_content&quot;</span><br>        android:inflatedId=<span class="hljs-string">&quot;@+id/action_mode_bar&quot;</span><br>        android:layout=<span class="hljs-string">&quot;@layout/action_mode_bar&quot;</span><br>        android:theme=<span class="hljs-string">&quot;?attr/actionBarTheme&quot;</span> /&gt;<br><br>    &lt;<span class="hljs-type">FrameLayout</span><br>        <span class="hljs-variable">style</span><span class="hljs-operator">=</span><span class="hljs-string">&quot;?android:attr/windowTitleBackgroundStyle&quot;</span><br>        android:layout_width=<span class="hljs-string">&quot;match_parent&quot;</span><br>        android:layout_height=<span class="hljs-string">&quot;?android:attr/windowTitleSize&quot;</span>&gt;<br><br>        &lt;TextView<br>            android:id=<span class="hljs-string">&quot;@android:id/title&quot;</span><br>            style=<span class="hljs-string">&quot;?android:attr/windowTitleStyle&quot;</span><br>            android:layout_width=<span class="hljs-string">&quot;match_parent&quot;</span><br>            android:layout_height=<span class="hljs-string">&quot;match_parent&quot;</span><br>            android:background=<span class="hljs-string">&quot;@null&quot;</span><br>            android:fadingEdge=<span class="hljs-string">&quot;horizontal&quot;</span><br>            android:gravity=<span class="hljs-string">&quot;center_vertical&quot;</span> /&gt;<br>    &lt;/FrameLayout&gt;<br><br>		<span class="hljs-comment">// Activity中用户的自定义布局加载到 content中！！！</span><br>    &lt;FrameLayout<br>        android:id=<span class="hljs-string">&quot;@android:id/content&quot;</span><br>        android:layout_width=<span class="hljs-string">&quot;match_parent&quot;</span><br>        android:layout_height=<span class="hljs-string">&quot;0dip&quot;</span><br>        android:layout_weight=<span class="hljs-string">&quot;1&quot;</span><br>        android:foreground=<span class="hljs-string">&quot;?android:attr/windowContentOverlay&quot;</span><br>        android:foregroundGravity=<span class="hljs-string">&quot;fill_horizontal|top&quot;</span> /&gt;<br>&lt;/LinearLayout&gt;<br></code></pre></td></tr></table></figure></li>
+</ol>
+<h5 id="4-Android-UI-Window显示过程"><a href="#4-Android-UI-Window显示过程" class="headerlink" title="4. Android UI Window显示过程"></a>4. Android UI Window显示过程</h5><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/samchen2009/category/524173.html">GUI系统</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/blogs-of-lxl/p/11443693.html">VSYNC设计</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.360doc.com/content/18/0328/15/7377734_740892969.shtml">Surface&amp;SurfaceFlinger关系</a></p>
+<h6 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h6><p><img src="/../img/android/UI_show_wms_viewroot_aidl.png" srcset="/img/loading.gif" lazyload alt="ui_aidl"></p>
+<p>​	ViewRootImpl持有与WMS通讯的AIDL WindowSession，WMS持有与ViewRootImp通讯的AIDL IWindow，这个IWindow也是ViewRootImpl注册到WMS里面的。</p>
+<p>​	<img src="/../img/android/ui_window_create.png" srcset="/img/loading.gif" lazyload alt="ui_window_create"></p>
+<h6 id="分析-2"><a href="#分析-2" class="headerlink" title="分析"></a>分析</h6><ul>
+<li><p>涉及类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">	* ViewManager 添加、删除、更新View</span><br><span class="hljs-comment">	*/</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ViewManager</span><br>&#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params)</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">updateViewLayout</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params)</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">removeView</span><span class="hljs-params">(View view)</span>;<br>&#125;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment">	* ViewParent 父View交互API</span><br><span class="hljs-comment">	*/</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ViewParent</span> &#123;<br>  	<span class="hljs-comment">// 导致View的onMeasure、onLayout、onDraw方法被调用</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">requestLayout</span><span class="hljs-params">()</span>;<br>  	...<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment">	* ViewGroup</span><br><span class="hljs-comment">	*/</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ViewGroup</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">View</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">ViewParent</span>, ViewManager &#123;<br>  <span class="hljs-comment">// Child views of this ViewGroup</span><br>  <span class="hljs-keyword">private</span> View[] mChildren;<br>  <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> mChildrenCount;<br>  <br>  <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">addView</span><span class="hljs-params">(View child, <span class="hljs-type">int</span> index, LayoutParams params)</span> &#123;<br>    <span class="hljs-comment">// addViewInner() will call child.requestLayout() when setting the new LayoutParams</span><br>    <span class="hljs-comment">// therefore, we call requestLayout() on ourselves before, so that the child&#x27;s request</span><br>    <span class="hljs-comment">// will be blocked at our level</span><br>    requestLayout();<br>    invalidate(<span class="hljs-literal">true</span>);<br>    addViewInner(child, index, params, <span class="hljs-literal">false</span>);<br>  &#125;<br>  ...<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>WindowManagerImpl实现了WindowManager接口：</strong></p>
+<blockquote>
+<p>注意：</p>
+<p>不管是<code>WindowManagerImpl</code>还是ViewGroup的addView(View view, ViewGroup.LayoutParams params)方法都是来自于<code>ViewManager</code>接口，但是在ViewGroup中是将普通的view或者ViewGroup作为Children加入，但是在<code>WindowManagerImpl</code>是将<code>DecorView</code>作为根布局加入到PhoneWindow中去，虽然都是基于同一个<code>ViewManager</code>接口，但是起作用截然不同.</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// windown交互管理类</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">WindowManagerImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">WindowManager</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">WindowManagerGlobal</span> <span class="hljs-variable">mGlobal</span> <span class="hljs-operator">=</span> WindowManagerGlobal.getInstance();<br>  <br>      ...<br>      <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">addView</span><span class="hljs-params">(<span class="hljs-meta">@NonNull</span> View view, <span class="hljs-meta">@NonNull</span> ViewGroup.LayoutParams params)</span> &#123;<br>        applyDefaultToken(params);<br>        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);<br>    &#125;<br>      ...<br>&#125;<br><br><span class="hljs-comment">// 单例window全局管理类</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">WindowManagerGlobal</span> &#123;<br>  	<span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> WindowManagerGlobal sDefaultWindowManager;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> IWindowManager sWindowManagerService;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> IWindowSession sWindowSession;<br>		<span class="hljs-comment">// 存储viewList,ViewRootImplList.</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ArrayList</span>&lt;View&gt; <span class="hljs-variable">mViews</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;View&gt;();<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ArrayList</span>&lt;ViewRootImpl&gt; <span class="hljs-variable">mRoots</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;ViewRootImpl&gt;();<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ArrayList&lt;WindowManager.LayoutParams&gt; mParams =<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;WindowManager.LayoutParams&gt;();<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ArraySet</span>&lt;View&gt; <span class="hljs-variable">mDyingViews</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArraySet</span>&lt;View&gt;();<br><br>  	<span class="hljs-comment">// viewrootimpl创建</span><br>  	<span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params,</span><br><span class="hljs-params">            Display display, Window parentWindow)</span> &#123;  	<br>    	ViewRootImpl root;<br>      <span class="hljs-type">View</span> <span class="hljs-variable">panelParentView</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>     	<span class="hljs-comment">// begin	</span><br>      root = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ViewRootImpl</span>(view.getContext(), display);<br>      view.setLayoutParams(wparams);<br>			<span class="hljs-comment">// 保存到List</span><br>      mViews.add(view);<br>      mRoots.add(root);<br>      mParams.add(wparams);<br>      <span class="hljs-comment">// do this last because it fires off messages to start doing things</span><br>      root.setView(view, wparams, panelParentView);<br>      ...<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// viewRootImpl通信类</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ViewRootImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">ViewParent</span>,<br>        View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks &#123;<br>    <span class="hljs-comment">// 与WMS通信接口</span><br>    <span class="hljs-keyword">final</span> IWindowSession mWindowSession;<br>    <span class="hljs-comment">// 显示类</span><br>    <span class="hljs-meta">@NonNull</span> Display mDisplay;<br>    <span class="hljs-keyword">final</span> DisplayManager mDisplayManager;      <br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">setView</span><span class="hljs-params">(View view, WindowManager.LayoutParams attrs, View panelParentView)</span> &#123;<br>    	...<br>      <span class="hljs-comment">// Schedule the first layout -before- adding to the window</span><br>      <span class="hljs-comment">// manager, to make sure we do the relayout before receiving</span><br>      <span class="hljs-comment">// any other events from the system.</span><br>      requestLayout();   <span class="hljs-comment">// 1.触发绘制流程 </span><br>      <span class="hljs-comment">// 通信WMS添加显示view  2. 通过IPC 执行WMS.addWindow方法。</span><br>      <span class="hljs-comment">// 通过WindowSession进行IPC调用，将View添加到Window上</span><br>      <span class="hljs-comment">// mWindow即W类，用来接收WMS信息；同时通过InputChannel接收触摸事件回调。</span><br>      res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,<br>                            getHostVisibility(), mDisplay.getDisplayId(),<br>                            mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,<br>                            mAttachInfo.mOutsets, mInputChannel);<br>    	...<br>    &#125;<br>          <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">requestLayout</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">if</span> (!mHandlingLayoutInLayoutRequest) &#123;<br>            checkThread();<br>            mLayoutRequested = <span class="hljs-literal">true</span>;<br>            scheduleTraversals();<br>        &#125;<br>    &#125;<br>    <br>    <span class="hljs-comment">// 遍历View进行测量计算(2次执行)      </span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">void</span> <span class="hljs-title function_">performTraversals</span><span class="hljs-params">()</span> &#123;<br>      ...<br>        <span class="hljs-keyword">if</span> (!cancelDraw &amp;&amp; !newSurface) &#123;<br>            <span class="hljs-keyword">if</span> (mPendingTransitions != <span class="hljs-literal">null</span> &amp;&amp; mPendingTransitions.size() &gt; <span class="hljs-number">0</span>) &#123;<br>                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; mPendingTransitions.size(); ++i) &#123;<br>                    mPendingTransitions.get(i).startChangingAnimations();<br>                &#125;<br>                mPendingTransitions.clear();<br>            &#125;<br>            <span class="hljs-comment">// draw</span><br>            performDraw();<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-keyword">if</span> (isViewVisible) &#123;<br>                <span class="hljs-comment">// Try again！！！</span><br>                scheduleTraversals();<br>            &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (mPendingTransitions != <span class="hljs-literal">null</span> &amp;&amp; mPendingTransitions.size() &gt; <span class="hljs-number">0</span>) &#123;<br>                <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; mPendingTransitions.size(); ++i) &#123;<br>                    mPendingTransitions.get(i).endChangingAnimations();<br>                &#125;<br>                mPendingTransitions.clear();<br>            &#125;<br>        &#125;<br>    &#125;           <br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>addToDisplay</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br>     <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">addToDisplay</span><span class="hljs-params">(IWindow window, <span class="hljs-type">int</span> seq, WindowManager.LayoutParams attrs,</span><br><span class="hljs-params">             <span class="hljs-type">int</span> viewVisibility, <span class="hljs-type">int</span> displayId, Rect outContentInsets, Rect outStableInsets,</span><br><span class="hljs-params">             Rect outOutsets, InputChannel outInputChannel)</span> &#123;<br>         <span class="hljs-keyword">return</span> mService.addWindow(<span class="hljs-built_in">this</span>, window, seq, attrs, viewVisibility, displayId,<br>                 outContentInsets, outStableInsets, outOutsets, outInputChannel);<br>     &#125;<br></code></pre></td></tr></table></figure>
+
+<p>​	注意，addToDisplay是在WMS系统进程中执行的。</p>
+<p>简单总结下Activity启动后布局显示过程：</p>
+<ol>
+<li>SurfaceFlinger 是在init.rc解析的时候被创建的，执行其main方法，实例化了Surfaceflinger，并向ServiceManager注册，SurfaceFlinger运行在单独进程中。</li>
+<li>在 Activity 创建过程中执行 scheduleLaunchActivity() 之后便调用到了 handleLaunchActivity() 方法。首先通过Instrumentation创建Activity，然后执行Activity的attach()方法，创建 PhoneWindow，且与activity建立回调关联。获取WindowManager，层层代理最终干活的是WindowManagerGlobal。</li>
+<li>setContentView过程，创建DecorView，并把xml的View树解析出来，加到DecorView上的contentParent部分。</li>
+<li>Activity 调用makeVisible ，实际上是WindowManagerGlobal执行addView操作，然后调用ViewRootImpl setView操作。</li>
+<li>ViewRootImpl setView 做了两件事： 1） requestLayout触发绘制流程 2）mWindowSession.addToDisplay 通过IPC 执行WMS.addWindow</li>
+<li>requestLayout ：中的relayoutWindow过程中app请求SurfaceFlinger创建Surface</li>
+<li>mWindowSession.addToDisplay：最终执行WMS.addWindow方法，该方法流程最终建立了app与SurfaceFlinger服务连接。</li>
+<li>Android应用程序与SurfaceFlinger服务是运行在不同的进程中的，用Binder进行通信，用匿名共享内存进行UI数据传递。</li>
+<li>requestLayout draw的流程中：Surface通过dequeueBuffer获取一块GraphicBuffer, 然后onDraw中通过传入的Java层Canvas 调用底层Skia引擎中的SKCanvas（画家）、SKBitmap（画布）进行具体绘制操作，绘制完成之后把图形数据放入GraphicBuffer，最后Surface执行queueBuffer，把这块带有图形数据的buffer送回BufferQueue,并通过onFrameAvailable通知Layer更新。</li>
+<li>SurfaceFlinger合成图层依赖于Android的异步消息处理机制，每16ms接收一次vsync信号来执行图层合成操作，最终通过handleMessageRefresh一系列方法的处理，其中包括把GraphicBuffer数据映射为OpenGL的texture ，收集所有Layer计算显示区域，然后通过openG 或 HWC进行合成以及栅格化处理，最后送显。</li>
+</ol>
+<h5 id="6-热修复原理？"><a href="#6-热修复原理？" class="headerlink" title="6. 热修复原理？"></a>6. 热修复原理？</h5><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/popfisher/p/8543973.html">参考</a></p>
+<blockquote>
+<p>代码修复主要有三个方案，分别是底层替换方案、类加载方案和Instant Run方案。</p>
+</blockquote>
+<ul>
+<li><p>类加载方案</p>
+<p>​	类加载方案基于Dex分包方案。65536限制的原因是DVM Bytecode的限制，DVM指令集的方法调用指令invoke-kind所以为16bits，最多能引用65535个方法。</p>
+<p><strong>Dex分包方案主要做的是在打包时将应用代码分成多个Dex，将应用启动时必须用到的类和这些类的直接引用类放到主Dex中，其他代码放到次Dex中。当应用启动时先加载主Dex，等到应用启动后再动态的加载次Dex，从而缓解了主Dex的65536限制和LinearAlloc限制。</strong></p>
+</li>
+</ul>
+<p>	</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//BaseDexClassLoader下有一个数组——DexPathList </span><br><span class="hljs-comment">// libcore/dalvik/src/main/java/dalvik/system/DexPathList.java</span><br> <span class="hljs-keyword">public</span> <span class="hljs-type">Class</span>&lt;?&gt; <span class="hljs-title function_">findClass</span><span class="hljs-params">(String name, List&lt;Throwable&gt; suppressed)</span> &#123;<br>        <span class="hljs-keyword">for</span> (Element element : dexElements) &#123;<span class="hljs-comment">//1 变量查找dex数组</span><br>            <span class="hljs-comment">//2 找到对应clazz</span><br>            <span class="hljs-type">Class</span>&lt;?&gt; <span class="hljs-variable">clazz</span> <span class="hljs-operator">=</span> element.findClass(name, definingContext, suppressed);<br>            <span class="hljs-keyword">if</span> (clazz != <span class="hljs-literal">null</span>) &#123;<br>                <span class="hljs-keyword">return</span> clazz;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (dexElementsSuppressedExceptions != <span class="hljs-literal">null</span>) &#123;<br>            suppressed.addAll(Arrays.asList(dexElementsSuppressedExceptions));<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>Element内部封装了DexFile，DexFile用于加载dex文件，因此每个dex文件对应一个Element。<br>多个Element组成了有序的Element数组dexElements。当要查找类时，会在注释1处遍历Element数组dexElements（相当于遍历dex文件数组），注释2处调用Element的findClass方法，其方法内部会调用DexFile的loadClassBinaryName方法查找类。如果在Element中（dex文件）找到了该类就返回，如果没有找到就接着在下一个Element中进行查找。<br><code>根据上面的查找流程，我们将有bug的类Key.class进行修改，再将Key.class打包成包含dex的补丁包Patch.jar，放在Element数组dexElements的第一个元素，这样会首先找到Patch.dex中的Key.class去替换之前存在bug的Key.class，排在数组后面的dex文件中的存在bug的Key.class根据ClassLoader的双亲委托模式就不会被加载，这就是类加载方案。</code></p>
+<p>​	例如：微信Tinker将新旧apk做了diff，得到patch.dex，然后将patch.dex与手机中apk的classes.dex做合并，生成新的classes.dex，然后在运行时通过反射将classes.dex放在Element数组的第一个元素。</p>
+<ul>
+<li><p>底层替换方案</p>
+<p>不会再次加载新类，而是直接在Native层修改原有的类。替换ArtMethod结构体中的字段或者替换整个ArtMethod结构体，这就是底层替换方案。</p>
+</li>
+<li><p>instant run方案</p>
+<p>在第一次构建apk时，使用asm在每一个方法注入检查方法是否变更的代码。如果变更，执行新的方法。</p>
+</li>
+</ul>
+<h5 id="7-Windows的显示流程？"><a href="#7-Windows的显示流程？" class="headerlink" title="7. Windows的显示流程？"></a>7. Windows的显示流程？</h5><h5 id="8-View的绘制流程？"><a href="#8-View的绘制流程？" class="headerlink" title="8. View的绘制流程？"></a>8. View的绘制流程？</h5>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Android/%E5%AE%89%E5%8D%93%E5%9F%BA%E7%A1%80/" class="category-chain-item">安卓基础</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/Android%E6%A1%86%E6%9E%B6/" class="print-no-link">#Android框架</a>
+      
+        <a href="/tags/UI%E7%BB%84%E4%BB%B6/" class="print-no-link">#UI组件</a>
+      
+        <a href="/tags/%E7%A7%BB%E5%8A%A8%E7%AB%AF/" class="print-no-link">#移动端</a>
+      
+        <a href="/tags/%E5%B7%A5%E7%A8%8B%E5%8C%96/" class="print-no-link">#工程化</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Android案例分析</div>
+      <div>https://crazycoding7.github.io/2019/07/20/Android_02安卓基础_Android案例分析/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2019年7月20日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/08/01/%E7%AE%97%E6%B3%95_04%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" title="优先队列">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">优先队列</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/07/15/%E7%AE%97%E6%B3%95_03%E5%A0%86%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97/" title="堆栈和队列">
+                        <span class="hidden-mobile">堆栈和队列</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
