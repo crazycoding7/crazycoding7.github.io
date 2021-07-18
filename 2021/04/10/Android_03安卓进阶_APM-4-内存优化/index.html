@@ -1,0 +1,952 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="内存优化做不好，OOM 就找上门。这篇从内存模型、泄漏检测、MAT 分析到 Bitmap 优化，把内存优化的核心知识点都覆盖了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="APM-4-内存优化">
+<meta property="og:url" content="https://crazycoding7.github.io/2021/04/10/Android_03%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6_APM-4-%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="内存优化做不好，OOM 就找上门。这篇从内存模型、泄漏检测、MAT 分析到 Bitmap 优化，把内存优化的核心知识点都覆盖了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://crazycoding7.github.io/img/android/apm_memory_phone.png">
+<meta property="article:published_time" content="2021-04-10T09:59:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.292Z">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="移动端">
+<meta property="article:tag" content="性能优化">
+<meta property="article:tag" content="崩溃优化">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://crazycoding7.github.io/img/android/apm_memory_phone.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>APM-4-内存优化 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="APM-4-内存优化"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-04-10 17:59" pubdate>
+          2021年4月10日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">APM-4-内存优化</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="内存优化"><a href="#内存优化" class="headerlink" title="内存优化"></a>内存优化</h2><h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><h4 id="1-手机内存和PC内存区别？"><a href="#1-手机内存和PC内存区别？" class="headerlink" title="1. 手机内存和PC内存区别？"></a>1. 手机内存和PC内存区别？</h4><p>​	PC内存：DDR,全名 <strong>双倍数据速率内存</strong>。</p>
+<p>​	手机内存：LPDDR，全称是<strong>“低功耗双倍数据速率内存”</strong>，其中 LP 就是“Lower Power”低功耗的意思。</p>
+<p>​	区别：体积小、功耗小。</p>
+<p>​	以 LPDDR4 为例，带宽 &#x3D; 时钟频率 × 内存总线位数 ÷ 8，即 1600 × 64 ÷ 8 &#x3D; 12.8GB&#x2F;s，因为是 DDR 内存是双倍速率，所以最后的带宽是 12.8 × 2 &#x3D; 25.6GB&#x2F;s。</p>
+<p><img src="/../img/android/apm_memory_phone.png" srcset="/img/loading.gif" lazyload></p>
+<p>目前市面上的手机，主流的运行内存有 LPDDR3、LPDDR4 以及 LPDDR4X。可以看出 LPDDR4 的性能要比 LPDDR3 高出一倍，而 LPDDR4X 相比 LPDDR4 工作电压更低，所以也比 LPDDR4 省电 20%～40%。当然图中的数据是标准数据，不同的生成厂商会有一些低频或者高频的版本，性能方面高频要好于低频。</p>
+<h4 id="2-设备内存大小与年限表"><a href="#2-设备内存大小与年限表" class="headerlink" title="2. 设备内存大小与年限表"></a>2. 设备内存大小与年限表</h4><p>其中：2010、2013位分水岭。</p>
+<table>
+<thead>
+<tr>
+<th>RAM</th>
+<th>condition</th>
+<th>Year Class</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>768MB</td>
+<td>1 core</td>
+<td>2009</td>
+</tr>
+<tr>
+<td></td>
+<td>2+ cores</td>
+<td>2010</td>
+</tr>
+<tr>
+<td>1GB</td>
+<td>&lt;1.3GHz</td>
+<td>2011</td>
+</tr>
+<tr>
+<td></td>
+<td>1.3GHz+</td>
+<td>2012</td>
+</tr>
+<tr>
+<td>1.5GB</td>
+<td>&lt;1.8GHz</td>
+<td>2012</td>
+</tr>
+<tr>
+<td></td>
+<td>1.8GHz+</td>
+<td>2013</td>
+</tr>
+<tr>
+<td>2GB</td>
+<td></td>
+<td>2013</td>
+</tr>
+<tr>
+<td>3GB</td>
+<td></td>
+<td>2014</td>
+</tr>
+<tr>
+<td>5GB</td>
+<td></td>
+<td>2015</td>
+</tr>
+<tr>
+<td>more</td>
+<td></td>
+<td>2016</td>
+</tr>
+</tbody></table>
+<h4 id="3-引发问题"><a href="#3-引发问题" class="headerlink" title="3. 引发问题"></a>3. 引发问题</h4><ol>
+<li>异常。比如：OOM、重启、low memory kill 杀进程。</li>
+<li>卡顿。比如：GC回收频繁。</li>
+</ol>
+<p><strong>两个误区：</strong></p>
+<p>误区一：内存占用越少越好；</p>
+<p>误区二：Native 内存不用管。</p>
+<h3 id="二、测量方式"><a href="#二、测量方式" class="headerlink" title="二、测量方式"></a>二、测量方式</h3><h4 id="1-Java内存分配"><a href="#1-Java内存分配" class="headerlink" title="1. Java内存分配"></a>1. Java内存分配</h4><p>​	跟踪Java堆内存使用情况，最常用的工具有Allocation Tracker 和 MAT(Memory Analyzer Tool)，一个是AS工具自带的，一个是eclipse 插件。</p>
+<p>Allocation Tracker 的三个缺点。</p>
+<p>​	获取的信息过于分散，中间夹杂着不少其他的信息，很多信息不是应用申请的，可能需要进行不少查找才能定位到具体的问题。</p>
+<p>​	跟 <strong>Traceview(统计函数执行时间)</strong> 一样，无法做到自动化分析，每次都需要开发者手工开始 &#x2F; 结束，这对于某些问题的分析可能会造成不便，而且对于批量分析来说也比较困难。</p>
+<p>​	虽然在 Allocation Tracking 的时候，不会对手机本身的运行造成过多的性能影响，但是在停止的时候，直到把数据 dump 出来之前，经常会把手机完全卡死，如果时间过长甚至会直接 ANR。</p>
+<p>​	<strong>解决方法（困难多多）：</strong></p>
+<p>​	实现一个自定义的“Allocation Tracker”，实现对象内存的自动化分析。通过这个工具可以获取所有对象的申请信息（大小、类型、堆栈等），可以找到一段时间内哪些对象占用了大量的内存。</p>
+<h4 id="2-Native内存分配"><a href="#2-Native内存分配" class="headerlink" title="2. Native内存分配"></a>2. Native内存分配</h4><ol>
+<li>利用Allocation Tracker工具，不太友好。<ol start="2">
+<li>利用<a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/bionic/+/master/libc/malloc_debug/README.md">Malloc 调试</a>、<a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/bionic/+/master/libc/malloc_hooks/README.md">Malloc Hooks</a>。</li>
+</ol>
+</li>
+</ol>
+<h3 id="三、内存优化方向探讨"><a href="#三、内存优化方向探讨" class="headerlink" title="三、内存优化方向探讨"></a>三、内存优化方向探讨</h3><h4 id="1-设备分级"><a href="#1-设备分级" class="headerlink" title="1. 设备分级"></a>1. 设备分级</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 动画设备分级展示</span><br><span class="hljs-keyword">if</span> (year &gt;= <span class="hljs-number">2013</span>) &#123;<br>    <span class="hljs-comment">// Do advanced animation</span><br>&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (year &gt;= <span class="hljs-number">2010</span>) &#123;<br>    <span class="hljs-comment">// Do simple animation</span><br>&#125; <span class="hljs-keyword">else</span> &#123;<br>    <span class="hljs-comment">// Phone too slow, don&#x27;t do any animations</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-图片优化"><a href="#2-图片优化" class="headerlink" title="2. 图片优化"></a>2. 图片优化</h4><h4 id="3-内存泄漏"><a href="#3-内存泄漏" class="headerlink" title="3. 内存泄漏"></a>3. 内存泄漏</h4><h4 id="4-本地或线上内存监控"><a href="#4-本地或线上内存监控" class="headerlink" title="4. 本地或线上内存监控"></a>4. 本地或线上内存监控</h4><h3 id="四、LeakCanary内存泄漏原理分析"><a href="#四、LeakCanary内存泄漏原理分析" class="headerlink" title="四、LeakCanary内存泄漏原理分析"></a>四、LeakCanary内存泄漏原理分析</h3><blockquote>
+<p>LeakCanary如何检测内存泄漏的呢？主要分为7步:</p>
+<ul>
+<li>1、<code>RefWatcher.watch()</code>创建了一个<code>KeyedWeakReference</code>用于去观察对象。</li>
+<li>2、然后，在后台线程中，它会检测引用是否被清除了，并且是否没有触发GC。</li>
+<li>3、如果引用仍然没有被清除，那么它将会把堆栈信息保存在文件系统中的.hprof文件里。</li>
+<li>4、<code>HeapAnalyzerService</code>被开启在一个独立的进程中，并且<code>HeapAnalyzer</code>使用了<code>HAHA</code>开源库解析了指定时刻的堆栈快照文件heap dump。</li>
+<li>5、从<code>heap dump</code>中，<code>HeapAnalyzer</code>根据一个独特的引用<code>key</code>找到了<code>KeyedWeakReference</code>，并且定位了泄露的引用。</li>
+<li>6、<code>HeapAnalyzer</code>为了确定是否有泄露，计算了到GC Roots的最短强引用路径，然后建立了导致泄露的链式引用。</li>
+<li>7、这个结果被传回到app进程中的<code>DisplayLeakService</code>，然后一个泄露通知便展现出来了。</li>
+</ul>
+</blockquote>
+<p>官方原理解释是:</p>
+<p><strong>在一个Activity执行完onDestroy后，将它放入到WeakReference中，然后将这个WeakReference类型的Activity的对象与ReferenceQueue关联，注意: 如果一个对象要被GC回收了，会把它引用的对象放入到ReferenceQueue中。这时候只需要在ReferenceQueue中去查找是否存在该对象，如果没有就执行一个GC，再次查找，如果还是没有，则说明该对象可能无法被回收，也就可能发生了内存泄漏，最后使用HAHA这个开源库取分析dump之后的heap内存。</strong></p>
+<p><strong>测试demo：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 对象</span><br><span class="hljs-type">Object</span> <span class="hljs-variable">obj</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br><span class="hljs-comment">// 引用队列，gc回收后会放入队列</span><br><span class="hljs-type">ReferenceQueue</span> <span class="hljs-variable">referenceQueue</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReferenceQueue</span>();<br><span class="hljs-comment">// 建立弱引用</span><br><span class="hljs-type">WeakReference</span> <span class="hljs-variable">weakReference</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">WeakReference</span>(obj,referenceQueue);<br><br>obj = <span class="hljs-literal">null</span>;<br>Runtime.getRuntime().gc();<br><br><span class="hljs-keyword">try</span> &#123;<br>  Thread.sleep(<span class="hljs-number">1000</span>);<br>&#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>  e.printStackTrace();<br>&#125;<br><br>Log.e(<span class="hljs-string">&quot;testme&quot;</span>, <span class="hljs-string">&quot;得到gc回收结果：&quot;</span> + referenceQueue.poll());<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>参考：</strong></p>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/studio/profile/memory-profiler?hl=zh-cn#performance">1. Allcation Tracker帮助文档</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.youkmi.cn/2020/01/01/android-xing-neng-you-hua-zhi-leakcanary-nei-cun-yuan-li-fen-xi/">2. LeakCanary学习</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Android/%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6/" class="category-chain-item">安卓进阶</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%E7%A7%BB%E5%8A%A8%E7%AB%AF/" class="print-no-link">#移动端</a>
+      
+        <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" class="print-no-link">#性能优化</a>
+      
+        <a href="/tags/%E5%B4%A9%E6%BA%83%E4%BC%98%E5%8C%96/" class="print-no-link">#崩溃优化</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>APM-4-内存优化</div>
+      <div>https://crazycoding7.github.io/2021/04/10/Android_03安卓进阶_APM-4-内存优化/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年4月10日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/05/10/Android_03%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6_APM-5-%E5%8D%A1%E9%A1%BF%E4%BC%98%E5%8C%96/" title="APM-5-卡顿优化">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">APM-5-卡顿优化</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/03/15/Android_03%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6_APM-3-ANR/" title="APM-3-ANR">
+                        <span class="hidden-mobile">APM-3-ANR</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

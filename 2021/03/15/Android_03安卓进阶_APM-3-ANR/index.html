@@ -1,0 +1,887 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="ANR 是 Android 开发中最头疼的问题之一。这篇从 ANR 的产生原因讲起，配合 traces 文件分析和实际案例，把 ANR 的定位和解决思路都梳理清楚了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="APM-3-ANR">
+<meta property="og:url" content="https://crazycoding7.github.io/2021/03/15/Android_03%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6_APM-3-ANR/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="ANR 是 Android 开发中最头疼的问题之一。这篇从 ANR 的产生原因讲起，配合 traces 文件分析和实际案例，把 ANR 的定位和解决思路都梳理清楚了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-15T05:09:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T17:24:20.292Z">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="移动端">
+<meta property="article:tag" content="性能优化">
+<meta property="article:tag" content="崩溃优化">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>APM-3-ANR - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="APM-3-ANR"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-03-15 13:09" pubdate>
+          2021年3月15日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          106 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">APM-3-ANR</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="ANR问题"><a href="#ANR问题" class="headerlink" title="ANR问题"></a>ANR问题</h2><h3 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h3><p>​	ANR全称：Application Not Reponding，也就四应用程序无响应。</p>
+<h4 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h4><p>​	Android系统中，**ActivityManagerService(简称AMS)<strong>和</strong>WindowManagerService(简称WMS)**会检测App的响应时间，如果App在特定时间无法相应屏幕触摸或键盘输入时间，或者特定事件没有处理完毕，就会出现ANR。</p>
+<ul>
+<li>主线程慢代码</li>
+<li>主线程IO</li>
+<li>锁竞争</li>
+<li>死锁</li>
+</ul>
+<h4 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h4><p>​	<strong>InputDispatching Timeout</strong>：5秒内无法响应屏幕触摸事件或键盘输入事件</p>
+<p>   <strong>BroadcastQueue Timeout</strong> ：在执行前台广播（BroadcastReceiver）的<code>onReceive()</code>函数时10秒没有处理完成，后台为60秒。</p>
+<p>   <strong>Service Timeout</strong> ：前台服务20秒内，后台服务在200秒内没有执行完毕。</p>
+<p>   <strong>ContentProvider Timeout</strong> ：ContentProvider的publish在10s内没进行完。</p>
+<h3 id="二、解决方案"><a href="#二、解决方案" class="headerlink" title="二、解决方案"></a>二、解决方案</h3><p><strong>异常代码：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 异常代码</span><br>findViewById(R.id.button).setOnClickListener(<span class="hljs-keyword">new</span> <span class="hljs-title class_">View</span>.OnClickListener() &#123;<br>            <span class="hljs-meta">@Override</span><br>            <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">onClick</span><span class="hljs-params">(View v)</span> &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    Thread.sleep(<span class="hljs-number">10000l</span>);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                    e.printStackTrace();<br>                &#125;<br>                Toast.makeText(MainActivity.<span class="hljs-built_in">this</span>,<span class="hljs-string">&quot;点我你就发了&quot;</span>, Toast.LENGTH_SHORT).show();<br>            &#125;<br>        &#125;);<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="1-利用logcat"><a href="#1-利用logcat" class="headerlink" title="1. 利用logcat"></a>1. 利用logcat</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// logcat 错误日志</span><br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">27</span>:<span class="hljs-number">04.810</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26558</span>/com.dodola.breakpad I/dodola.breakpa: Thread[<span class="hljs-number">3</span>,tid=<span class="hljs-number">26558</span>,WaitingInMainSignalCatcherLoop,Thread*=<span class="hljs-number">0x7cc7c17400</span>,peer=<span class="hljs-number">0x13f80120</span>,<span class="hljs-string">&quot;Signal Catcher&quot;</span>]: reacting to signal <span class="hljs-number">3</span><br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">27</span>:<span class="hljs-number">05.595</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26558</span>/com.dodola.breakpad I/dodola.breakpa: Wrote stack traces to <span class="hljs-string">&#x27;[tombstoned]&#x27;</span><br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">00.799</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26591</span>/com.dodola.breakpad I/dodola.breakpa: Starting profile saver IsSaveProfileNow end.<br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">00.812</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26533</span>/com.dodola.breakpad I/Choreographer: Skipped <span class="hljs-number">6006</span> frames!  The application may be doing too much work on its main thread.<br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">00.840</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26605</span>/com.dodola.breakpad I/OpenGLRenderer: Davey! duration=100143ms; Flags=<span class="hljs-number">0</span>, IntendedVsync=<span class="hljs-number">2621994292513931</span>, Vsync=<span class="hljs-number">2622094392509927</span>, OldestInputEvent=<span class="hljs-number">9223372036854775807</span>, NewestInputEvent=<span class="hljs-number">0</span>, HandleInputStart=<span class="hljs-number">2622094408549484</span>, AnimationStart=<span class="hljs-number">2622094408734901</span>, PerformTraversalsStart=<span class="hljs-number">2622094413432818</span>, DrawStart=<span class="hljs-number">2622094415197401</span>, SyncQueued=<span class="hljs-number">2622094420339588</span>, SyncStart=<span class="hljs-number">2622094420743234</span>, IssueDrawCommandsStart=<span class="hljs-number">2622094421002609</span>, SwapBuffers=<span class="hljs-number">2622094433322401</span>, FrameCompleted=<span class="hljs-number">2622094436245838</span>, DequeueBufferDuration=<span class="hljs-number">746000</span>, QueueBufferDuration=<span class="hljs-number">1130000</span>, <br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">00.865</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26533</span>/com.dodola.breakpad I/ViewRootImpl: jank_removeInvalidNode jank list is <span class="hljs-literal">null</span><br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">00.867</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26533</span>/com.dodola.breakpad V/AudioManager: playSoundEffect   effectType: <span class="hljs-number">0</span><br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">00.867</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26533</span>/com.dodola.breakpad V/AudioManager: querySoundEffectsEnabled...<br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">01.480</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26593</span>/com.dodola.breakpad D/ZrHung.AppEyeUiProbe: sendAppEye recover Events.<br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">04.694</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26593</span>/com.dodola.breakpad D/ZrHung.AppEyeUiProbe: message delay warning<br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">28</span>:<span class="hljs-number">05.796</span> <span class="hljs-number">26533</span>-<span class="hljs-number">26593</span>/com.dodola.breakpad D/ZrHung.AppEyeUiProbe: message delay warning<br></code></pre></td></tr></table></figure>
+
+<p> 可以看到logcat清晰地记录了ANR发生的时间，以及线程的tid和一句话概括原因：<code>WaitingInMainSignalCatcherLoop</code>，大概意思为主线程等待异常。<br> 最后一句<code>The application may be doing too much work on its main thread.</code>告知可能在主线程做了太多的工作。</p>
+<h4 id="2-使用-FileObserver-监听-data-anr-traces-txt-的变化"><a href="#2-使用-FileObserver-监听-data-anr-traces-txt-的变化" class="headerlink" title="2. 使用 FileObserver 监听 &#x2F;data&#x2F;anr&#x2F;traces.txt 的变化"></a>2. 使用 FileObserver 监听 &#x2F;data&#x2F;anr&#x2F;traces.txt 的变化</h4><p>高版本已经没有权限。只能导出日志。</p>
+<p><strong>命令行导出:</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//低版本</span><br>adb pull /data/anr/traces.txt /Users/xin/Desktop<br><span class="hljs-comment">//高版本</span><br>adb bugreport /Users/xin/Desktop<br></code></pre></td></tr></table></figure>
+
+<p><strong>文件内容:</strong></p>
+<p>错误原因： Sleeping ，后面是行数和进程信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><code class="hljs java"><br>----- pid <span class="hljs-number">26533</span> at <span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">11</span>:<span class="hljs-number">26</span>:<span class="hljs-number">36</span> -----<br>Cmd line: com.dodola.breakpad<br>Build fingerprint: <span class="hljs-string">&#x27;HONOR/STF-AL00/HWSTF:9/HUAWEISTF-AL00/9.1.0.201C00:user/release-keys&#x27;</span><br>ABI: <span class="hljs-string">&#x27;arm64&#x27;</span><br>Build type: optimized<br>Zygote <span class="hljs-type">loaded</span> <span class="hljs-variable">classes</span><span class="hljs-operator">=</span><span class="hljs-number">11989</span> post <span class="hljs-type">zygote</span> <span class="hljs-variable">classes</span><span class="hljs-operator">=</span><span class="hljs-number">98</span><br>Intern table: <span class="hljs-number">101624</span> strong; <span class="hljs-number">364</span> weak<br>JNI: CheckJNI is off; globals=<span class="hljs-number">624</span> (plus <span class="hljs-number">41</span> weak)<br>Libraries: /data/app/com.dodola.breakpad-0gSImeXHx-t0IM3fZVYZPQ==/lib/arm64/libcrash-lib.so /system/lib64/libandroid.so /system/lib64/libcompiler_rt.so /system/lib64/libhwetrace_jni.so /system/lib64/libhwlog_jni.so /system/lib64/libiAwareSdk_jni.so /system/lib64/libimonitor_jni.so /system/lib64/libjavacrypto.so /system/lib64/libjnigraphics.so /system/lib64/libmedia_jni.so /system/lib64/libsoundpool.so /system/lib64/libwebviewchromium_loader.so libjavacore.so libopenjdk.so (<span class="hljs-number">14</span>)<br>Heap: <span class="hljs-number">11</span>% free, 2MB/2MB; <span class="hljs-number">40464</span> objects<br>Dumping cumulative Gc timings<br>Start Dumping histograms <span class="hljs-keyword">for</span> <span class="hljs-number">1</span> iterations <span class="hljs-keyword">for</span> concurrent copying<br>GrayAllDirtyImmuneObjects:	Sum: <span class="hljs-number">3.</span>181ms <span class="hljs-number">99</span>% C.I. <span class="hljs-number">3.</span>181ms-<span class="hljs-number">3.</span>181ms Avg: <span class="hljs-number">3.</span>181ms Max: <span class="hljs-number">3.</span>181ms<br>VisitConcurrentRoots:	Sum: <span class="hljs-number">2.</span>989ms <span class="hljs-number">99</span>% C.I. <span class="hljs-number">2.</span>989ms-<span class="hljs-number">2.</span>989ms Avg: <span class="hljs-number">2.</span>989ms Max: <span class="hljs-number">2.</span>989ms<br><span class="hljs-type">ProfileSaver</span> <span class="hljs-variable">total_ms_of_sleep</span><span class="hljs-operator">=</span><span class="hljs-number">5000</span><br><span class="hljs-type">ProfileSaver</span> <span class="hljs-variable">total_ms_of_work</span><span class="hljs-operator">=</span><span class="hljs-number">0</span><br><span class="hljs-type">ProfileSaver</span> <span class="hljs-variable">max_number_profile_entries_cached</span><span class="hljs-operator">=</span><span class="hljs-number">0</span><br><span class="hljs-type">ProfileSaver</span> <span class="hljs-variable">total_number_of_hot_spikes</span><span class="hljs-operator">=</span><span class="hljs-number">0</span><br><span class="hljs-type">ProfileSaver</span> <span class="hljs-variable">total_number_of_wake_ups</span><span class="hljs-operator">=</span><span class="hljs-number">0</span><br><br>suspend all histogram:	Sum: <span class="hljs-number">32.</span>283ms <span class="hljs-number">99</span>% C.I. 2us-<span class="hljs-number">3423.</span>999us Avg: <span class="hljs-number">61.</span>491us Max: 9945us<br><span class="hljs-type">DALVIK</span> <span class="hljs-title function_">THREADS</span> <span class="hljs-params">(<span class="hljs-number">17</span>)</span>:<br><span class="hljs-string">&quot;Signal Catcher&quot;</span> <span class="hljs-type">daemon</span> <span class="hljs-variable">prio</span><span class="hljs-operator">=</span><span class="hljs-number">5</span> tid=<span class="hljs-number">3</span> Runnable<br>  | group=<span class="hljs-string">&quot;system&quot;</span> sCount=<span class="hljs-number">0</span> dsCount=<span class="hljs-number">0</span> flags=<span class="hljs-number">0</span> obj=<span class="hljs-number">0x13f80120</span> self=<span class="hljs-number">0x7cc7c17400</span><br>  | sysTid=<span class="hljs-number">26558</span> nice=<span class="hljs-number">0</span> cgrp=<span class="hljs-type">default</span> <span class="hljs-variable">sched</span><span class="hljs-operator">=</span><span class="hljs-number">0</span>/<span class="hljs-number">0</span> handle=<span class="hljs-number">0x7cc12fe4f0</span><br>  | state=<span class="hljs-type">R</span> <span class="hljs-variable">schedstat</span><span class="hljs-operator">=</span>( <span class="hljs-number">30344792</span> <span class="hljs-number">900001</span> <span class="hljs-number">21</span> ) utm=<span class="hljs-number">1</span> stm=<span class="hljs-number">1</span> core=<span class="hljs-number">2</span> HZ=<span class="hljs-number">100</span><br>  | stack=<span class="hljs-number">0x7cc1203000</span>-<span class="hljs-number">0x7cc1205000</span> stackSize=1009KB<br>  | <span class="hljs-type">held</span> <span class="hljs-variable">mutexes</span><span class="hljs-operator">=</span> <span class="hljs-string">&quot;mutator lock&quot;</span>(shared held)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">00</span> pc 00000000003c7d4c  /system/lib64/libart.so (art::DumpNativeStack(std::__1::basic_ostream&lt;<span class="hljs-type">char</span>, std::__1::char_traits&lt;<span class="hljs-type">char</span>&gt;&gt;&amp;, <span class="hljs-type">int</span>, BacktraceMap*, <span class="hljs-type">char</span> const*, art::ArtMethod*, <span class="hljs-keyword">void</span>*, bool)+<span class="hljs-number">220</span>)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">01</span> pc 00000000004a5b64  /system/lib64/libart.so (art::Thread::DumpStack(std::__1::basic_ostream&lt;<span class="hljs-type">char</span>, std::__1::char_traits&lt;<span class="hljs-type">char</span>&gt;&gt;&amp;, bool, <br><span class="hljs-comment">// 错误原因和行数信息    </span><br><br><span class="hljs-string">&quot;main&quot;</span> prio=<span class="hljs-number">5</span> tid=<span class="hljs-number">1</span> Sleeping<br>  | group=<span class="hljs-string">&quot;main&quot;</span> sCount=<span class="hljs-number">1</span> dsCount=<span class="hljs-number">0</span> flags=<span class="hljs-number">1</span> obj=<span class="hljs-number">0x76148358</span> self=<span class="hljs-number">0x7cc7c15c00</span><br>  | sysTid=<span class="hljs-number">26533</span> nice=-<span class="hljs-number">10</span> cgrp=<span class="hljs-type">default</span> <span class="hljs-variable">sched</span><span class="hljs-operator">=</span><span class="hljs-number">0</span>/<span class="hljs-number">0</span> handle=<span class="hljs-number">0x7d4e4bd548</span><br>  | state=<span class="hljs-type">S</span> <span class="hljs-variable">schedstat</span><span class="hljs-operator">=</span>( <span class="hljs-number">536965100</span> <span class="hljs-number">28957813</span> <span class="hljs-number">497</span> ) utm=<span class="hljs-number">44</span> stm=<span class="hljs-number">9</span> core=<span class="hljs-number">3</span> HZ=<span class="hljs-number">100</span><br>  | stack=<span class="hljs-number">0x7ff1ddc000</span>-<span class="hljs-number">0x7ff1dde000</span> stackSize=8MB<br>  | <span class="hljs-type">held</span> <span class="hljs-variable">mutexes</span><span class="hljs-operator">=</span><br>  at java.lang.Thread.sleep(Native method)<br>  - sleeping on &lt;<span class="hljs-number">0x01ff52c8</span>&gt; (a java.lang.Object)<br>  at java.lang.Thread.sleep(Thread.java:<span class="hljs-number">386</span>)<br>  - locked &lt;<span class="hljs-number">0x01ff52c8</span>&gt; (a java.lang.Object)<br>  at java.lang.Thread.sleep(Thread.java:<span class="hljs-number">327</span>)<br>  at com.dodola.breakpad.MainActivity$<span class="hljs-number">1.</span>onClick(MainActivity.java:<span class="hljs-number">54</span>)<br>  at android.view.View.performClick(View.java:<span class="hljs-number">6663</span>)<br>  at android.view.View.performClickInternal(View.java:<span class="hljs-number">6635</span>)<br>  at android.view.View.access$<span class="hljs-number">3100</span>(View.java:<span class="hljs-number">794</span>)<br>  at android.view.View$PerformClick.run(View.java:<span class="hljs-number">26199</span>)<br>  at android.os.Handler.handleCallback(Handler.java:<span class="hljs-number">907</span>)<br>  at android.os.Handler.dispatchMessage(Handler.java:<span class="hljs-number">105</span>)<br>  at android.os.Looper.loop(Looper.java:<span class="hljs-number">216</span>)<br>  at android.app.ActivityThread.main(ActivityThread.java:<span class="hljs-number">7625</span>)<br>  at java.lang.reflect.Method.invoke(Native method)<br>  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:<span class="hljs-number">524</span>)<br>  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:<span class="hljs-number">987</span>)<br><br><span class="hljs-string">&quot;Jit thread pool worker thread 0&quot;</span> <span class="hljs-type">daemon</span> <span class="hljs-variable">prio</span><span class="hljs-operator">=</span><span class="hljs-number">5</span> tid=<span class="hljs-number">2</span> Native<br>  | group=<span class="hljs-string">&quot;main&quot;</span> sCount=<span class="hljs-number">1</span> dsCount=<span class="hljs-number">0</span> flags=<span class="hljs-number">1</span> obj=<span class="hljs-number">0x13f80000</span> self=<span class="hljs-number">0x7cc1434000</span><br>  | sysTid=<span class="hljs-number">26557</span> nice=<span class="hljs-number">9</span> cgrp=<span class="hljs-type">default</span> <span class="hljs-variable">sched</span><span class="hljs-operator">=</span><span class="hljs-number">0</span>/<span class="hljs-number">0</span> handle=<span class="hljs-number">0x7cc13ff4f0</span><br>  | state=<span class="hljs-type">S</span> <span class="hljs-variable">schedstat</span><span class="hljs-operator">=</span>( <span class="hljs-number">71260934</span> <span class="hljs-number">10785941</span> <span class="hljs-number">155</span> ) utm=<span class="hljs-number">4</span> stm=<span class="hljs-number">2</span> core=<span class="hljs-number">1</span> HZ=<span class="hljs-number">100</span><br>  | stack=<span class="hljs-number">0x7cc1301000</span>-<span class="hljs-number">0x7cc1303000</span> stackSize=1021KB<br>  | <span class="hljs-type">held</span> <span class="hljs-variable">mutexes</span><span class="hljs-operator">=</span><br>  kernel: (couldn<span class="hljs-string">&#x27;t read /proc/self/task/26557/stack stderr:Permission denied)</span><br><span class="hljs-string">  native: #00 pc 000000000001f2ec  /system/lib64/libc.so (syscall+28)</span><br><span class="hljs-string">  native: #01 pc 00000000000dbd94  /system/lib64/libart.so (art::ConditionVariable::WaitHoldingLocks(art::Thread*)+148)</span><br><span class="hljs-string">  native: #02 pc 00000000004c0fc4  /system/lib64/libart.so (art::ThreadPool::GetTask(art::Thread*)+260)</span><br><span class="hljs-string">  native: #03 pc 00000000004c052c  /system/lib64/libart.so (art::ThreadPoolWorker::Run()+124)</span><br><span class="hljs-string">  native: #04 pc 00000000004bffec  /system/lib64/libart.so (art::ThreadPoolWorker::Callback(void*)+148)</span><br><span class="hljs-string">  native: #05 pc 0000000000083588  /system/lib64/libc.so (__pthread_start(void*)+36)</span><br><span class="hljs-string">  native: #06 pc 00000000000241dc  /system/lib64/libc.so (__start_thread+68)</span><br><span class="hljs-string">  (no managed stack frames)</span><br><span class="hljs-string"></span><br><span class="hljs-string">&quot;ADB-JDWP Connection Control Thread&quot; daemon prio=0 tid=4 WaitingInMainDebuggerLoop</span><br><span class="hljs-string">  | group=&quot;system&quot; sCount=1 dsCount=0 flags=1 obj=0x13f801d0 self=0x7cc1413800</span><br><span class="hljs-string">  | sysTid=26559 nice=0 cgrp=default sched=0/0 handle=0x7cab9104f0</span><br><span class="hljs-string">  | state=S schedstat=( 3231772 346354 14 ) utm=0 stm=0 core=2 HZ=100</span><br><span class="hljs-string">  | stack=0x7cab815000-0x7cab817000 stackSize=1009KB</span><br><span class="hljs-string">  | held mutexes=</span><br><span class="hljs-string">  kernel: (couldn&#x27;</span>t read /proc/self/task/<span class="hljs-number">26559</span>/stack stderr:Permission denied)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">00</span> pc 000000000006fdcc  /system/lib64/libc.so (__ppoll+<span class="hljs-number">8</span>)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">01</span> pc 000000000002c310  /system/lib64/libc.so (poll+<span class="hljs-number">88</span>)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">02</span> pc 0000000000006c50  /system/lib64/libadbconnection.so (adbconnection::AdbConnectionState::RunPollLoop(art::Thread*)+<span class="hljs-number">836</span>)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">03</span> pc 0000000000005218  /system/lib64/libadbconnection.so (adbconnection::CallbackFunction(<span class="hljs-keyword">void</span>*)+<span class="hljs-number">1060</span>)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">04</span> pc 0000000000083588  /system/lib64/libc.so (__pthread_start(<span class="hljs-keyword">void</span>*)+<span class="hljs-number">36</span>)<br>  <span class="hljs-keyword">native</span>: #<span class="hljs-number">05</span> pc 00000000000241dc  /system/lib64/libc.so (__start_thread+<span class="hljs-number">68</span>)<br>  (no managed stack frames)<br><br>----- end <span class="hljs-number">26533</span> -----<br><br>----- binder transactions -----<br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span>  <span class="hljs-number">11</span>:<span class="hljs-number">26</span>:<span class="hljs-number">36</span><br>blocked binder transactions:<br>	<span class="hljs-number">28826</span>:<span class="hljs-number">9048</span>(hwid.persistent:HiHealth_Thread) -&gt; <span class="hljs-number">29570</span>:<span class="hljs-number">22884</span>(hwid.container1:Binder:<span class="hljs-number">29570_8</span>) code <span class="hljs-number">1</span> wait:<span class="hljs-number">404727.528225547</span> s<br>	<span class="hljs-number">28826</span>:<span class="hljs-number">28902</span>(hwid.persistent:HiHealth_Thread) -&gt; <span class="hljs-number">29570</span>:<span class="hljs-number">29594</span>(hwid.container1:Binder:<span class="hljs-number">29570_4</span>) code <span class="hljs-number">1</span> wait:<span class="hljs-number">401127.433798407</span> s<br>	<span class="hljs-number">28826</span>:<span class="hljs-number">29205</span>(hwid.persistent:HiHealth_Thread) -&gt; <span class="hljs-number">29570</span>:<span class="hljs-number">1786</span>(hwid.container1:Binder:<span class="hljs-number">29570_6</span>) code <span class="hljs-number">1</span> wait:<span class="hljs-number">411927.784341807</span> s<br>	<span class="hljs-number">28826</span>:<span class="hljs-number">31426</span>(hwid.persistent:HiHealth_Thread) -&gt; <span class="hljs-number">29570</span>:<span class="hljs-number">29275</span>(hwid.container1:Binder:29570_B) code <span class="hljs-number">1</span> wait:<span class="hljs-number">408327.765007375</span> s<br>	<span class="hljs-number">1319</span>:<span class="hljs-number">1453</span>(system_server:SensorService) -&gt; <span class="hljs-number">734</span>:<span class="hljs-number">859</span>(sensors@<span class="hljs-number">1.0</span>-ser:HwBinder:<span class="hljs-number">734_1</span>) code <span class="hljs-number">4</span> wait:<span class="hljs-number">0.326859376</span> s<br>binder thread count, and memory info:<br><br>pid	context		max_threads	ready_threads	requested_threads	requested_threads_started	free <span class="hljs-type">async</span> <span class="hljs-title function_">space</span><span class="hljs-params">(<span class="hljs-type">byte</span>)</span><br><span class="hljs-number">28826</span>	hwbinder	<span class="hljs-number">0</span>		<span class="hljs-number">0</span>		<span class="hljs-number">0</span>			<span class="hljs-number">0</span>					<span class="hljs-number">520192</span><br><span class="hljs-number">28826</span>	binder		<span class="hljs-number">15</span>		<span class="hljs-number">7</span>		<span class="hljs-number">0</span>			<span class="hljs-number">6</span>					<span class="hljs-number">520192</span><br><span class="hljs-number">29570</span>	binder		<span class="hljs-number">15</span>		<span class="hljs-number">6</span>		<span class="hljs-number">0</span>			<span class="hljs-number">13</span>					<span class="hljs-number">520192</span><br><span class="hljs-number">1319</span>	hwbinder	<span class="hljs-number">4</span>		<span class="hljs-number">5</span>		<span class="hljs-number">0</span>			<span class="hljs-number">4</span>					<span class="hljs-number">520192</span><br><span class="hljs-number">1319</span>	binder		<span class="hljs-number">31</span>		<span class="hljs-number">32</span>		<span class="hljs-number">0</span>			<span class="hljs-number">31</span>					<span class="hljs-number">520192</span><br><span class="hljs-number">734</span>	hwbinder	<span class="hljs-number">1</span>		<span class="hljs-number">1</span>		<span class="hljs-number">0</span>			<span class="hljs-number">1</span>					<span class="hljs-number">520192</span><br><span class="hljs-number">499</span>	vndbinder	<span class="hljs-number">0</span>		<span class="hljs-number">1</span>		<span class="hljs-number">0</span>			<span class="hljs-number">0</span>					<span class="hljs-number">65536</span>	&lt; -- binder memory &lt; 100KB<br><span class="hljs-number">497</span>	binder		<span class="hljs-number">0</span>		<span class="hljs-number">1</span>		<span class="hljs-number">0</span>			<span class="hljs-number">0</span>					<span class="hljs-number">65536</span>	&lt; -- binder memory &lt; 100KB<br>----- end binder transactions -----<br><br></code></pre></td></tr></table></figure>
+
+<h4 id="3-监控消息队列的运行时间"><a href="#3-监控消息队列的运行时间" class="headerlink" title="3. 监控消息队列的运行时间"></a>3. 监控消息队列的运行时间</h4><p>​	建立一个线程，不停向消息队列发送消息，如果处理时间大于5s，代表发生了ANR。但不是100%准确，需要单独跑线程。</p>
+<p>例如<strong>Watchdog</strong>。</p>
+<h4 id="4-jstack工具监控"><a href="#4-jstack工具监控" class="headerlink" title="4. jstack工具监控"></a>4. jstack工具监控</h4><p>​	jstack(查看线程)、jmap(查看内存)和jstat(性能分析)。</p>
+<h4 id="5-微信团队Hardcoder性能优化框架"><a href="#5-微信团队Hardcoder性能优化框架" class="headerlink" title="5. 微信团队Hardcoder性能优化框架"></a>5. 微信团队Hardcoder性能优化框架</h4><p>​	需要和ROM厂商谈合作。</p>
+<h3 id="三、finalize-time-out-崩溃问题案例"><a href="#三、finalize-time-out-崩溃问题案例" class="headerlink" title="三、finalize time out 崩溃问题案例"></a>三、finalize time out 崩溃问题案例</h3><p>​	gc垃圾回收手，会将实现了finalize()函数的对象放在一个队列中，由守护线程<code>FinalizerWatchdogDaemon</code>执行，如果处理超时(默认10s)，就会报<code>TimeoutException</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 异常demo</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">GhostObject</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-type">void</span> <span class="hljs-title function_">finalize</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> Throwable &#123;<br>        Log.d(<span class="hljs-string">&quot;ghost&quot;</span>, <span class="hljs-string">&quot;=============fire finalize=============&quot;</span>+Thread.currentThread().getName());<br>        <span class="hljs-built_in">super</span>.finalize();<br>        Thread.sleep(<span class="hljs-number">80000</span>);<span class="hljs-comment">//每个手机触发 Timeout 的时长不同，比如 vivo 的某些rom 是2分钟，模拟器统一都是10秒钟，所以在模拟器上效果明显</span><br>    &#125;<br>&#125;<br><br><span class="hljs-comment">// 异常日志</span><br><span class="hljs-number">2020</span>-<span class="hljs-number">12</span>-<span class="hljs-number">21</span> <span class="hljs-number">15</span>:<span class="hljs-number">27</span>:<span class="hljs-number">58.370</span> <span class="hljs-number">7443</span>-<span class="hljs-number">7453</span>/com.dodola.watchdogkiller E/AndroidRuntime: FATAL EXCEPTION: FinalizerWatchdogDaemon<br>    Process: com.dodola.watchdogkiller, PID: <span class="hljs-number">7443</span><br>    java.util.concurrent.TimeoutException: com.dodola.watchdogkiller.GhostObject.finalize() timed out after <span class="hljs-number">10</span> seconds<br>        at java.lang.Thread.sleep(Native Method)<br>        at java.lang.Thread.sleep(Thread.java:<span class="hljs-number">386</span>)<br>        at java.lang.Thread.sleep(Thread.java:<span class="hljs-number">327</span>)<br>        at com.dodola.watchdogkiller.GhostObject.finalize(GhostObject.java:<span class="hljs-number">13</span>)<br>        at java.lang.Daemons$FinalizerDaemon.doFinalize(Daemons.java:<span class="hljs-number">250</span>)<br>        at java.lang.Daemons$FinalizerDaemon.runInternal(Daemons.java:<span class="hljs-number">237</span>)<br>        at java.lang.Daemons$Daemon.run(Daemons.java:<span class="hljs-number">103</span>)<br>        at java.lang.Thread.run(Thread.java:<span class="hljs-number">784</span>)<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="1-利用反射停止守护线程"><a href="#1-利用反射停止守护线程" class="headerlink" title="1. 利用反射停止守护线程"></a>1. 利用反射停止守护线程</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">stopWatchDog</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 建议在在debug包或者灰度包中不要stop，保留发现问题的能力。为了Sample效果，先注释</span><br>        <span class="hljs-comment">//if (!BuildConfig.DEBUG) &#123;</span><br>        <span class="hljs-comment">//    return;</span><br>        <span class="hljs-comment">//&#125;</span><br><br>        <span class="hljs-comment">// Android P 以后不能反射FinalizerWatchdogDaemon</span><br>        <span class="hljs-keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="hljs-number">28</span>) &#123;<br>            Log.w(TAG, <span class="hljs-string">&quot;stopWatchDog, do not support after Android P, just return&quot;</span>);<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (sWatchdogStopped) &#123;<br>            Log.w(TAG, <span class="hljs-string">&quot;stopWatchDog, already stopped, just return&quot;</span>);<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        sWatchdogStopped = <span class="hljs-literal">true</span>;<br>        Log.w(TAG, <span class="hljs-string">&quot;stopWatchDog, try to stop watchdog&quot;</span>);<br><br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">final</span> <span class="hljs-type">Class</span> <span class="hljs-variable">clazz</span> <span class="hljs-operator">=</span> Class.forName(<span class="hljs-string">&quot;java.lang.Daemons$FinalizerWatchdogDaemon&quot;</span>);<br>            <span class="hljs-keyword">final</span> <span class="hljs-type">Field</span> <span class="hljs-variable">field</span> <span class="hljs-operator">=</span> clazz.getDeclaredField(<span class="hljs-string">&quot;INSTANCE&quot;</span>);<br>            field.setAccessible(<span class="hljs-literal">true</span>);<br>            <span class="hljs-keyword">final</span> <span class="hljs-type">Object</span> <span class="hljs-variable">watchdog</span> <span class="hljs-operator">=</span> field.get(<span class="hljs-literal">null</span>);<br>            <span class="hljs-keyword">try</span> &#123;<br>                <span class="hljs-keyword">final</span> <span class="hljs-type">Field</span> <span class="hljs-variable">thread</span> <span class="hljs-operator">=</span> clazz.getSuperclass().getDeclaredField(<span class="hljs-string">&quot;thread&quot;</span>);<br>                thread.setAccessible(<span class="hljs-literal">true</span>);<br>                thread.set(watchdog, <span class="hljs-literal">null</span>);<br>            &#125; <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">final</span> Throwable t) &#123;<br>                Log.e(TAG, <span class="hljs-string">&quot;stopWatchDog, set null occur error:&quot;</span> + t);<br><br>                t.printStackTrace();<br>                <span class="hljs-keyword">try</span> &#123;<br>                    <span class="hljs-comment">// 直接调用stop方法，在Android 6.0之前会有线程安全问题</span><br>                    <span class="hljs-keyword">final</span> <span class="hljs-type">Method</span> <span class="hljs-variable">method</span> <span class="hljs-operator">=</span> clazz.getSuperclass().getDeclaredMethod(<span class="hljs-string">&quot;stop&quot;</span>);<br>                    method.setAccessible(<span class="hljs-literal">true</span>);<br>                    method.invoke(watchdog);<br>                &#125; <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">final</span> Throwable e) &#123;<br>                    Log.e(TAG, <span class="hljs-string">&quot;stopWatchDog, stop occur error:&quot;</span> + t);<br>                    t.printStackTrace();<br>                &#125;<br>            &#125;<br>        &#125; <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">final</span> Throwable t) &#123;<br>            Log.e(TAG, <span class="hljs-string">&quot;stopWatchDog, get object occur error:&quot;</span> + t);<br>            t.printStackTrace();<br>        &#125;<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-利用Thread-setDefaultuncaughtExceptionHandler忽略异常"><a href="#2-利用Thread-setDefaultuncaughtExceptionHandler忽略异常" class="headerlink" title="2. 利用Thread.setDefaultuncaughtExceptionHandler忽略异常"></a>2. 利用Thread.setDefaultuncaughtExceptionHandler忽略异常</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java">Thread.setDefaultUncaughtExceptionHandler(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>.UncaughtExceptionHandler() &#123;<br>          <span class="hljs-meta">@Override</span><br>          <span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title function_">uncaughtException</span><span class="hljs-params">(Thread t, Throwable e)</span> &#123;<br>              Log.e(<span class="hljs-string">&quot;MainActivity&quot;</span>, t.getName() + Toast.LENGTH_SHORT + (e <span class="hljs-keyword">instanceof</span> TimeoutException));<br>              <span class="hljs-keyword">if</span>(t.getName().contains(<span class="hljs-string">&quot;FinalizerWatchdogDaemon&quot;</span>) || e <span class="hljs-keyword">instanceof</span> TimeoutException)&#123;<br>                  Log.e(<span class="hljs-string">&quot;MainActivity&quot;</span>, <span class="hljs-string">&quot;-----------&quot;</span>+t.getName() + Toast.LENGTH_SHORT);<br>                  <span class="hljs-comment">// 忽略异常</span><br>                  <span class="hljs-keyword">return</span>;<br>              &#125;<br>          &#125;<br>      &#125;);<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-优化代码结构，争取不超时-根本方法"><a href="#3-优化代码结构，争取不超时-根本方法" class="headerlink" title="3. 优化代码结构，争取不超时(根本方法)"></a>3. 优化代码结构，争取不超时(根本方法)</h4><p><a target="_blank" rel="noopener" href="https://github.com/AndroidAdvanceWithGeektime/Chapter02">例子参考Chapter02</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/ganyao939543405/article/details/89205821">Art hook</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Android/%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6/" class="category-chain-item">安卓进阶</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%E7%A7%BB%E5%8A%A8%E7%AB%AF/" class="print-no-link">#移动端</a>
+      
+        <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" class="print-no-link">#性能优化</a>
+      
+        <a href="/tags/%E5%B4%A9%E6%BA%83%E4%BC%98%E5%8C%96/" class="print-no-link">#崩溃优化</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>APM-3-ANR</div>
+      <div>https://crazycoding7.github.io/2021/03/15/Android_03安卓进阶_APM-3-ANR/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年3月15日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/04/10/Android_03%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6_APM-4-%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/" title="APM-4-内存优化">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">APM-4-内存优化</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/02/20/Android_03%E5%AE%89%E5%8D%93%E8%BF%9B%E9%98%B6_APM-2-%E5%B4%A9%E6%BA%83%E9%97%AE%E9%A2%98/" title="APM-2-崩溃问题">
+                        <span class="hidden-mobile">APM-2-崩溃问题</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
