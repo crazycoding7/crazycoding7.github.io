@@ -4,11 +4,40 @@
   
   
   <entry>
+    <title>如何用好AI</title>
+    <link href="/2026/04/11/AI_2%E5%A6%82%E4%BD%95%E7%94%A8%E5%A5%BDAI/"/>
+    <url>/2026/04/11/AI_2%E5%A6%82%E4%BD%95%E7%94%A8%E5%A5%BDAI/</url>
+    
+    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>网上有个段子：质疑曹操，理解曹操，成为曹操，超越曹操。<br>我对 AI 也走过类似的路。一开始觉得是虚风口，后来慢慢上手，再后来发现这玩意儿真能帮我们干活，到现在已经离不开它了。</p><p>用好 AI 这事，说白了就一句话：搞清楚什么交给它、什么自己做。不是无脑依赖，也不是死扛不用。</p><h1 id="AI基本术语"><a href="#AI基本术语" class="headerlink" title="AI基本术语"></a>AI基本术语</h1><p>刚接触 AI 开发，容易被一堆名词砸晕。其实没那么玄乎，下面用大白话过一遍，碰到再查也行。</p><p><strong>LLM（大语言模型）</strong><br>就是我们常说的大模型。它不是真的在“思考”，就是根据海量文本算下一个最合适的词。写代码、写文章都挺溜，但有个毛病：会一本正经地胡说八道。代码语法看着没问题，API、依赖版本可能是编的。</p><p><strong>上下文 (Context)</strong><br>就是当前这轮对话的全部内容，也是 AI 能看到的所有信息。它有容量上限，聊太多前面的就“忘了”。长任务容易出错，根子就在这。</p><p><strong>Token</strong><br>AI 读内容的最小单位。一个汉字大概 1~2 个 token，上下文窗口说到底就是 token 上限。写长提示词的时候得想着这个。</p><p><strong>幻觉（Hallucination）</strong><br>AI 的老毛病。它会很自信地编造不存在的接口、文档，不是故意骗你，概率生成自带的。所以 AI 给的代码和方案，一定要自己过一遍。</p><p><strong>工具调用（Tool Calling &#x2F; Function Calling）</strong><br>AI 本身访问不了外部世界，工具调用就是让它输出结构化指令去调外部接口、跑脚本。Agent 和插件的底层都靠这个。</p><p><strong>Agent（智能体）</strong><br>给 AI 加上工具调用能力。不再只是你问它答，它能自己规划任务、查文档、跑脚本、改代码。流程固定的重复活儿交给它很合适，但涉及业务取舍和风险判断，还是得人来。</p><p><strong>MCP（Model Context Protocol，模型上下文协议）</strong><br>一套通信标准。简单说就是给 AI 和外部工具统一一套对接方式，不用每个工具单独写一套。</p><p><strong>RAG（检索增强生成）</strong><br>把项目文档、私有资料提前入库，提问时先检索相关片段再给到模型。目的就是减少幻觉，让 AI 读懂你项目里的私有东西。</p><p>比如一个客服知识库，每条数据大概长这样：</p><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;chunk_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;faq_refund_001&quot;</span><span class="hljs-punctuation">,</span>          <span class="hljs-comment">// 唯一标识，方便定位和去重</span><br>  <span class="hljs-attr">&quot;question&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;退款多久能到账？&quot;</span><span class="hljs-punctuation">,</span>          <span class="hljs-comment">// 用户可能问的问题，用于语义匹配</span><br>  <span class="hljs-attr">&quot;answer&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;退款一般在3-5个工作日到账&quot;</span><span class="hljs-punctuation">,</span>    <span class="hljs-comment">// 标准答案，检索命中后直接返回</span><br>  <span class="hljs-attr">&quot;content&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;退款一般在3-5个工作日到账...&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-comment">// 原始文本内容，给大模型做上下文</span><br>  <span class="hljs-attr">&quot;vector&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-number">0.12</span><span class="hljs-punctuation">,</span> <span class="hljs-number">-0.34</span><span class="hljs-punctuation">,</span> <span class="hljs-number">0.56</span><span class="hljs-punctuation">,</span> ...<span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>    <span class="hljs-comment">// 文本向量化后的 Embedding，用于相似度检索</span><br>  <span class="hljs-attr">&quot;source&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;退款政策v2.pdf&quot;</span><span class="hljs-punctuation">,</span>             <span class="hljs-comment">// 数据来源文件，方便溯源</span><br>  <span class="hljs-attr">&quot;tags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;退款&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;售后&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>               <span class="hljs-comment">// 标签分类，支持过滤和分组</span><br>  <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;active&quot;</span><span class="hljs-punctuation">,</span>                    <span class="hljs-comment">// 数据状态，active / archived</span><br>  <span class="hljs-attr">&quot;version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;v2&quot;</span><span class="hljs-punctuation">,</span>                       <span class="hljs-comment">// 内容版本号，方便迭代管理</span><br>  <span class="hljs-attr">&quot;effective_to&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2027-12-31&quot;</span><span class="hljs-punctuation">,</span>          <span class="hljs-comment">// 有效期截止，过期自动失效</span><br>  <span class="hljs-attr">&quot;permission&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span>                    <span class="hljs-comment">// 权限控制，all / vip / internal</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure><p><strong>Plugin（插件）</strong><br>给 AI 加新动作。比如联网搜索、读本地文件、调第三方 API。核心是“能干什么”。</p><p><strong>Skill（技能）</strong><br>跟插件不一样。Skill 不是接口，是一套做事的流程和经验。告诉 AI 某一类任务“该怎么干”。<br>一句话区分：Plugin 决定能干什么，Skill 决定该怎么干。</p><p><strong>Loop Engineer（循环工程师）</strong><br>不再一条一条给 AI 发指令，而是设计一套自动闭环：定目标、校验结果、失败重试、定义停止条件，让 AI 自己循环迭代。我们的重心从写单次 prompt，变成设计整套 AI 自主运行的机制。</p><h1 id="如何使用好"><a href="#如何使用好" class="headerlink" title="如何使用好"></a>如何使用好</h1><h2 id="1-如何写AGENTS-md"><a href="#1-如何写AGENTS-md" class="headerlink" title="1.如何写AGENTS.md"></a>1.如何写AGENTS.md</h2><p>AGENTS.md 放在项目根目录，每次对话都会自动加载。相当于给 AI 一份项目说明书，告诉它“这个项目是怎么回事”。注意别写太长，800 行以内最好，不然占满上下文，AI 反而记不住重点。</p><p>主要包括：</p><ol><li><strong>项目概述</strong>        ← 你是谁</li><li><strong>技术栈</strong>          ← 你用什么工具</li><li><strong>构建与运行命令</strong>   ← 你怎么验证（⭐ 补充）</li><li><strong>框架规范</strong>        ← 代码怎么组织</li><li><strong>编码规范</strong>        ← 代码怎么写</li><li><strong>复用规范</strong>        ← 什么东西不要重复造</li><li><strong>禁止事项</strong>        ← 什么事绝对不能做（⭐ 补充）</li></ol><p>下面用一个 Flutter 项目的完整 AGENTS.md 做例子，注释写在代码里，一看就懂：</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># AGENTS.md</span><br><br><span class="hljs-quote">&gt; 项目级全局指令，每次对话自动读取。</span><br><br><span class="hljs-section">## 项目概述                    &lt;!-- ① 你是谁：一句话说清定位 --&gt;</span><br>Flutter 知识点 Demo —— 面向面试展示的全栈技术演示项目。<br>展示 GetX 架构、AI 流式对话、MQTT 通信、短视频播放等核心能力。<br><br><span class="hljs-section">## 技术栈                      &lt;!-- ② 用什么工具：版本 + 用途列清楚 --&gt;</span><br><span class="hljs-bullet">-</span> 框架：Flutter 3.x（Dart SDK ^3.7.2）<br><span class="hljs-bullet">-</span> 状态管理 / 路由 / DI：GetX<br><span class="hljs-bullet">-</span> 网络请求：Dio（HTTP + Mock 适配 + SSE 解析）<br><span class="hljs-bullet">-</span> 视频播放：media<span class="hljs-emphasis">_kit（FFI 零拷贝渲染）</span><br><span class="hljs-emphasis">- MQTT：mqtt5_</span>client（5.0 协议）<br><span class="hljs-bullet">-</span> 架构：Clean Architecture（三层分层 + 依赖倒置）<br><br><span class="hljs-section">## 构建与运行                   &lt;!-- ③ 怎么验证：常用命令列出来 --&gt;</span><br>flutter pub get                # 安装依赖<br>flutter run -d macos           # macOS 运行<br>flutter test                   # 运行测试<br>flutter analyze                # 代码分析<br><br><span class="hljs-section">## 架构约束                     &lt;!-- ④ 代码怎么组织：分层 + 目录 --&gt;</span><br>依赖方向：presentation → domain ← data<br><br>| 层 | 目录 | 职责 | 禁止 |<br>|---|------|------|------|<br>| presentation | lib/app/modules/ | UI 渲染、交互 | 不直接做网络请求 |<br>| domain | lib/app/domain/ | 业务规则、实体 | 不依赖任何外层 |<br>| data | lib/app/data/ | 数据获取、缓存 | 不包含 UI 逻辑 |<br><br>每个模块按 page + controller + binding 拆分：<br>modules/&lt;模块名&gt;/<span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">page_name</span>&gt;</span></span>/<br>├── <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">page_name</span>&gt;</span></span><span class="hljs-emphasis">_page.dart          # UI 页面</span><br><span class="hljs-emphasis">├── <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">page_name</span>&gt;</span></span>_</span>controller.dart    # 业务逻辑<br>└── <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">page_name</span>&gt;</span></span><span class="hljs-emphasis">_binding.dart       # 依赖注入</span><br><span class="hljs-emphasis"></span><br><span class="hljs-emphasis">## 编码规范                     &lt;!-- ⑤ 代码怎么写：命名 + 注释 + 简洁性 --&gt;</span><br><span class="hljs-emphasis">- 文件名 snake_</span>case，类名 PascalCase，变量/方法 camelCase<br><span class="hljs-bullet">-</span> 路由路径 kebab-case，如 /product/list<br><span class="hljs-bullet">-</span> Controller 只负责业务逻辑，不持有 UI 引用<br><span class="hljs-bullet">-</span> Obx 只包裹需要响应式更新的局部（精准刷新）<br><span class="hljs-bullet">-</span> 工具类封装优先于 Controller 内联逻辑<br><br><span class="hljs-section">## 共享基础设施                  &lt;!-- ⑥ 复用规范：已有的别重复造 --&gt;</span><br>| 组件 | 用途 | 不要重复创建 |<br>|------|------|-------------|<br>| DioClient | HTTP 客户端 + SSE 解析 | 不要新建 HTTP 客户端 |<br>| UI组件库 | 各种UI组件 | 复用现有组件 |<br><br><span class="hljs-section">## 禁止事项                     &lt;!-- ⑦ 什么不能做：这条最有价值 --&gt;</span><br><span class="hljs-bullet">-</span> 不要自动生成测试文件和 Mock 代码<br><span class="hljs-bullet">-</span> 不要修改 iOS/Android 原生配置（除非明确要求）<br><span class="hljs-bullet">-</span> 不要使用 setState，统一用 GetX 的 Rx + Obx<br><span class="hljs-bullet">-</span> 不要直接修改现有代码的无关部分（最小化原则）<br></code></pre></td></tr></table></figure><h2 id="2-如何写好-Rules"><a href="#2-如何写好-Rules" class="headerlink" title="2.如何写好 Rules"></a>2.如何写好 Rules</h2><p>AGENTS.md 什么都往里塞，迟早爆掉。Rules 就是把它拆成一个个独立文件，各管各的领域。</p><p>为什么要拆？AGENTS.md 太长 AI 记不住，而且有些规则只在特定场景才有用，没必要每次都加载。</p><p>Rules 放在 <code>.cursor/rules/</code> 下，每个规则一个 <code>.mdc</code> 文件。注意：<strong>不是所有 Rule 都是按需加载</strong>，有三种触发方式：</p><table><thead><tr><th>触发方式</th><th>加载时机</th><th>和 AGENTS.md 的区别</th></tr></thead><tbody><tr><td>always_on</td><td>每次都加载</td><td>规则必须生效，但从 AGENTS.md 拆出来保持独立好维护</td></tr><tr><td>glob</td><td>编辑匹配文件时加载</td><td>真正的按需：碰路由代码才加载路由规范</td></tr><tr><td>model_decision</td><td>AI 判断需要时加载</td><td>真正的按需：涉及 MQTT 才加载 MQTT 规范</td></tr></tbody></table><p>举个例子，Flutter 项目可以拆成这样：</p><figure class="highlight livescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs livescript">.cursor<span class="hljs-regexp">/rules/</span><br>├── architecture.mdc        <span class="hljs-comment"># always_on：三层架构约束</span><br>├── naming.mdc              <span class="hljs-comment"># always_on：命名规范</span><br>├── android-<span class="hljs-keyword">native</span>.mdc      <span class="hljs-comment"># glob: **/*.kt → 编辑 Kotlin 时加载</span><br>├── routing.mdc             <span class="hljs-comment"># glob: routes/** → 涉及路由时加载</span><br>└── mqtt-module.mdc         <span class="hljs-comment"># model_decision：涉及 MQTT 时加载</span><br></code></pre></td></tr></table></figure><p>下面拿 <code>routing.mdc</code> 做个真实例子。Rule 只写约束红线，不写流程：</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs xml">---                                                                <span class="hljs-comment">&lt;!-- ① 元数据区：定义触发条件 --&gt;</span><br>description: GetX 路由使用规范。编辑路由、页面跳转、路由传参时适用。<br>globs: [&quot;lib/app/routes/**&quot;, &quot;lib/app/modules/**&quot;]                 # 编辑这些文件时自动加载<br>---<br><br># 路由约束规范（只写红线，不写流程）<br><br>## 路由常量                                                         <span class="hljs-comment">&lt;!-- ② 禁止硬编码 --&gt;</span><br>// ✅ static const productList = &#x27;/product/list&#x27;;<br>// ❌ Get.toNamed(&#x27;/product/list&#x27;);<br>常量名 camelCase，路径 kebab-case 以 / 开头，全部集中在 AppRoutes。<br><br>## 路由注册                                                         <span class="hljs-comment">&lt;!-- ③ 有 Controller 必须绑 Binding --&gt;</span><br>// ✅ GetPage(name: AppRoutes.list, page: () =&gt; ListPage(), binding: ListBinding())<br>// ❌ GetPage(name: &#x27;/product/list&#x27;, ...)              // 禁止硬编码路径<br>// ❌ GetPage(name: AppRoutes.list, page: () =&gt; ListPage())  // 有 Controller 却沒绑 Binding<br>纯展示页可省略 Binding。<br><br>## Binding                                                         <span class="hljs-comment">&lt;!-- ④ 注入顺序 + 方式 --&gt;</span><br>// ✅ Get.lazyPut(() =&gt; ListController(repo));         // 懒加载<br>// ❌ Get.put(() =&gt; ListController(repo));             // 禁止立即创建<br>注入顺序：DataSource → Repository → Controller。<br><br>## 页面跳转                                                         <span class="hljs-comment">&lt;!-- ⑤ 跳转 + 传参 --&gt;</span><br>// ✅ Get.toNamed(AppRoutes.detail, arguments: entity);<br>// ❌ Get.toNamed(&#x27;/product/detail&#x27;);                  // 禁止硬编码<br>// ❌ Navigator.push(context, ...);                     // 禁止原生路由<br>传参用 arguments，接收方在 onInit 中取：product = Get.arguments as ProductEntity?;<br></code></pre></td></tr></table></figure><h2 id="3-如何写好-Skill"><a href="#3-如何写好-Skill" class="headerlink" title="3.如何写好 Skill"></a>3.如何写好 Skill</h2><p>前面两个解决了“项目背景”和“约束红线”，Skill 解决的是“某件事该怎么做”。它就是一套可复用的工作流，放在 <code>.cursor/skills/</code> 下，用斜杠命令调用（比如 <code>/commit</code>、<code>/review</code>）。</p><p>打个比方：AGENTS.md 是员工手册，Rules 是部门规范，Skill 是操作 SOP。</p><p>拿一个“新增路由”的 Skill 做例子，Skill 只写流程步骤，不重复约束细节：</p><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs xml">---                                                                <span class="hljs-comment">&lt;!-- ① 元数据：Skill 的基本信息 --&gt;</span><br>name: add-route<br>description: 新增一条路由。输入页面名和路径，自动完成创建、注册、验证全流程。<br>---<br><br># 新增路由 SOP                                                     <span class="hljs-comment">&lt;!-- ② 只写流程，不写约束 --&gt;</span><br><br>## 输入参数                                                       <span class="hljs-comment">&lt;!-- ③ 用户需要提供什么 --&gt;</span><br>- 页面名：如 ProductList<br>- 路由路径：如 /product/list<br><br>## 执行步骤<br><br>### 步骤 1：定义路由常量                                           <span class="hljs-comment">&lt;!-- ④ 每步做什么 + 产出是什么 --&gt;</span><br>在 app_routes.dart 中添加：static const productlist = &#x27;/product/list&#x27;;<br>产出：路由常量已定义。<br><br>### 步骤 2：创建页面三件套<br>在 modules/<span class="hljs-tag">&lt;<span class="hljs-name">模块</span>&gt;</span>/ 下创建：<br>- product_list_page.dart          → StatelessWidget<br>- product_list_controller.dart    → GetxController<br>- product_list_binding.dart       → Bindings，注入依赖链<br>产出：三个文件已创建，依赖方向 presentation → domain ← data。<br><br>### 步骤 3：注册路由<br>在 app_pages.dart 中添加 GetPage，绑定 ProductListBinding。<br>产出：路由已注册，可通过路径访问。<br><br>### 步骤 4：添加首页入口<br>在 home_page.dart 的 KnowledgeType 枚举中添加入口卡片。<br>产出：用户可从首页点击进入。<br><br>### 步骤 5：验证                                                   <span class="hljs-comment">&lt;!-- ⑤ 最后一步永远是验证 --&gt;</span><br>运行 flutter analyze，确保无报错。<br>产出：代码通过静态检查。<br><br>## 完成标准                                                       <span class="hljs-comment">&lt;!-- ⑥ 怎么判断做完了 --&gt;</span><br>- 5 个步骤全部完成<br>- flutter analyze 无报错<br>- 路由约束规范中的红线全部遵守（详见 routing Rule）<br></code></pre></td></tr></table></figure><p><strong>什么时候该写 Skill</strong>：同一类活做过 3 次以上、团队要统一产出、流程固定不需每次做取舍。</p><p>总结一下：<strong>AGENTS.md 是背景，Rules 是红线，Skill 是剧本。三个配合好，AI 才能从“能写代码”变成“能干活”。</strong></p><h2 id="4-如何高效对话"><a href="#4-如何高效对话" class="headerlink" title="4.如何高效对话"></a>4.如何高效对话</h2><p>配置写好了，怎么跟 AI 说话才是日常提效的关键。几个实用的点：</p><ul><li><strong>先出计划再动手</strong>：提需求时加一句“先出计划”，AI 会先列计划等你点头再写代码，中间不对随时纠</li><li><strong>说清楚</strong>：背景 + 需求 + 约束 + 参考 + 节奏，五个要素。比如“Flutter + GetX，账号密码登录，复用 DioClient，参考 ProductList 风格。先出计划。” 20 秒打完，AI 就能精准干活</li><li><strong>贴代码比写描述管用</strong>：一段好示例顶一百字描述，AI 最擅长从你的代码里提取模式</li><li><strong>大活拆小步</strong>：一次改 10 个文件出错概率极高，拆成小任务每步验证，错了也好定位</li><li><strong>反馈要具体</strong>：别说“感觉不太对”，要说“密码框加个明文切换”“登录失败加个 Toast”</li></ul><h2 id="5-代码-Review"><a href="#5-代码-Review" class="headerlink" title="5.代码 Review"></a>5.代码 Review</h2><p>AI 写的代码跑通了不代表没问题。它可能引入你没要求的依赖、边界情况没处理、风格和你项目不一致。所以代码一定要 Review，这是最后一道关。</p><p>更重要的是：Review 发现的问题别只改完就完了，要沉淀下来。同类问题出现 2 次以上，就该写成 Rule 文件，下次 AI 编辑对应文件时自动加载，就不会再犯。</p><p>闭环就是这样：AI 写代码 → 你 Review → 发现问题 → 当场纠正 + 沉淀成 Rule → 下次不再犯。</p><h1 id="最后说两句"><a href="#最后说两句" class="headerlink" title="最后说两句"></a>最后说两句</h1><p>做程序开发这块，AGENTS.md、Rules、Skills、高效对话、代码 Review，这五样配齐基本就够用了。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>AI</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>AI</tag>
+      
+      <tag>大模型</tag>
+      
+      <tag>Agent</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>我想聊聊 AI 这件事</title>
     <link href="/2026/02/20/AI_1%E6%88%91%E6%83%B3%E8%81%8A%E8%81%8A%20AI%20%E8%BF%99%E4%BB%B6%E4%BA%8B/"/>
     <url>/2026/02/20/AI_1%E6%88%91%E6%83%B3%E8%81%8A%E8%81%8A%20AI%20%E8%BF%99%E4%BB%B6%E4%BA%8B/</url>
     
-    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>AI 这两年的进步速度有点吓人。两年前还只会扯淡，现在已经能撸出半成品的业务代码了。</p><p>所以想聊聊。不是什么深度分析，也不是技术综述，就是聊聊 AI 到底是什么、怎么突然就变成这样了、以及写代码的人该怎么跟它相处。</p><h1 id="AI-到底是什么？"><a href="#AI-到底是什么？" class="headerlink" title="AI 到底是什么？"></a>AI 到底是什么？</h1><p>这个问题要是去翻教科书，能给你写一整章。但换个方式问——AI 现在能干嘛？这个反而更实际。</p><p>帮我写那些烦人的样板代码，比如 adapter、builder 之类的重复劳动（虽然写出来的东西经常需要返工）；啃那种几百页的英文文档，省掉大量查词时间；帮忙定位 bug，偶尔还能给出我没想到的思路；有时候思路卡住了，跟它聊聊反而能理清方向——它不会嫌你问题蠢，也不会回你一句”这个你搜一下就有了”。</p><p>但要说它是什么，我觉得现阶段最准确的说法是：<strong>一个记性超好、但判断力不太靠谱的同事。</strong></p><p>你问它什么它都能答，而且答得头头是道。但你要是真不检查就信了，迟早翻车。它就像一个什么都能聊两句的人，知识面极广，但深度嘛……看运气。</p><h1 id="这东西怎么突然就厉害了？"><a href="#这东西怎么突然就厉害了？" class="headerlink" title="这东西怎么突然就厉害了？"></a>这东西怎么突然就厉害了？</h1><p>AI 这个概念其实比很多人想象的要老。上世纪 50 年代就有了，比在座大部分程序员年纪都大。但中间几十年基本就是在坐冷板凳，偶尔被拿出来炒作一波，然后继续凉。</p><p>2012 年之前，提 AI 基本等于提笑话。语音助手听不懂人话，图像识别能把猫认成狗，聊天机器人答非所问。大家私下聊起来都是当段子讲。</p><p>然后深度学习冒出来了。2016 年 AlphaGo 赢了李世石，那会儿圈子里第一次出现了一种微妙的焦虑感——不是”AI 要取代我”的恐慌，而是”等等，这玩意好像比我想的强？”的惊讶。但说实话，那时候大部分程序员该干嘛还干嘛，觉得这事离自己挺远。</p><p>然后就是 2022 年底，ChatGPT 炸了。</p><p>这次不一样。不是”Demo 很酷但没法用”，而是真的能用了。写代码、写文档、翻译、画图、做 PPT……一夜之间好像什么都能干了。从”AI 可能改变世界”变成了”AI 正在改变我每天的日常工作”。这个转变，也就一两年功夫。</p><h1 id="几个老被提到的概念"><a href="#几个老被提到的概念" class="headerlink" title="几个老被提到的概念"></a>几个老被提到的概念</h1><p>现在聊 AI 动不动就甩一堆缩写，什么 LLM、Agent、Prompt、RAG……搞得不整几个术语就不会说话似的。但其实核心概念就那么几个，也没那么玄乎。</p><h2 id="LLM，大语言模型"><a href="#LLM，大语言模型" class="headerlink" title="LLM，大语言模型"></a>LLM，大语言模型</h2><p>这玩意就是 ChatGPT、Claude、文心一言背后的引擎。</p><p>怎么理解呢？想象你面前有一本超级厚的字典，厚到什么程度呢——几乎把整个人类互联网上的文字都收录进去了。它把每个词跟前后文的关系都摸透了，所以你给它一个开头，它能顺着往下”接”，而且接得像模像样。</p><p>但注意，它是在”接”，不是在”想”。</p><p>这是最关键的区别。它不懂什么叫业务逻辑，不知道你的项目为什么要这么设计，它只是根据见过的海量文本，猜接下来最可能出现什么。所以它写出来的代码看着像那么回事，语法也对，但跑不跑得通、逻辑对不对，得你来判断。</p><p>踩坑是迟早的事。它给你的代码可能语法完美，但用了项目里根本没有的库版本；API 调用写得有模有样，但那个方法其实三年前就被废弃了。看都不看就 copy paste，等着被坑吧。</p><h2 id="Agent，智能体"><a href="#Agent，智能体" class="headerlink" title="Agent，智能体"></a>Agent，智能体</h2><p>如果说 LLM 是那个什么都能聊的同事，Agent 就是给这个同事配了一堆工具，让它不光能聊，还能动手。</p><p>比如它能自己查文档、自己跑测试、自己改代码、改完再跑一遍看看过没过。整个过程你不用一步步指挥，给个大方向就行。</p><p>听起来很美好对吧？确实，处理一些重复性的、流程明确的任务，Agent 挺能干的。但一旦场景复杂起来——比如需要理解业务背景、需要在多个互相矛盾的需求之间做取舍——它就抓瞎了。</p><p>现阶段 Agent 的定位更像是：能帮你处理杂活的助手，但拍板决策还得你来。</p><h2 id="Prompt，提示词"><a href="#Prompt，提示词" class="headerlink" title="Prompt，提示词"></a>Prompt，提示词</h2><p>这个最简单——就是你跟 AI 说的话。</p><p>但”简单”不代表”容易”。写好 prompt 其实是个技术活。</p><p>你问”帮我写个 APP”，它给你一堆废话。你换成”用 Flutter 写一个登录页面，需要邮箱格式校验，密码最少 8 位，登录失败要显示错误提示”，出来的东西就靠谱多了。</p><p>说白了就是：你描述得越具体，它越知道你要什么。跟给人提需求一样——“把那个东西改一下”和”把首页 banner 的字体从 16px 改成 18px，颜色换成 #333”，效果能一样吗？</p><p>所以网上那些教你写 prompt 的课，核心就一句话：<strong>把 AI 当成一个能力很强但对你的项目一无所知的人来沟通。</strong> 背景给足，约束说清，例子摆出来，结果就不会太差。</p><h1 id="踩过的坑和一些经验"><a href="#踩过的坑和一些经验" class="headerlink" title="踩过的坑和一些经验"></a>踩过的坑和一些经验</h1><p>聊点实际的。</p><p>AI 写的代码有个典型问题：看着都对，一跑就炸。比如让它处理构建配置，它可能引用一个根本不存在的插件版本，还自信满满地告诉你”这是最新的稳定版”。依赖版本冲突、废弃 API 调用，这些都是常见坑。</p><p>所以原则很简单：<strong>AI 写的代码，一行都不能直接信。</strong> 逐行过一遍，确认逻辑、依赖、版本都没问题。把它当成一个写得很快但从来不写单元测试的同事——产出高，但质量得你来把关。</p><p>另一个坑是学习上的。遇到不懂的技术直接问 AI，它给个答案看着挺对就用了，时间长了很多东西只停留在”知道怎么用”的层面，底层原理完全没搞明白。AI 给了答案，但没给你理解。<strong>学习阶段的东西，先自己啃，啃不动了再问 AI。</strong></p><p>还有一点，关于怎么跟 AI 相处的心态问题。</p><p>见过两种极端。一种是恐慌派，天天喊”程序员要失业了”、”AI 要取代所有开发者了”。另一种是完全不当回事，”我不用 AI 照样写代码”。</p><p>这两种都不对。</p><p>AI 不会取代程序员。但说句不好听的，<strong>不会用 AI 的程序员，迟早会被会用 AI 的程序员卷死。</strong> 这话听着焦虑，但确实是现实。就像当年不会用 Git 的人，后来也不得不学了一样——不是谁逼你，是整个行业的基础水位在涨。</p><p>但也不用神化它。它就是个工具，一个很强但毛病也不少的工具。用它来加速那些重复性的、机械性的工作，把省下来的时间花在真正需要动脑子的地方——架构设计、业务理解、技术选型——这才是正经用法。</p><h1 id="最后说两句"><a href="#最后说两句" class="headerlink" title="最后说两句"></a>最后说两句</h1><p>AI 这东西，说不好它到底会把行业带向哪里。</p><p>半年前谁能想到一个聊天机器人能写出像样的代码？那半年后呢？一年后呢？真说不准。可能突然冒出来一个更厉害的东西，把现在的认知又推翻一遍。</p><p>唯一确定的是，这东西不会消失，只会越来越强。与其焦虑或者无视，不如先上手用起来。用着用着，自然就知道边界在哪了。</p><p>潮水来了，学会游泳总比站在岸上喊救命强。</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>AI 这两年的进步速度着实有点吓人。两年前还只会扯淡，现在已经能撸出像样的业务代码了。</p><p>所以想聊聊。不是什么深度分析，也不是技术科普，就是聊聊 AI 到底是什么、怎么突然就变成这样了、以及我们该怎么跟它相处。</p><h1 id="AI-到底是什么？"><a href="#AI-到底是什么？" class="headerlink" title="AI 到底是什么？"></a>AI 到底是什么？</h1><p>这个问题要是去网上搜，能给你n篇文章，还说的有理有据，让你眼花缭乱。但换个方式问——AI 能干嘛？这个反而更实际。</p><p>问答聊天，生成文档，生成图片视频；帮助学习新知识、分析问题；帮忙生成代码，定位 bug，给出技术思路；赋予设备灵魂——摄像头能看懂闯入的人，车机能帮你规避危险，机器人能自己判断怎么抓起一个它从未见过的东西。</p><p>但要说它是什么，我觉得现阶段最准确的说法是：<strong>一个会思考的巨型知识库。</strong></p><p>你问它什么它都能答，而且答得头头是道。但你要是真不检查就信了，迟早翻车。所以用 AI 最核心的原则就一条：<strong>永远核实。</strong></p><h1 id="这东西怎么突然就厉害了？"><a href="#这东西怎么突然就厉害了？" class="headerlink" title="这东西怎么突然就厉害了？"></a>这东西怎么突然就厉害了？</h1><p>AI 这个概念其实比很多人想象的要老。上世纪 50 年代就有了，比在座大部分程序员年纪都大。但中间几十年基本就是在坐冷板凳，偶尔被拿出来炒作一波，然后继续凉。</p><p>2012 年之前，提 AI 基本等于提笑话。语音助手听不懂人话，图像识别能把猫认成狗，聊天机器人答非所问。大家私下聊起来都是当段子讲。</p><p>然后深度学习冒出来了。2016 年 AlphaGo 赢了李世石，那会儿圈子里第一次出现了一种微妙的焦虑感——不是”AI 要取代我”的恐慌，而是”等等，这玩意好像比我想的强？”的惊讶。但说实话，那时候大部分程序员该干嘛还干嘛，觉得这事离自己挺远。</p><p>然后就是 2022 年底，ChatGPT 炸了。</p><p>这次不一样。不是”Demo 很酷但没法用”，而是真的能用了。写代码、写文档、翻译、画图、做 PPT……一夜之间好像什么都能干了。从”AI 可能改变世界”变成了”AI 正在改变我每天的日常工作”。这个转变，也就一两年功夫。</p><h1 id="几个老被提到的概念"><a href="#几个老被提到的概念" class="headerlink" title="几个老被提到的概念"></a>几个老被提到的概念</h1><p>现在聊 AI 动不动就甩一堆缩写，什么 LLM、Agent、Prompt、RAG……搞得不整几个术语就不会说话似的。但其实核心概念就那么几个，也没那么玄乎。</p><h2 id="LLM，大语言模型"><a href="#LLM，大语言模型" class="headerlink" title="LLM，大语言模型"></a>LLM，大语言模型</h2><p>这玩意就是 ChatGPT、Claude、文心一言背后的引擎。</p><p>怎么理解呢？想象你面前有一本超级厚的字典，厚到什么程度呢——几乎把整个人类互联网上的文字都收录进去了。它把每个词跟前后文的关系都摸透了，所以你给它一个开头，它能顺着往下”接”，而且接得像模像样。</p><p>但注意，它是在”接”，不是在”想”。</p><p>这是最关键的区别。它不懂什么叫业务逻辑，不知道你的项目为什么要这么设计，它只是根据见过的海量文本，猜接下来最可能出现什么。所以它写出来的代码看着像那么回事，语法也对，但跑不跑得通、逻辑对不对，得你来判断。</p><p>踩坑是迟早的事。它给你的代码可能语法完美，但用了项目里根本没有的库版本；API 调用写得有模有样，但那个方法其实三年前就被废弃了。看都不看就 copy paste，等着被坑吧。</p><h2 id="Agent，智能体"><a href="#Agent，智能体" class="headerlink" title="Agent，智能体"></a>Agent，智能体</h2><p>如果说 LLM 是那个什么都能聊的同事，Agent 就是给这个同事配了一堆工具，让它不光能聊，还能动手。</p><p>比如它能自己查文档、自己跑测试、自己改代码、改完再跑一遍看看过没过。整个过程你不用一步步指挥，给个大方向就行。</p><p>听起来很美好对吧？确实，处理一些重复性的、流程明确的任务，Agent 挺能干的。但一旦场景复杂起来——比如需要理解业务背景、需要在多个互相矛盾的需求之间做取舍——它就抓瞎了。</p><p>现阶段 Agent 的定位更像是：能帮你处理杂活的助手，但拍板决策还得你来。</p><h2 id="Prompt，提示词"><a href="#Prompt，提示词" class="headerlink" title="Prompt，提示词"></a>Prompt，提示词</h2><p>这个最简单——就是你跟 AI 说的话。</p><p>但”简单”不代表”容易”。写好 prompt 其实是个技术活。</p><p>你问”帮我写个 APP”，它给你一堆废话。你换成”用 Flutter 写一个登录页面，需要邮箱格式校验，密码最少 8 位，登录失败要显示错误提示”，出来的东西就靠谱多了。</p><p>说白了就是：你描述得越具体，它越知道你要什么。跟给人提需求一样——“把那个东西改一下”和”把首页 banner 的字体从 16px 改成 18px，颜色换成 #333”，效果能一样吗？</p><p>所以网上那些教你写 prompt 的课，核心就一句话：<strong>把 AI 当成一个能力很强但对你的项目一无所知的人来沟通。</strong> 背景给足，约束说清，例子摆出来，结果就不会太差。</p><h1 id="踩过的坑和一些经验"><a href="#踩过的坑和一些经验" class="headerlink" title="踩过的坑和一些经验"></a>踩过的坑和一些经验</h1><p>聊点实际的。</p><p>AI 写的代码有个典型问题：看着都对，一跑就炸。比如让它处理构建配置，它可能引用一个根本不存在的插件版本，还自信满满地告诉你”这是最新的稳定版”。依赖版本冲突、废弃 API 调用，这些都是常见坑。</p><p>所以原则很简单：<strong>AI 写的代码，一行都不能直接信。</strong> 逐行过一遍，确认逻辑、依赖、版本都没问题。把它当成一个写得很快但从来不写单元测试的同事——产出高，但质量得你来把关。</p><p>另一个坑是学习上的。遇到不懂的技术直接问 AI，它给个答案看着挺对就用了，时间长了很多东西只停留在”知道怎么用”的层面，底层原理完全没搞明白。AI 给了答案，但没给你理解。<strong>学习阶段的东西，先自己啃，啃不动了再问 AI。</strong></p><p>还有一点，关于怎么跟 AI 相处的心态问题。</p><p>见过两种极端。一种是恐慌派，天天喊”程序员要失业了”、”AI 要取代所有开发者了”。另一种是完全不当回事，”我不用 AI 照样写代码”。</p><p>这两种都不对。</p><p>AI 不会取代程序员。但说句不好听的，<strong>不会用 AI 的程序员，迟早会被会用 AI 的程序员卷死。</strong> 这话听着焦虑，但确实是现实。就像当年不会用 Git 的人，后来也不得不学了一样——不是谁逼你，是整个行业的基础水位在涨。</p><p>但也不用神化它。它就是个工具，一个很强但毛病也不少的工具。用它来加速那些重复性的、机械性的工作，把省下来的时间花在真正需要动脑子的地方——架构设计、业务理解、技术选型——这才是正经用法。</p><h1 id="最后说两句"><a href="#最后说两句" class="headerlink" title="最后说两句"></a>最后说两句</h1><p>AI 这东西，说不好它到底会把行业带向哪里。</p><p>半年前谁能想到一个聊天机器人能写出像样的代码？那半年后呢？一年后呢？真说不准。可能突然冒出来一个更厉害的东西，把现在的认知又推翻一遍。</p><p>唯一确定的是，这东西不会消失，只会越来越强。与其焦虑或者无视，不如先上手用起来。用着用着，自然就知道边界在哪了。</p><p>潮水来了，学会游泳总比站在岸上喊救命强。</p>]]></content>
     
     
     <categories>
@@ -101,9 +130,9 @@
     
     <tags>
       
-      <tag>人生规划</tag>
-      
       <tag>竞争力</tag>
+      
+      <tag>人生规划</tag>
       
       <tag>人生感悟</tag>
       
@@ -130,11 +159,11 @@
     
     <tags>
       
+      <tag>竞争力</tag>
+      
       <tag>自我提升</tag>
       
       <tag>人生规划</tag>
-      
-      <tag>竞争力</tag>
       
     </tags>
     
@@ -269,9 +298,9 @@
     
     <tags>
       
-      <tag>自我提升</tag>
-      
       <tag>竞争力</tag>
+      
+      <tag>自我提升</tag>
       
     </tags>
     
@@ -358,9 +387,9 @@
     
     <tags>
       
-      <tag>人生规划</tag>
-      
       <tag>竞争力</tag>
+      
+      <tag>人生规划</tag>
       
     </tags>
     
@@ -478,9 +507,9 @@
       
       <tag>Android</tag>
       
-      <tag>UI组件</tag>
-      
       <tag>移动端</tag>
+      
+      <tag>UI组件</tag>
       
       <tag>性能优化</tag>
       
@@ -687,9 +716,9 @@
     
     <tags>
       
-      <tag>生活</tag>
-      
       <tag>美食</tag>
+      
+      <tag>生活</tag>
       
     </tags>
     
@@ -714,9 +743,9 @@
     
     <tags>
       
-      <tag>运动</tag>
-      
       <tag>生活</tag>
+      
+      <tag>运动</tag>
       
     </tags>
     
@@ -1233,9 +1262,9 @@
       
       <tag>Android</tag>
       
-      <tag>UI组件</tag>
-      
       <tag>移动端</tag>
+      
+      <tag>UI组件</tag>
       
       <tag>源码分析</tag>
       
@@ -1295,9 +1324,9 @@
       
       <tag>Android</tag>
       
-      <tag>UI组件</tag>
-      
       <tag>移动端</tag>
+      
+      <tag>UI组件</tag>
       
     </tags>
     
@@ -1382,9 +1411,9 @@
       
       <tag>Android框架</tag>
       
-      <tag>UI组件</tag>
-      
       <tag>移动端</tag>
+      
+      <tag>UI组件</tag>
       
       <tag>工程化</tag>
       
@@ -1539,9 +1568,9 @@
       
       <tag>Android框架</tag>
       
-      <tag>UI组件</tag>
-      
       <tag>移动端</tag>
+      
+      <tag>UI组件</tag>
       
     </tags>
     
