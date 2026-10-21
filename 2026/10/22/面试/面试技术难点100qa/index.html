@@ -1,0 +1,1390 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="面试技术难点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面试技术难点">
+<meta property="og:url" content="https://crazycoding7.github.io/2026/10/22/%E9%9D%A2%E8%AF%95/%E9%9D%A2%E8%AF%95%E6%8A%80%E6%9C%AF%E9%9A%BE%E7%82%B9100qa/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="面试技术难点">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-22T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-21T23:31:05.088Z">
+<meta property="article:tag" content="技术面试">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>面试技术难点 - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="面试技术难点"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-10-22 10:00" pubdate>
+          2026年10月22日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          105 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">面试技术难点</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h3 id="一、性能优化类"><a href="#一、性能优化类" class="headerlink" title="一、性能优化类"></a>一、性能优化类</h3><h4 id="1-冷启动优化（2-8s-→-1-2s-提升-57-）"><a href="#1-冷启动优化（2-8s-→-1-2s-提升-57-）" class="headerlink" title="1. 冷启动优化（2.8s → 1.2s,提升 57%）"></a>1. 冷启动优化（2.8s → 1.2s,提升 57%）</h4><p><strong>S（背景）</strong>：<br>在医百科技做互联网医院 App 时，用户反馈首页加载慢，冷启动要 2.8 秒，竞品只要 1 秒左右，严重影响用户留存。这是 Flutter 混合栈项目，启动流程比纯原生更复杂。</p>
+<p><strong>冷启动定义</strong>：从用户点击 APP 图标 → 到首屏第一帧渲染完成、用户可以交互（不是到启动图出现）。</p>
+<p><strong>冷启动完整流程</strong>：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs dart">用户点击 APP 图标<br>  ↓<br>【原生层】<span class="hljs-title class_">Application</span>.<span class="hljs-title function_">onCreate</span>()<br>  ↓<br>【原生层】<span class="hljs-title class_">MainActivity</span>.<span class="hljs-title function_">onCreate</span>()<br>  ↓<br>【原生层】启动图显示（<span class="hljs-title class_">Splash</span> <span class="hljs-title class_">Screen</span>）← 用户看到这个<br>  ↓<br>【引擎层】<span class="hljs-title class_">Flutter</span> 引擎加载（<span class="hljs-title class_">Dart</span> VM 初始化）<br>  ↓<br>【引擎层】<span class="hljs-title function_">main</span>() 入口执行<br>  ↓<br>【业务层】首屏路由解析<br>  ↓<br>【业务层】首屏接口请求<br>  ↓<br>【业务层】首屏 UI 渲染完成 ← 冷启动结束（用户可以交互）<br></code></pre></td></tr></table></figure>
+
+<p><strong>T（难点）</strong>：<br>Flutter 冷启动不是简单的”优化几个点”，而是要<strong>分三段分析</strong>：</p>
+<ul>
+<li><strong>原生层</strong>：Application 初始化、Activity 创建</li>
+<li><strong>引擎层</strong>：Flutter 引擎加载、Isolate 启动</li>
+<li><strong>业务层</strong>：首屏接口、UI 渲染</li>
+</ul>
+<p>真正的难点：</p>
+<ol>
+<li><strong>引擎加载时间固定</strong>（约 800ms）：Dart VM 初始化、snapshot 加载是固定的，很难压缩</li>
+<li><strong>SDK 初始化有依赖</strong>：推送、统计、地图互相依赖，不能简单延迟</li>
+<li><strong>接口必须等 Flutter ready</strong>：Flutter 没启动完不能发请求，时序难处理</li>
+</ol>
+<p><strong>A（解决方案）</strong>：</p>
+<p><strong>第一步：分段耗时分析</strong><br>用 <strong>Systrace + Flutter DevTools</strong> 做深度分析，找到各段耗时：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>耗时</th>
+<th>占比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Application 初始化</td>
+<td>800ms</td>
+<td>29%</td>
+</tr>
+<tr>
+<td>Flutter 引擎加载</td>
+<td>700ms</td>
+<td>25%</td>
+</tr>
+<tr>
+<td>main() 入口 + 首屏接口</td>
+<td>700ms</td>
+<td>25%</td>
+</tr>
+<tr>
+<td>UI 渲染</td>
+<td>600ms</td>
+<td>21%</td>
+</tr>
+</tbody></table>
+<p><strong>关键发现</strong>：引擎加载 700ms 是固定的，优化空间在 Application 和接口。</p>
+<p><strong>第二步：Application 初始化治理（800ms → 200ms）</strong></p>
+<ul>
+<li><strong>难点</strong>：第三方 SDK（推送、统计、地图、埋点）全在 Application 里同步初始化，互相有依赖；SharedPreferences 单文件过大，首次加载慢</li>
+<li><strong>方案</strong>：<ol>
+<li>用 <strong>AndroidX Startup 库</strong> 做依赖编排</li>
+<li>区分关键路径和非关键路径：<ul>
+<li><strong>关键</strong>：网络库、日志库（首屏需要）</li>
+<li><strong>非关键</strong>：推送、统计、地图（可延迟）</li>
+</ul>
+</li>
+<li>非关键 SDK 用 <strong>IdleHandler</strong> 在消息队列空闲时加载</li>
+<li>用 <strong>ContentProvider 自动初始化</strong> 替代手动调用</li>
+<li><strong>SharedPreferences 分块存储</strong>：核心配置（Token、主题）首屏加载，非核心配置（历史记录）子线程延迟加载</li>
+</ol>
+</li>
+<li><strong>效果</strong>：Application 初始化从 800ms 降到 200ms</li>
+</ul>
+<p><strong>第三步：Flutter 引擎预加载（700ms → 300ms 感知）</strong></p>
+<ul>
+<li><strong>难点</strong>：Flutter 引擎第一次加载要初始化 Dart VM、加载 snapshot，这个时间相对固定</li>
+<li><strong>方案</strong>：<ol>
+<li><strong>引擎预创建</strong>：在闪屏页就提前创建 FlutterEngine，不等到页面跳转</li>
+<li><strong>引擎复用</strong>：用 <strong>FlutterEngineCache</strong> 缓存引擎，避免重复创建</li>
+<li>**预执行 main()**：引擎创建后立即执行 main()，让首屏路由提前就绪</li>
+</ol>
+</li>
+<li><strong>效果</strong>：引擎加载从用户等待的 700ms 降到感知的 300ms（和闪屏页重叠）</li>
+</ul>
+<p><strong>第四步：接口预加载 + 并行（700ms → 400ms）</strong></p>
+<ul>
+<li><strong>难点</strong>：首屏 5 个接口串行请求，而且优化前是在 Flutter 端发请求，必须等引擎 ready 后才能发</li>
+<li><strong>方案</strong>：<ol>
+<li><strong>接口前置</strong>：在原生层闪屏页就发请求，不等 Flutter 启动</li>
+<li><strong>数据缓存</strong>：请求结果存到本地缓存（SharedPreferences），Flutter 启动后直接读缓存，不需要再请求接口</li>
+<li><strong>并行请求</strong>：用 RxJava <code>zip</code> 合并多个接口结果，和引擎预加载并行执行</li>
+<li><strong>首屏快照</strong>：用原生页面做首屏快照，Flutter 渲染完再替换</li>
+</ol>
+</li>
+<li><strong>效果</strong>：接口耗时从 700ms 降到 400ms</li>
+</ul>
+<p><strong>第五步：UI 渲染优化（600ms → 300ms）</strong></p>
+<ul>
+<li><strong>方案</strong>：<ol>
+<li>图片用 <strong>WebP 格式</strong>，体积减少 60%</li>
+<li>用 <strong>Glide 预加载</strong>，闪屏页就开始加载首页图片</li>
+<li>布局用 <strong>ConstraintLayout</strong> 减少嵌套，层级从 5 层降到 2 层</li>
+<li>首屏用 <strong>ListView + 分页</strong>，避免一次性渲染所有内容</li>
+</ol>
+</li>
+<li><strong>效果</strong>：UI 渲染从 600ms 降到 300ms</li>
+</ul>
+<p><strong>R（结果）</strong>：</p>
+<ul>
+<li>冷启动从 <strong>2.8s 降到 1.2s</strong>，提升 57%</li>
+<li>形成了一套 <strong>Flutter 混合栈性能优化体系</strong>，后续应用到其他模块</li>
+</ul>
+<hr>
+<h3 id="面试话术（3-分钟内讲完）"><a href="#面试话术（3-分钟内讲完）" class="headerlink" title="面试话术（3 分钟内讲完）"></a>面试话术（3 分钟内讲完）</h3><ol>
+<li><p>问题（10秒）</p>
+<ul>
+<li>冷启动 2.8 秒，目标 1.5 秒内</li>
+</ul>
+</li>
+<li><p>分析（20秒）</p>
+<ul>
+<li>分段耗时：Application 800ms + 引擎 700ms + Flutter 端 700ms + UI 600ms</li>
+</ul>
+</li>
+<li><p>方案（50秒）</p>
+<ul>
+<li>四个优化，每个 10-15 秒</li>
+</ul>
+</li>
+<li><p>结果（10秒）</p>
+<ul>
+<li>2.8s → 1.2s，超过目标</li>
+</ul>
+</li>
+<li><p>技术难点（30秒）← 新增</p>
+<ul>
+<li>技术取舍：SP vs MMKV</li>
+<li>风险控制：确保不影响现有功能</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>“我先讲一个<strong>APP冷启动慢</strong>的问题。</p>
+<p>我在做互联网医院 APP 的时候，遇到过用户反馈说 APP 启动时间比较长。针对这个问题，我用几台手机做了测试，确实冷启动时间达到了 <strong>2.8 秒</strong>，在行业内属于较差水平。<strong>我们的目标是优化到 1.5 秒之内</strong>。</p>
+<p><strong>首先，我进行了分段耗时分析</strong>。用 ADB 命令行和代码打点，把启动流程分成四段：</p>
+<ul>
+<li>Application 初始化：800ms，占 29%</li>
+<li>Flutter 引擎加载：720ms，占 25%</li>
+<li>Flutter 端初始化 + 首屏接口请求：750ms，占 25%</li>
+<li>UI 渲染：600ms，占 21%</li>
+</ul>
+<p><strong>针对这些问题，我们做了四个优化</strong>：</p>
+<ol>
+<li><strong>Application 初始化治理</strong>：用 AndroidX Startup 做依赖编排，关键 SDK 优先初始化，非关键 SDK 用 IdleHandler 延迟加载；同时把 SharedPreferences 分成核心配置和非核心配置两块，核心配置首屏加载，非核心配置子线程延迟加载。从 800ms 降到 400ms。</li>
+<li><strong>Flutter 引擎预加载</strong>：在原生启动页提前创建 FlutterEngine，用 FlutterEngineCache 缓存，和启动图显示并行，感知时间从 700ms 降到 300ms。</li>
+<li><strong>接口预加载 + 并行</strong>：优化前接口是在 Flutter 端发请求，必须等引擎 ready。优化后在原生层闪屏页就发请求，数据存到本地缓存，Flutter 启动后直接读缓存，和引擎预加载并行执行。从 700ms 降到 400ms。</li>
+<li><strong>UI 渲染优化</strong>：图片用 WebP，布局用 ConstraintLayout 减少嵌套。从 600ms 降到 300ms。</li>
+</ol>
+<p><strong>最终效果</strong>：冷启动从 <strong>2.8s 降到 1.2s</strong>，提升 57%，达到行业优秀水平。</p>
+<p><strong>踩坑和方案权衡</strong>：</p>
+<p>这个优化的技术难点，我觉得不是具体实现，而是<strong>方案选型和踩坑</strong>。</p>
+<p>比如引擎优化，一开始我想用<strong>定制化引擎</strong>，裁剪不需要的模块。但实际评估后发现，<strong>每次 Flutter 升级都要合并代码</strong>，维护成本太高，创业公司没有专门团队维护。后来改成了<strong>引擎预加载</strong>，在原生层提前创建 FlutterEngine，性价比更高。</p>
+<p>还有 SharedPreferences 优化，有人建议用 <strong>MMKV</strong>，但我评估后觉得<strong>改动太大，引入新 SO 库</strong>，对创业公司没必要。最后选了<strong>分块存储</strong>，核心配置和非核心配置分开加载，简单有效。</p>
+<p>还有一个难点是<strong>确保优化不影响原有功能</strong>。比如延迟初始化后，<strong>推送会不会收不到？统计会不会丢数据？</strong> 我在做的时候，先在小范围测试，确认推送、统计都正常，再全量上线。还有接口前置，<strong>数据一致性怎么保证？</strong> 我在原生层请求完数据后，存到本地缓存，Flutter 启动后先读缓存，同时做数据校验，确保数据一致。</p>
+<p>还有一个方案是<strong>用子线程初始化 SDK</strong>。一开始我觉得这样可以不阻塞主线程，但实际分析后发现，<strong>有些 SDK 可以用子线程（如推送、统计），有些必须在主线程（如地图）</strong>。这样混用后，<strong>后期维护难度很大</strong>，容易出问题。所以最后改成了 <strong>Startup 依赖编排</strong>，统一管理初始化顺序。</p>
+<p>所以性能优化的难点，不只是’怎么做’，而是’<strong>为什么这么做，踩过什么坑，怎么确保不影响功能</strong>‘。”</p>
+</blockquote>
+<blockquote>
+<p>完整精简版话术（2 分钟内）<br>“我做互联网医院 APP 时，冷启动 2.8 秒，目标是优化到 1.5 秒内。分段耗时：Application 800ms、引擎 700ms、Flutter 端初始化 + 接口 700ms、UI 600ms。四个优化：<br>Application 治理：Startup 依赖编排 + SP 分块存储，800ms → 200ms<br>引擎预加载：FlutterEngineCache，700ms → 300ms 在原生启动页提前创建 FlutterEngine，用 FlutterEngineCache 缓存，和启动图显示并行<br>接口预加载(引擎预加载同是并行请求)：原生层发请求，存缓存，Flutter 读缓存，700ms → 400ms<br>UI 优化：WebP + ConstraintLayout+计算，600ms → 300ms<br>最终 2.8s → 1.2s，超过目标。”<br>“这里面主要考虑三点：开发难度、维护成本、线上风险控制。比如本地缓存，有人建议用 MMKV，性能确实好。但我评估后觉得改动太大、并且引入新的so库维护维护成本高。还有风险控制：延迟初始化后，有没有可能影响现有功能？这些都需要小范围测试验证，确认没问题再全量上线。所以性能优化的难点，不仅是技术实现，还有维护成本和风险控制。”</p>
+</blockquote>
+<hr>
+<h4 id="2-内存优化（降低-40-）"><a href="#2-内存优化（降低-40-）" class="headerlink" title="2. 内存优化（降低 40%）"></a>2. 内存优化（降低 40%）</h4><p><strong>待补充…</strong></p>
+<hr>
+<h4 id="3-卡顿治理（30fps-→-58fps）"><a href="#3-卡顿治理（30fps-→-58fps）" class="headerlink" title="3. 卡顿治理（30fps → 58fps）"></a>3. 卡顿治理（30fps → 58fps）</h4><p><strong>待补充…</strong></p>
+<hr>
+<h3 id="二、复杂业务类"><a href="#二、复杂业务类" class="headerlink" title="二、复杂业务类"></a>二、复杂业务类</h3><h4 id="1-AI-流式对话（SSE-优化）"><a href="#1-AI-流式对话（SSE-优化）" class="headerlink" title="1. AI 流式对话（SSE 优化）"></a>1. AI 流式对话（SSE 优化）</h4><p><strong>S（背景）</strong>：<br>做 AI 对话功能时，需要实现类似 豆包 的打字机效果：大模型通过 SSE 协议流式返回数据，边接收边显示，产品要求每行由慢到快线性加速显示。</p>
+<p><strong>T（难点）</strong>：<br>核心难点：网络速度 ≠ UI 展示速度，怎么协调？</p>
+<table>
+<thead>
+<tr>
+<th>难点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SSE 推送频率不可控</strong></td>
+<td>短时间内可能连续推送多个 chunk，每个 chunk 都 setState 会导致卡顿</td>
+</tr>
+<tr>
+<td><strong>JSON 解析开销大</strong></td>
+<td>每条 SSE 数据都是 JSON，全量解析成本高</td>
+</tr>
+<tr>
+<td><strong>刷新范围难控制</strong></td>
+<td>流式消息更新时，历史消息不应该 rebuild</td>
+</tr>
+<tr>
+<td><strong>打字机节奏感</strong></td>
+<td>产品要求每行由慢到快线性加速，不是匀速</td>
+</tr>
+</tbody></table>
+<p><strong>A（解决方案）</strong>：<br>三层架构：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>解决什么</th>
+<th>方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>网络接收层</strong></td>
+<td>控制数据推送频率</td>
+<td>30ms 时间窗口缓冲，合并 chunk</td>
+</tr>
+<tr>
+<td><strong>状态管理层</strong></td>
+<td>控制刷新范围</td>
+<td>历史消息和当前消息分开管理，刷新隔离</td>
+</tr>
+<tr>
+<td><strong>UI 渲染层</strong></td>
+<td>控制显示节奏</td>
+<td>打字机控制器，行级线性加速</td>
+</tr>
+</tbody></table>
+<p>关键细节：</p>
+<ol>
+<li><strong>30ms 时间窗口</strong>：不是随便定的，60fps 每帧 16.6ms，30ms 约两帧，既降低 build 压力，又保持流式连贯性</li>
+<li><strong>刷新隔离</strong>：正在生成的消息用独立的 RxString，历史消息完全不感知、不 rebuild</li>
+<li><strong>行级线性加速</strong>：每行第一个字符 83ms，最后一个 30ms，中间线性插值，换行时重置</li>
+</ol>
+<p><strong>R（结果）</strong>：</p>
+<ul>
+<li>JSON 解析开销降低 90%</li>
+<li>UI 刷新频率减少 40%</li>
+<li>对话流畅度明显提升，打字机节奏感强</li>
+</ul>
+<p><strong>技术取舍</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>取舍点</th>
+<th>方案 A</th>
+<th>方案 B</th>
+<th>选择</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>协议选型</strong></td>
+<td>WebSocket</td>
+<td>SSE</td>
+<td>SSE</td>
+<td>单向推送够用，基于 HTTP，更简单</td>
+</tr>
+<tr>
+<td><strong>缓冲策略</strong></td>
+<td>固定条数</td>
+<td>时间窗口</td>
+<td>时间窗口</td>
+<td>条数不可控，时间窗口更稳定</td>
+</tr>
+<tr>
+<td><strong>状态管理</strong></td>
+<td>GetX 全局</td>
+<td>ValueNotifier 局部</td>
+<td>ValueNotifier</td>
+<td>局部刷新更精准，不影响全局</td>
+</tr>
+<tr>
+<td><strong>打字机效果</strong></td>
+<td>匀速</td>
+<td>行级加速</td>
+<td>行级加速</td>
+<td>产品要求节奏感，匀速太死板</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="面试话术（2-分钟）"><a href="#面试话术（2-分钟）" class="headerlink" title="面试话术（2 分钟）"></a>面试话术（2 分钟）</h3><p>AI 流式对话：<br>  难点：控制推送频率 + 控制 UI 刷新频率<br>  方案：<br>    1. 33ms 时间窗口 + 轻量字符串提取<br>    2. 行级线性加速（83ms → 30ms）<br>    3. 流式显示组件（500 字分段）</p>
+<blockquote>
+<p>“我再讲一个 <strong>AI 流式对话</strong>的问题。</p>
+<p>产品需要实现类似豆包的打字机效果，大模型通过流式数据返回，app端边接收边显示，并且实现行级加速显示效果。</p>
+<p><strong>核心难点</strong>有两个：</p>
+<ol>
+<li><strong>如何控制 SSE 推送频率</strong>：推送频率不可控，短时间内可能连续推送多个 chunk，如果每个 chunk 都 setState，会导致卡顿。</li>
+<li><strong>如何控制 UI 刷新频率</strong>：需要实现按行线性加速显示，就要控制每一行每个字符的 delay 时间，每行由慢到快，有节奏感。”</li>
+</ol>
+<p><strong>我的方案分三层</strong>：</p>
+<p>第一层，<strong>网络接收层</strong>：用 <strong>33ms 时间窗口缓冲</strong>，合并多个 chunk，控制返回给UI的数据速度。33ms 约两帧，既降低 build 压力，又保持流式连贯性。同时弃用 jsonDecode 全量解析，改用<strong>轻量字符串提取</strong>，只取需要的字段，比如用 indexOf 和 substring 直接截取 content 内容，降低cpu开销。</p>
+<p>第二层，<strong>UI 渲染层</strong>：封装了<strong>行级线性加速控制器</strong>，输入当前行的显示宽度和字符数，通过线性插值算法计算每个字符的显示延迟。每行第一个字符 83ms，最后一个 33ms，中间线性插值，换行时重置。视觉上就是’每行开头稍顿，然后越打越快’，节奏感很强。</p>
+<p>第三层，<strong>状态管理层</strong>：封装了<strong>流式显示组件</strong>，文本小于 500 字时用单个 Text，超过 500 字后按 500 字分段封装多个 Text。这样每次 setState 只触发当前 Text rebuild，历史 Text 完全不感知，实现局部刷新，提升渲染效率。”</p>
+</blockquote>
+<hr>
+<h4 id="2-IM-实时通信"><a href="#2-IM-实时通信" class="headerlink" title="2. IM 实时通信"></a>2. IM 实时通信</h4><p><strong>S（背景）</strong>：<br>做 IM 功能时，需要实现消息的实时收发、离线消息同步、多端同步。</p>
+<p><strong>T（难点）</strong>：<br>核心难点有四个：</p>
+<ol>
+<li><strong>连接稳定性</strong>：长连接容易断开，网络切换、后台休眠都会导致断线</li>
+<li><strong>消息可靠性</strong>：消息不能丢、不能重复、顺序不能乱</li>
+<li><strong>离线消息同步</strong>：用户离线期间的消息，上线后如何高效同步</li>
+<li><strong>高并发性能</strong>：大量消息涌入时，UI 不能卡顿</li>
+</ol>
+<p><strong>A（解决方案）</strong>：</p>
+<p>第一，<strong>连接稳定性</strong>：用面试话术。</p>
+<p>第二，<strong>消息可靠性</strong>：每条消息唯一 ID + 本地去重，服务端 ACK 机制保证不丢失，序列号保证顺序。消息本地 SQLite 缓存，保证不丢失。</p>
+<p>第三，<strong>离线消息同步</strong>：客户端记录最后一条消息 ID，上线时只同步增量消息。如果离线消息 &lt; 50 条，直接 WebSocket 推送；如果 ≥ 50 条，用 HTTP 分页拉取，避免阻塞。</p>
+<p>第四，<strong>高并发性能</strong>：用面试话术。</p>
+<p><strong>R（结果）</strong>：</p>
+<ul>
+<li>消息到达率 99.9%，延迟 &lt; 200ms</li>
+<li>10000 条消息列表快速滑动 60fps 流畅，内存占用稳定在 50MB 以内</li>
+</ul>
+<hr>
+<h3 id="面试话术（2-分钟）-1"><a href="#面试话术（2-分钟）-1" class="headerlink" title="面试话术（2 分钟）"></a>面试话术（2 分钟）</h3><blockquote>
+<p>“我再讲一个 <strong>IM 实时通信</strong>的问题。</p>
+<p>做 IM 功能时，需要实现消息的实时收发、离线消息同步、多端同步。</p>
+<p><strong>核心难点</strong>有两个：</p>
+<ol>
+<li><strong>弱网下的连接稳定性</strong>：地铁、电梯等弱网环境下长连接容易断开，如何保证连接稳定？</li>
+<li><strong>高并发下的 UI 流畅性</strong>：大量消息涌入时，UI 不能卡顿，如何保证流畅？</li>
+</ol>
+<p><strong>我的方案</strong>：</p>
+<p>第一，<strong>连接稳定性</strong>：用心跳保活检测连接状态，断线后用<strong>指数退避算法</strong>重连（1s → 2s → 4s），最多重试 5 次。5 次失败后停止频繁重连，避免 WebSocket 连接风暴。改用轻量级 HTTP GET 请求定期探测网络恢复（如每 30s 一次），网络恢复后立即重连。同时监听网络变化，WiFi&#x2F;4G 切换时主动重连。</p>
+<p>第二，<strong>高并发 UI 流畅性</strong>：用<strong>三层缓冲 + 七层优化</strong>。</p>
+<p><strong>三层缓冲</strong>：</p>
+<ol>
+<li><strong>消息队列缓冲</strong>：收到消息先进队列，100ms 定时器批量更新 UI，减少 setState 频率（100次&#x2F;秒 → 10次&#x2F;秒）</li>
+<li><strong>ListView 懒加载</strong>：用 ListView.builder，只渲染可见区域，配合 cacheExtent 预加载</li>
+<li><strong>离线双策略</strong>：&lt;50 条 WebSocket 推送（实时性强），≥50 条 HTTP 分页拉取（避免阻塞）</li>
+</ol>
+<p><strong>七层优化</strong>：</p>
+<ol>
+<li>**ValueKey(msgId)**：避免 ListView 错误复用导致的 UI 闪烁，帮助 Flutter 准确识别 item</li>
+<li><strong>cacheExtent</strong>：设置预加载区域（如 200px），滑动时减少白屏</li>
+<li><strong>Item 内部优化</strong>：用 const Widget、减少布局嵌套、图片按尺寸加载，避免 rebuild</li>
+<li><strong>批量更新</strong>：100ms 合并多次 UI 更新，用 addAll() 一次性添加</li>
+<li><strong>数据库分页</strong>：历史消息每次加载 20 条，上拉加载更多</li>
+<li><strong>内存数据源控制</strong>：内存中只保留 200 条消息，超过的存数据库，降低内存占用</li>
+<li><strong>快速滑动占位</strong>：监听滚动速度（velocity &gt; 100 时显示占位图，&lt; 100 时正常渲染），避免快速滑动时频繁 layout&#x2F;paint</li>
+</ol>
+<p>另外，消息可靠性和离线同步是基础功能：UUID 去重 + ACK 保证不丢不乱，离线消息增量同步。</p>
+<p><strong>最终效果</strong>：消息到达率 99.9%，延迟 &lt; 200ms，10000 条消息列表快速滑动 60fps 流畅，内存占用稳定在 50MB 以内。”</p>
+</blockquote>
+<hr>
+<h4 id="3-短视频列表（滑动流畅-内存优化）"><a href="#3-短视频列表（滑动流畅-内存优化）" class="headerlink" title="3. 短视频列表（滑动流畅 + 内存优化）"></a>3. 短视频列表（滑动流畅 + 内存优化）</h4><h5 id="视频播放原理基础"><a href="#视频播放原理基础" class="headerlink" title="视频播放原理基础"></a>视频播放原理基础</h5><p><strong>1. MP4 文件结构</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-title class_">MP4</span> = 容器（<span class="hljs-title class_">Container</span>）<br>├─ moov atom（元数据）<br>│   ├─ 视频轨道信息（编码格式、分辨率、帧率）<br>│   ├─ 音频轨道信息（编码格式、采样率、声道数）<br>│   └─ 时间戳、索引（每一帧的位置）<br>│<br>└─ mdat atom（实际数据）<br>    ├─ 视频帧数据（H.<span class="hljs-number">264</span>/H.<span class="hljs-number">265</span> 编码）<br>    └─ 音频帧数据（AAC/<span class="hljs-title class_">MP3</span> 编码）<br></code></pre></td></tr></table></figure>
+
+<p><strong>2. 视频播放完整流程</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-title class_">MP4</span> 文件（网络/本地）<br>  ↓<br>第 <span class="hljs-number">1</span> 步：解封装（<span class="hljs-title class_">Demux</span>）<br>  ├─ 读取 moov atom → 解析元数据<br>  └─ 根据索引分离出音频流 + 视频流<br>  ↓<br>第 <span class="hljs-number">2</span> 步：解码（<span class="hljs-title class_">Decode</span>）<br>  ├─ 视频解码：H.<span class="hljs-number">264</span>/H.<span class="hljs-number">265</span> → YUV/RGB 像素数据<br>  │   └─ 硬件加速：<span class="hljs-title class_">Android</span> <span class="hljs-title class_">MediaCodec</span> / iOS <span class="hljs-title class_">VideoToolbox</span><br>  └─ 音频解码：AAC/<span class="hljs-title class_">MP3</span> → PCM 音频数据<br>      └─ 硬件加速：<span class="hljs-title class_">Android</span> <span class="hljs-title class_">MediaCodec</span> / iOS <span class="hljs-title class_">AudioToolbox</span><br>  ↓<br>第 <span class="hljs-number">3</span> 步：渲染（<span class="hljs-title class_">Render</span>）<br>  ├─ 视频：像素数据 → GPU 纹理 → <span class="hljs-title class_">Texture</span> <span class="hljs-title class_">Widget</span> → 屏幕显示<br>  └─ 音频：PCM 数据 → 扬声器播放<br></code></pre></td></tr></table></figure>
+
+<p><strong>3. 帧率与屏幕刷新率的协调</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs dart">【场景：手机 60Hz 屏幕 + 视频 30fps】<br>- 屏幕刷新率：60Hz = 每 <span class="hljs-number">16</span>.67ms 刷新一次（<span class="hljs-title class_">VSync</span> 信号）<br>- 视频帧率：30fps = 每 <span class="hljs-number">33</span>.33ms 一帧<br><br>【业界标准做法：帧保持策略】<br>每一帧视频保持 <span class="hljs-number">2</span> 个 <span class="hljs-title class_">VSync</span> 周期（<span class="hljs-number">60</span> / <span class="hljs-number">30</span> = <span class="hljs-number">2</span>）<br><br>时间轴：<br>0ms      <span class="hljs-number">16</span>.67ms  <span class="hljs-number">33</span>.33ms  50ms     <span class="hljs-number">66</span>.67ms<br>|--------|--------|--------|--------|--------|<br><span class="hljs-title class_">VSync</span> <span class="hljs-number">1</span>  <span class="hljs-title class_">VSync</span> <span class="hljs-number">2</span>  <span class="hljs-title class_">VSync</span> <span class="hljs-number">3</span>  <span class="hljs-title class_">VSync</span> <span class="hljs-number">4</span>  <span class="hljs-title class_">VSync</span> <span class="hljs-number">5</span><br>|        |        |        |        |<br>帧 <span class="hljs-number">1</span>     帧 <span class="hljs-number">1</span>     帧 <span class="hljs-number">2</span>     帧 <span class="hljs-number">2</span>     帧 <span class="hljs-number">3</span><br>(显示<span class="hljs-number">2</span>次)        (显示<span class="hljs-number">2</span>次)        (显示<span class="hljs-number">1</span>次)<br><br>【渲染循环逻辑】<br><span class="hljs-keyword">while</span> (isPlaying) &#123;<br>  <span class="hljs-title function_">waitForVSync</span>();  <span class="hljs-comment">// 等待屏幕刷新信号（每 16.67ms）</span><br>  <br>  long currentTime = <span class="hljs-title function_">getCurrentTime</span>();<br>  <span class="hljs-title class_">VideoFrame</span> frame = <span class="hljs-title function_">getNextFrame</span>(currentTime);<br>  <br>  <span class="hljs-comment">// 判断是否需要切换到新帧</span><br>  <span class="hljs-keyword">if</span> (frame.pts &lt;= currentTime &amp;&amp; frame != currentDisplayFrame) &#123;<br>    currentDisplayFrame = frame;<br>    <span class="hljs-title function_">uploadToGPU</span>(frame);  <span class="hljs-comment">// 上传到 GPU 纹理</span><br>  &#125;<br>  <br>  <span class="hljs-comment">// 渲染当前帧（可能还是上一帧）</span><br>  <span class="hljs-title function_">renderTexture</span>(currentDisplayFrame);<br>&#125;<br><br>【核心机制】<br>- 渲染循环由屏幕 <span class="hljs-title class_">VSync</span> 驱动（每 <span class="hljs-number">16</span>.67ms 一次）<br>- 视频帧切换由 PTS 控制（每 <span class="hljs-number">33</span>.33ms 一次）<br>- 每一帧视频保持多个 <span class="hljs-title class_">VSync</span> 周期，直到下一帧的 PTS 到达<br>- 平台播放器（<span class="hljs-title class_">MediaCodec</span>/<span class="hljs-title class_">AVPlayer</span>）自动处理帧率匹配<br></code></pre></td></tr></table></figure>
+
+<p><strong>4. 音视频同步</strong></p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs dns">【为什么需要同步？】<br>- 视频解码快，音频解码慢 → 视频超前，口型对不上<br>- 音频解码快，视频解码慢 → 音频超前，声音先出画面后出<br><br>【同步策略：以音频时钟为基准】<br>void syncAndRender<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span> &#123;<br>  double audioTime = audioPlayer.getCurrentTime<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span><span class="hljs-comment">;  // 音频时钟</span><br>  <br>  while <span class="hljs-punctuation">(</span>hasVideoFrames<span class="hljs-punctuation">)</span> &#123;<br>    VideoFrame frame = videoDecoder.peekNextFrame<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span><span class="hljs-comment">;</span><br>    <br>    if <span class="hljs-punctuation">(</span>frame.pts &lt;= audioTime<span class="hljs-punctuation">)</span> &#123;<br>      // 视频时间 &lt;= 音频时间 → 显示这一帧<br>      videoDecoder.dequeueFrame<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span><span class="hljs-comment">;</span><br>      renderFrame<span class="hljs-punctuation">(</span>frame<span class="hljs-punctuation">)</span><span class="hljs-comment">;</span><br>    &#125; else if <span class="hljs-punctuation">(</span>frame.pts - audioTime &gt; <span class="hljs-number">0</span>.<span class="hljs-number">1</span><span class="hljs-punctuation">)</span> &#123;<br>      // 视频超前音频超过 <span class="hljs-number">100m</span>s → 等待<br>      sleep<span class="hljs-punctuation">(</span>frame.pts - audioTime<span class="hljs-punctuation">)</span><span class="hljs-comment">;</span><br>    &#125; else &#123;<br>      // 视频稍微超前 → 渲染上一帧，保持画面<br>      renderFrame<span class="hljs-punctuation">(</span>lastFrame<span class="hljs-punctuation">)</span><span class="hljs-comment">;</span><br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>5. MediaKit 在这个过程中的职责</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs dart">【<span class="hljs-title class_">MediaKit</span> 自动处理的】<br>✓ 解封装：内置 <span class="hljs-title class_">FFmpeg</span> 或平台原生解封装器<br>✓ 解码：调用平台硬件解码器（<span class="hljs-title class_">MediaCodec</span>/<span class="hljs-title class_">VideoToolbox</span>）<br>✓ 渲染：注册纹理 ID，提供 <span class="hljs-title class_">Texture</span> <span class="hljs-title class_">Widget</span><br>✓ 音视频同步：根据时间戳同步音频和视频<br>✓ 缓冲管理：控制解码缓冲区，避免内存溢出<br>✓ 帧率匹配：自动处理 30fps → 60Hz 的映射<br><br>【你需要做的】<br>✓ 给 <span class="hljs-title class_">MediaKit</span> 提供数据源（URL 或本地路径）<br>✓ 用 <span class="hljs-title class_">Texture</span> <span class="hljs-title class_">Widget</span> 显示画面<br>✓ 控制播放/暂停/停止<br></code></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>S（背景）</strong>：<br>做短视频 App 时，需要实现类似抖音的上下滑动播放功能。用户反馈滑动卡顿、内存占用高、切换视频黑屏，低端机经常 OOM。</p>
+<p><strong>T（难点）</strong>：<br>核心难点有四个：</p>
+<ol>
+<li><strong>视频预下载与缓存</strong>：如何实现边下边播 + 本地缓存，下次滑到直接播放（0 延迟）</li>
+<li><strong>滑动卡顿</strong>：快速滑动时，视频预加载和释放不及时，导致掉帧</li>
+<li><strong>内存爆炸</strong>：多个视频同时加载，内存占用过高，低端机 OOM</li>
+<li><strong>切换黑屏</strong>：切换视频时出现短暂黑屏或闪烁</li>
+</ol>
+<p><strong>A（解决方案）</strong>：</p>
+<p><strong>第一步：本地代理实现预下载与缓存</strong></p>
+<ul>
+<li><strong>难点</strong>：MediaKit 播放器不支持”只下载不解码”，无法实现预下载；播放器只能选择一个数据源（本地 or 网络），不能中途切换</li>
+<li><strong>方案</strong>：用本地代理服务器（Cache Proxy）拦截播放器请求，自动处理缓存逻辑<ol>
+<li><strong>本地代理服务器</strong>：启动 HTTP 代理（127.0.0.1:8080），播放器请求代理 URL，代理自动处理缓存</li>
+<li><strong>缓存命中</strong>：代理检查本地缓存，有就直接返回本地文件（0 延迟）</li>
+<li><strong>缓存未命中</strong>：代理从网络下载，流式返回给播放器，同时保存到本地缓存</li>
+<li><strong>支持 Range</strong>：代理支持 HTTP Range 请求，可以分片下载和播放（边下边播）</li>
+<li><strong>预下载策略</strong>：WiFi 预下载 5 个视频，4G 预下载 2 个，弱网不预下载</li>
+<li><strong>LRU 缓存清理</strong>：最多缓存 20 个视频文件（500MB），超过自动清理最久未访问的</li>
+</ol>
+</li>
+<li><strong>关注</strong>：存储占用、网络请求优化</li>
+<li><strong>效果</strong>：首次加载边下边播（约 500ms），下次加载本地缓存（0ms）</li>
+</ul>
+<p><strong>第二步：滑动流畅优化（60fps → 58fps）</strong></p>
+<ul>
+<li><strong>难点</strong>：快速滑动时，当前视频释放和新视频加载有时间差，导致卡顿</li>
+<li><strong>方案</strong>：<ol>
+<li><strong>播放器对象池</strong>：提前创建 3 个播放器实例（当前 + 上下各 1 个），滑到时从对象池取（不用等创建，创建耗时约 200ms），滑出后延迟 500ms 再释放回对象池，避免频繁创建销毁</li>
+<li><strong>快速滑动占位</strong>：监听滚动速度，velocity &gt; 100 时显示封面图占位（避免频繁 layout&#x2F;paint），&lt; 100 时正常渲染</li>
+<li><strong>异步解码</strong>：MediaKit 播放器内部已封装异步解码（MediaCodec&#x2F;AVPlayer），解码在子线程，不阻塞主线程</li>
+</ol>
+</li>
+<li><strong>关注</strong>：播放器实例的创建&#x2F;销毁开销、滑动流畅度</li>
+<li><strong>效果</strong>：滑动流畅度从 45fps 提升到 58fps，接近满帧</li>
+</ul>
+<p><strong>第三步：内存优化（降低 60%）</strong></p>
+<ul>
+<li><strong>难点</strong>：每个视频解码后占用大量内存，多个视频同时存在容易 OOM</li>
+<li><strong>方案</strong>：<ol>
+<li><strong>单例播放器</strong>：同一时刻只保留 1 个活跃播放器，其他视频只加载封面图</li>
+<li><strong>分辨率适配</strong>：根据屏幕大小和网络情况动态选择分辨率（小屏用 720p，弱网用 480p）</li>
+<li><strong>及时释放资源</strong>：滑出屏幕的视频立即暂停，延迟 500ms 后释放播放器实例</li>
+</ol>
+</li>
+<li><strong>关注</strong>：内存占用、OOM 风险控制</li>
+<li><strong>效果</strong>：内存占用从 300MB 降到 120MB，降低 60%，低端机不再 OOM</li>
+</ul>
+<p><strong>第四步：无缝切换优化</strong></p>
+<ul>
+<li><strong>难点</strong>：切换视频时，旧视频释放和新视频加载有时间差，导致黑屏</li>
+<li><strong>方案</strong>：<ol>
+<li><strong>交叉淡入淡出</strong>：新旧视频重叠 200ms，用透明度动画过渡，避免黑屏</li>
+<li><strong>首帧预渲染</strong>：新视频加载完成后先渲染首帧，再显示，避免加载中状态</li>
+<li><strong>封面图占位</strong>：视频加载前显示封面图，用户感知不到加载过程</li>
+</ol>
+</li>
+<li><strong>关注</strong>：用户体验、切换黑屏问题</li>
+<li><strong>效果</strong>：切换视频无黑屏、无闪烁，用户体验流畅</li>
+</ul>
+<p><strong>四个分工总览</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>关注点</th>
+<th>核心资源</th>
+<th>目标</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第一步：本地代理预下载与缓存</td>
+<td>存储占用、网络请求优化</td>
+<td>视频文件（LRU 20个&#x2F;500MB）</td>
+<td>下次滑到直接播放（0延迟）</td>
+</tr>
+<tr>
+<td>第二步：滑动流畅优化</td>
+<td>播放器实例创建&#x2F;销毁开销、滑动流畅度</td>
+<td>播放器对象池（3个实例）</td>
+<td>60fps → 58fps</td>
+</tr>
+<tr>
+<td>第三步：内存优化</td>
+<td>内存占用、OOM 风险控制</td>
+<td>单例播放器 + 分辨率适配</td>
+<td>300MB → 120MB（降低60%）</td>
+</tr>
+<tr>
+<td>第四步：无缝切换优化</td>
+<td>用户体验、切换黑屏问题</td>
+<td>交叉淡入淡出 + 首帧预渲染</td>
+<td>无黑屏、无闪烁</td>
+</tr>
+</tbody></table>
+<p><strong>R（结果）</strong>：</p>
+<ul>
+<li>滑动流畅度从 <strong>45fps 提升到 58fps</strong></li>
+<li>内存占用从 <strong>300MB 降到 120MB</strong>，降低 60%</li>
+<li>低端机 OOM 率从 15% 降到 0.5%</li>
+</ul>
+<hr>
+<h3 id="面试话术（2-分钟）-2"><a href="#面试话术（2-分钟）-2" class="headerlink" title="面试话术（2 分钟）"></a>面试话术（2 分钟）</h3><blockquote>
+<p>“我再讲一个 <strong>短视频列表优化</strong>的问题。</p>
+<p>做短视频 App 时，用户反馈滑动卡顿、内存占用高、切换视频黑屏，低端机经常 OOM。</p>
+<p><strong>核心难点</strong>有四个：</p>
+<ol>
+<li><strong>视频预下载与缓存</strong>：如何实现边下边播 + 本地缓存，下次滑到直接播放（0 延迟）</li>
+<li><strong>滑动卡顿</strong>：快速滑动时，视频预加载和释放不及时</li>
+<li><strong>内存爆炸</strong>：多个视频同时加载，低端机 OOM</li>
+<li><strong>切换黑屏</strong>：切换视频时出现短暂黑屏</li>
+</ol>
+<p><strong>我的方案分四步</strong>：</p>
+<p>第一，<strong>本地代理实现预下载与LRU缓存</strong>：</p>
+<ol>
+<li><strong>本地代理服务器</strong>：启动 HTTP 代理（127.0.0.1:8080），MediaKit 播放器请求代理 URL，代理自动处理缓存逻辑</li>
+<li><strong>缓存命中</strong>：代理检查本地缓存，有就直接返回本地文件（0 延迟）</li>
+<li><strong>缓存未命中</strong>：代理从网络下载，流式返回给播放器，同时保存到本地缓存</li>
+<li><strong>支持 Range</strong>：代理支持 HTTP Range 请求，可以分片下载和播放（边下边播）</li>
+<li><strong>预下载策略</strong>：WiFi 预下载 5 个视频，4G 预下载 2 个，弱网不预下载</li>
+<li><strong>LRU 缓存清理</strong>：最多缓存 20 个视频（500MB），超过自动清理最久未访问的</li>
+</ol>
+<p>关注：存储占用、网络请求优化<br>效果：首次加载边下边播（约 500ms），下次加载本地缓存（0ms）。</p>
+<p>第二，<strong>滑动流畅优化</strong>：</p>
+<ol>
+<li><strong>播放器对象池</strong>：提前创建 3 个播放器实例（当前 + 上下各 1 个），滑到时从对象池取（不用等创建，创建耗时约 200ms），滑出后延迟 500ms 再释放回对象池</li>
+<li><strong>快速滑动占位</strong>：监听滚动速度，velocity &gt; 100 时显示封面图占位（避免频繁 layout&#x2F;paint），&lt; 100 时正常渲染</li>
+<li><strong>异步解码</strong>：MediaKit 播放器内部已封装异步解码，解码在子线程，不阻塞主线程</li>
+</ol>
+<p>关注：播放器实例的创建&#x2F;销毁开销、滑动流畅度<br>效果：滑动流畅度从 45fps 提升到 58fps。</p>
+<p>第三，<strong>内存优化</strong>：</p>
+<ol>
+<li><strong>单例播放器</strong>：同一时刻只保留 1 个活跃播放器，其他视频只加载封面</li>
+<li><strong>纹理复用</strong>：用 Texture Widget 渲染，减少内存拷贝</li>
+<li><strong>分辨率适配</strong>：根据屏幕大小和网络情况动态选择 720p 或 1080p</li>
+</ol>
+<p>关注：内存占用、OOM 风险控制<br>效果：内存占用从 300MB 降到 120MB，降低 60%。</p>
+<p>第四，<strong>无缝切换优化</strong>：</p>
+<ol>
+<li><strong>交叉淡入淡出</strong>：新旧视频重叠 200ms，用透明度动画过渡</li>
+<li><strong>首帧预渲染</strong>：加载完成后先渲染首帧，再显示</li>
+<li><strong>封面图占位</strong>：加载前显示封面图，用户感知不到加载</li>
+</ol>
+<p>关注：用户体验、切换黑屏问题<br>效果：切换视频无黑屏、无闪烁。</p>
+<p><strong>最终效果</strong>：首次加载 500ms（边下边播），下次加载 0ms（本地缓存），滑动 58fps，内存降低 60%，低端机 OOM 率从 15% 降到 0.5%。”</p>
+</blockquote>
+<hr>
+<h3 id="技术难点详解：本地代理实现预加载与缓存策略（3-分钟）"><a href="#技术难点详解：本地代理实现预加载与缓存策略（3-分钟）" class="headerlink" title="技术难点详解：本地代理实现预加载与缓存策略（3 分钟）"></a>技术难点详解：本地代理实现预加载与缓存策略（3 分钟）</h3><blockquote>
+<p>“我展开讲一下本地代理这块的技术难点。</p>
+<p>本地代理本身实现不难，就是一个轻量级 HTTP 服务器，跑在 127.0.0.1:8080，拦截 MediaKit 的请求，检查缓存，有就返回本地文件，没有就从网络下载再返回。大概 200 行代码就能搞定。</p>
+<p><strong>真正的难点在缓存策略</strong>，这块我调了大概两周。</p>
+<p><strong>第一个难点：预下载策略</strong>。<br>不是无脑下载，要根据三个维度动态调整：</p>
+<ol>
+<li><strong>网络状况</strong>：WiFi 预下载 5 个，4G 预下载 2 个，弱网不预下载</li>
+<li><strong>滑动方向</strong>：用户向下滑 → 预下载后面的视频；向上滑 → 预下载前面的</li>
+<li><strong>滑动速度</strong>：快速滑 → 少预下载（用户不会停留）；慢速滑 → 多预下载（用户可能在找）</li>
+</ol>
+<p><strong>第二个难点：LRU 缓存清理</strong>。<br>最多缓存 20 个视频（500MB），超过时清理最久未访问的。但有三个约束：</p>
+<ol>
+<li><strong>正在播放的视频不能清理</strong></li>
+<li><strong>正在下载的视频不能清理</strong>（下载中断会污染缓存）</li>
+<li><strong>清理时要同时更新磁盘和内存索引</strong>（避免不一致）</li>
+</ol>
+<p><strong>第三个难点：下载完整性校验</strong>。<br>下载了一半断网了怎么办？</p>
+<ol>
+<li>检测到下载失败 → 立即删除不完整的文件</li>
+<li>下次请求时重新从网络下载</li>
+<li>绝对不能把不完整的文件当缓存返回给播放器（MediaKit 会播放失败或中途停止）</li>
+</ol>
+<p><strong>第四个难点：并发控制与请求取消</strong>。<br>播放器和预下载器可能同时请求同一个视频：</p>
+<ol>
+<li>播放器请求 Range: bytes&#x3D;0-1024（要文件头）</li>
+<li>预下载器正在下载 bytes&#x3D;0-5MB（全量下载）</li>
+<li>需要加锁，避免重复下载和文件写入冲突</li>
+<li>用 Map&lt;videoId, Completer&gt; 管理下载状态，同一个视频只下载一次</li>
+<li><strong>快速滑动时取消低优先级请求</strong>：当检测到 velocity &gt; 200 时，取消队列中优先级 &lt; 50 的下载任务，释放网络带宽给高优先级视频</li>
+</ol>
+<p><strong>最终效果</strong>：</p>
+<ul>
+<li>首次加载：边下边播，约 500ms</li>
+<li>下次加载：本地缓存，0ms</li>
+<li>缓存命中率：85%（用户滑回看过的视频时直接播放）</li>
+<li>内存占用：代理服务器本身约 6-8MB，可以忽略”</li>
+</ul>
+</blockquote>
+<hr>
+<h3 id="三、架构设计类"><a href="#三、架构设计类" class="headerlink" title="三、架构设计类"></a>三、架构设计类</h3><h4 id="1-Flutter-混合栈方案"><a href="#1-Flutter-混合栈方案" class="headerlink" title="1. Flutter 混合栈方案"></a>1. Flutter 混合栈方案</h4><p><strong>S（背景）</strong>：<br>老项目是纯 Android 原生，要逐步迁移到 Flutter，但不能一次性重写。</p>
+<p><strong>T（难点）</strong>：<br>需要设计混合栈方案，让 Flutter 和原生页面能共存、互相跳转。</p>
+<p><strong>A（解决方案）</strong>：</p>
+<ol>
+<li>用 <strong>FlutterFragment + 原生 Fragment</strong> 混合栈</li>
+<li>用 <strong>MethodChannel</strong> 做页面路由和数据传递</li>
+<li>统一导航栈管理，保证返回逻辑正确</li>
+</ol>
+<p><strong>R（结果）</strong>：<br>实现了渐进式迁移，团队可以并行开发，项目按时交付。</p>
+<hr>
+<h4 id="2-组件化架构"><a href="#2-组件化架构" class="headerlink" title="2. 组件化架构"></a>2. 组件化架构</h4><p><strong>待补充…</strong></p>
+<hr>
+<h4 id="3-技术选型（原生-vs-Flutter-vs-H5）"><a href="#3-技术选型（原生-vs-Flutter-vs-H5）" class="headerlink" title="3. 技术选型（原生 vs Flutter vs H5）"></a>3. 技术选型（原生 vs Flutter vs H5）</h4><p><strong>待补充…</strong></p>
+<hr>
+<h3 id="四、技术管理类"><a href="#四、技术管理类" class="headerlink" title="四、技术管理类"></a>四、技术管理类</h3><h4 id="1-团队分工与管理"><a href="#1-团队分工与管理" class="headerlink" title="1. 团队分工与管理"></a>1. 团队分工与管理</h4><p><strong>待补充…</strong></p>
+<hr>
+<h4 id="2-Code-Review-流程建设"><a href="#2-Code-Review-流程建设" class="headerlink" title="2. Code Review 流程建设"></a>2. Code Review 流程建设</h4><p><strong>待补充…</strong></p>
+<hr>
+<h3 id="五、其他高频问题"><a href="#五、其他高频问题" class="headerlink" title="五、其他高频问题"></a>五、其他高频问题</h3><h4 id="1-Flutter-和原生怎么选型？"><a href="#1-Flutter-和原生怎么选型？" class="headerlink" title="1. Flutter 和原生怎么选型？"></a>1. Flutter 和原生怎么选型？</h4><p><strong>回答框架</strong>：</p>
+<ul>
+<li>按业务场景分析，不盲目选边</li>
+<li>新项目优先 Flutter（开发效率高）</li>
+<li>重度原生功能（地图、支付）用原生</li>
+<li>老项目渐进式迁移用混合栈</li>
+</ul>
+<hr>
+<h4 id="2-你带团队怎么做的？"><a href="#2-你带团队怎么做的？" class="headerlink" title="2. 你带团队怎么做的？"></a>2. 你带团队怎么做的？</h4><p><strong>回答框架</strong>：</p>
+<ul>
+<li>按功能模块分工</li>
+<li>设专人负责性能优化、架构设计、Code Review</li>
+<li>制定技术规范和流程</li>
+<li>指导初级开发，培养团队</li>
+</ul>
+<hr>
+<h4 id="3-性能优化说说你的体系？"><a href="#3-性能优化说说你的体系？" class="headerlink" title="3. 性能优化说说你的体系？"></a>3. 性能优化说说你的体系？</h4><p><strong>回答框架</strong>：</p>
+<ul>
+<li>监控发现（APM 工具）</li>
+<li>工具分析（Systrace&#x2F;Perfetto）</li>
+<li>根因定位</li>
+<li>方案实施</li>
+<li>CI&#x2F;CD 防回归</li>
+</ul>
+<hr>
+<h2 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h2><ol>
+<li>每个问题按 STAR 法则组织（S 背景、T 难点、A 解决方案、R 结果）</li>
+<li>回答要体现 14 年经验的技术深度和系统性思维</li>
+<li>有具体数据支撑（如 3.2s→0.9s，降低 90%）</li>
+<li>口语化表达，避免背诵感</li>
+</ol>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E9%9D%A2%E8%AF%95/" class="category-chain-item">面试</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E9%9D%A2%E8%AF%95/" class="print-no-link">#技术面试</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>面试技术难点</div>
+      <div>https://crazycoding7.github.io/2026/10/22/面试/面试技术难点100qa/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年10月22日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

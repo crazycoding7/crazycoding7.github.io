@@ -1,0 +1,1261 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="面试Flutter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面试Flutter100QA">
+<meta property="og:url" content="https://crazycoding7.github.io/2026/10/22/%E9%9D%A2%E8%AF%95/%E9%9D%A2%E8%AF%95Flutter100qa/index.html">
+<meta property="og:site_name" content="alex blogs">
+<meta property="og:description" content="面试Flutter">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-22T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-21T23:25:36.840Z">
+<meta property="article:tag" content="Flutter">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>面试Flutter100QA - alex blogs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazycoding7.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 60vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Alex的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/three_bp.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="面试Flutter100QA"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-10-22 10:00" pubdate>
+          2026年10月22日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          12k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          102 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">面试Flutter100QA</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="面试100qa"><a href="#面试100qa" class="headerlink" title="面试100qa"></a>面试100qa</h2><p>[TOC]</p>
+<h3 id="1-基础"><a href="#1-基础" class="headerlink" title="1. 基础"></a>1. 基础</h3><h4 id="1-关键字-空安全-Sound-NullSafety-、late、required、-、-等"><a href="#1-关键字-空安全-Sound-NullSafety-、late、required、-、-等" class="headerlink" title="1. 关键字 空安全(Sound NullSafety)、late、required、??、! 等"></a>1. 关键字 空安全(Sound NullSafety)、late、required、??、! 等</h4><ul>
+<li><p>空安全</p>
+<p>是一种通过类型系统在编译时彻底杜绝空指针异常的一种特性。相比于 Java 的手动防御和 TypeScript 的非健全设计，Dart 和 Kotlin 提供了真正安全、可靠且不影响开发体验的空安全机制。</p>
+<p>例子： 接口字段频繁变更问题：实体类字段都为空DTO，业务Model做转换(集中处理脏数据和默认值)。好处：UI层彻底解放、容错集中化；坏处：多Model类和转换。</p>
+</li>
+<li><p>late 解决非空变量无法立即初始化问题(LateInitializationError)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs dar">//1. 依赖生命周期的延迟初始化（最常见）<br>late final TextEditingController _controller;<br>@override<br>void initState() &#123;<br>  super.initState();<br>  _controller = TextEditingController(); // 此时 Context 已可用<br>&#125;<br><br>//2. 性能优化（延迟加载昂贵对象） 只有当第一次访问 bigData 时，才会执行耗时的加载操作<br>late final List&lt;Map&lt;String, dynamic&gt;&gt; bigData = _loadBigData(); <br></code></pre></td></tr></table></figure>
+</li>
+<li><p>?? 默认值</p>
+<p>Text(user?.name ?? ‘未知用户’)</p>
+</li>
+<li><p>! 强制告诉编译器：“我保证这个变量此时绝对不为 null”。</p>
+</li>
+<li><p><strong>Mixin（with混入）</strong> 是<strong>横向扩展</strong></p>
+<p>Dart 语言<strong>不支持多重继承</strong>（即不能写 <code>class C extends A, B &#123;&#125;</code>），为了解决单继承的限制并避免多重继承带来的“菱形问题（Diamond Problem）”，Dart 引入了 Mixin。通过 Mixin，一个类可以同时拥有多个不相关类的功能。</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-comment">// 1. 定义两个独立的功能（Mixin）</span><br><span class="hljs-keyword">mixin</span> <span class="hljs-title class_">Flyer</span> &#123;<br>  <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span>() &#123; <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;Flying...&#x27;</span>); &#125;<br>&#125;<br><span class="hljs-keyword">mixin</span> <span class="hljs-title class_">Swimmer</span> &#123;<br>  <span class="hljs-keyword">void</span> <span class="hljs-title function_">swim</span>() &#123; <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;Swimming...&#x27;</span>); &#125;<br>&#125;<br><br><span class="hljs-comment">// 2. 将功能“混入”到具体的类中</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bird</span> <span class="hljs-title">with</span> <span class="hljs-title">Flyer</span> </span>&#123;&#125;           <span class="hljs-comment">// 鸟会飞</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Fish</span> <span class="hljs-title">with</span> <span class="hljs-title">Swimmer</span> </span>&#123;&#125;         <span class="hljs-comment">// 鱼会游泳</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Duck</span> <span class="hljs-title">with</span> <span class="hljs-title">Flyer</span>, <span class="hljs-title">Swimmer</span> </span>&#123;&#125;  <span class="hljs-comment">// 鸭子同时拥有飞行和游泳功能</span><br></code></pre></td></tr></table></figure>
+
+
+</li>
+<li><p><strong>Sealed Class（密封类）</strong></p>
+<p><strong>Enum 适合表示固定的“标签”，而 Sealed Class 适合表示固定的“状态机（包含不同的数据载荷）”。</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-comment">// 1. 定义密封类 （必须在同一个 dart 文件中）</span><br><span class="hljs-keyword">sealed</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ApiResult</span>&lt;<span class="hljs-title">T</span>&gt; </span>&#123;&#125;<br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Success</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title">ApiResult</span>&lt;<span class="hljs-title">T</span>&gt; </span>&#123;<br>  <span class="hljs-keyword">final</span> T data;<br>  <span class="hljs-title class_">Success</span>(<span class="hljs-keyword">this</span>.data);<br>&#125;<br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Failure</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ApiResult</span>&lt;<span class="hljs-title">Never</span>&gt; </span>&#123;<br>  <span class="hljs-keyword">final</span> <span class="hljs-title class_">String</span> errorMsg;<br>  <span class="hljs-title class_">Failure</span>(<span class="hljs-keyword">this</span>.errorMsg);<br>&#125;<br><br><span class="hljs-comment">// 2. 真实业务处理：返回对应的实体类 User</span><br><span class="hljs-title class_">Future</span>&lt;<span class="hljs-title class_">User</span>&gt; <span class="hljs-title function_">handleResult</span>(<span class="hljs-title class_">ApiResult</span>&lt;<span class="hljs-title class_">User</span>&gt; result) <span class="hljs-keyword">async</span> &#123;<br>  <span class="hljs-keyword">return</span> <span class="hljs-keyword">switch</span> (result) &#123;<br>    <span class="hljs-comment">// 匹配成功：直接返回解构出来的 User 实体类对象</span><br>    <span class="hljs-title class_">Success</span>(data: <span class="hljs-keyword">var</span> user) =&gt; user, <br>    <br>    <span class="hljs-comment">// 匹配失败：抛出异常，或者返回一个默认的空 User 对象</span><br>    <span class="hljs-title class_">Failure</span>(errorMsg: <span class="hljs-keyword">var</span> msg) =&gt; <span class="hljs-keyword">throw</span> <span class="hljs-title class_">Exception</span>(msg), <br>  &#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+</li>
+<li><p><strong>模式匹配（Pattern Matching）</strong></p>
+<p>在 Dart 3 中，它其实是一个语法类别，就像我们平时写的 <code>if</code> 语句或 <code>+</code> 表达式一样。它的核心能力可以拆分为两个动作：<strong>匹配（Matching）</strong> 和 <strong>解构（Destructuring）</strong>。</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-comment">/// <span class="language-markdown">以前</span></span><br><span class="hljs-keyword">var</span> list = [<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-number">25</span>];<br><span class="hljs-keyword">if</span> (list <span class="hljs-keyword">is</span> <span class="hljs-title class_">List</span> &amp;&amp; list.length == <span class="hljs-number">2</span>) &#123;<br>  <span class="hljs-keyword">var</span> name = list[<span class="hljs-number">0</span>] <span class="hljs-keyword">as</span> <span class="hljs-title class_">String</span>; <span class="hljs-comment">// 手动取值，手动强转类型</span><br>  <span class="hljs-keyword">var</span> age = list[<span class="hljs-number">1</span>] <span class="hljs-keyword">as</span> <span class="hljs-built_in">int</span>;<br>  <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;<span class="hljs-subst">$name</span> is <span class="hljs-subst">$age</span> years old&#x27;</span>);<br>&#125;<br><span class="hljs-comment">/// <span class="language-markdown">现在</span></span><br><span class="hljs-keyword">var</span> list = [<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-number">25</span>];<br><span class="hljs-comment">// 匹配它是不是一个包含两个元素的列表，如果是，直接拆包赋值给 name 和 age</span><br><span class="hljs-keyword">if</span> (list <span class="hljs-keyword">case</span> [<span class="hljs-title class_">String</span> name, <span class="hljs-built_in">int</span> age]) &#123; <br>  <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;<span class="hljs-subst">$name</span> is <span class="hljs-subst">$age</span> years old&#x27;</span>);<br>&#125;<br><br><span class="hljs-comment">//3. 位置字段：通过 $1, $2 访问</span><br>(<span class="hljs-title class_">String</span>, <span class="hljs-built_in">int</span>) <span class="hljs-title function_">getUserInfo</span>() =&gt; (<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-number">25</span>);<br><span class="hljs-keyword">var</span> (name, age) = <span class="hljs-title function_">getUserInfo</span>(); <span class="hljs-comment">// 解构赋值</span><br><br><span class="hljs-comment">//4. 同时返回数据和错误，不需要单独定义 Result 类</span><br><span class="hljs-title class_">Future</span>&lt;(<span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">String</span>&gt;?, <span class="hljs-title class_">String</span>?)&gt; <span class="hljs-title function_">fetchItems</span>() <span class="hljs-keyword">async</span> &#123;<br>  <span class="hljs-keyword">try</span> &#123;<br>    <span class="hljs-comment">// 模拟网络请求</span><br>    <span class="hljs-keyword">return</span> ([<span class="hljs-string">&#x27;item1&#x27;</span>, <span class="hljs-string">&#x27;item2&#x27;</span>], <span class="hljs-keyword">null</span>); <span class="hljs-comment">// 成功</span><br>  &#125; <span class="hljs-keyword">catch</span> (e) &#123;<br>    <span class="hljs-keyword">return</span> (<span class="hljs-keyword">null</span>, e.<span class="hljs-title function_">toString</span>()); <span class="hljs-comment">// 失败</span><br>  &#125;<br>&#125;<br><br><span class="hljs-comment">// 调用端：直接解构赋值，逻辑清晰</span><br><span class="hljs-keyword">void</span> <span class="hljs-title function_">loadData</span>() <span class="hljs-keyword">async</span> &#123;<br>  <span class="hljs-keyword">final</span> (items, error) = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetchItems</span>(); <br>  <span class="hljs-keyword">if</span> (error != <span class="hljs-keyword">null</span>) &#123;<br>    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;Error: <span class="hljs-subst">$error</span>&#x27;</span>);<br>  &#125; <span class="hljs-keyword">else</span> &#123;<br>    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;Items: <span class="hljs-subst">$items</span>&#x27;</span>);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="2-线程、消息"><a href="#2-线程、消息" class="headerlink" title="2. 线程、消息"></a>2. 线程、消息</h4><p>​    Flutter 引擎底层有 4 个线程(UI、渲染、平台、IO)，但开发者编写的 Dart 代码只运行在 UI 线程上，采用单线程事件循环模型。<code>async/await</code> 只是在这个单线程内调度任务，并非开启新线程。如果遇到解析大 JSON 等 CPU 密集型任务阻塞了 UI，我会使用 Dart 提供的 Isolate 机制。Isolate 拥有独立的内存和事件循环，不共享内存，通过消息传递通信，从根本上避免了锁竞争和线程安全问题，是 Flutter 中实现真正并行的核心武器。</p>
+<h4 id="3-GC"><a href="#3-GC" class="headerlink" title="3. GC"></a>3. GC</h4><h4 id="4-异步"><a href="#4-异步" class="headerlink" title="4. 异步"></a>4. 异步</h4><p>在 Dart 中，<code>async</code> 和 <code>await</code> 并不是魔法，它们本质上是 <strong><code>Future</code> 的语法糖</strong>，其底层完全依赖于 Dart 的<strong>单线程事件循环（Event Loop）和消息调度机制</strong>来实现异步。</p>
+<p><strong>1.</strong> <code>async</code>：函数的“包装器”与状态机**</p>
+<p>当你把一个函数标记为 <code>async</code> 时，Dart 编译器在底层会做两件事：</p>
+<ul>
+<li><strong>自动包装返回值</strong>：无论函数内部返回什么，它都会被包装成一个 <code>Future</code> 对象。</li>
+<li><strong>生成状态机</strong>：编译器会将 <code>async</code> 函数内部的代码逻辑转换为一个状态机（State Machine）。当函数执行时，它会同步运行直到遇到第一个 <code>await</code> 关键字。</li>
+</ul>
+<p><strong>2.</strong> <code>await</code>：挂起与消息入队**</p>
+<p>当代码执行到 <code>await someFuture</code> 时，消息机制开始发挥核心作用：</p>
+<ul>
+<li><p><strong>挂起当前执行</strong>：<code>await</code> 会立即“挂起（Suspend）”当前 <code>async</code> 函数的执行，并将函数的控制权交还给调用者。这意味着 <code>await</code> 后面的代码<strong>不会立即执行</strong>，也不会阻塞主线程。</p>
+</li>
+<li><p>注册回调（消息入队）</p>
+<p>Dart 会在 someFuture 完成时，将 await后面的代码作为一个回调任务进行调度。根据 Future</p>
+<p> 的状态，这个任务会被放入不同的队列中：</p>
+<ul>
+<li>如果 <code>Future</code> 已经执行完毕，后续的代码会被放入<strong>微任务队列（Microtask Queue）</strong>。</li>
+</ul>
+</li>
+<li><p>如果 <code>Future</code> 还在执行中（例如网络请求），后续代码会被放入<strong>事件队列（Event Queue）</strong>，等待 I&#x2F;O 操作完成后再被调度。</p>
+</li>
+</ul>
+<h4 id="5-setState原理"><a href="#5-setState原理" class="headerlink" title="5. setState原理"></a>5. setState原理</h4><ol>
+<li>同步执行回调，更新内存数据</li>
+<li>标记当前Element为脏节点</li>
+<li>等待Vsync信号，批量处理脏节点</li>
+<li>新旧树对比，局部重绘</li>
+</ol>
+<h4 id="6-Stream原理-StreamController-StreamBuilder"><a href="#6-Stream原理-StreamController-StreamBuilder" class="headerlink" title="6. Stream原理(StreamController&#x2F;StreamBuilder)"></a>6. Stream原理(StreamController&#x2F;StreamBuilder)</h4><p>核心机制：<strong>生产者与消费者的单向数据管道</strong>，分为单次订阅和广播流。</p>
+<h4 id="7-InheritedWidget"><a href="#7-InheritedWidget" class="headerlink" title="7. InheritedWidget"></a>7. InheritedWidget</h4><p>“<code>InheritedWidget</code> 是 Flutter 中实现跨组件状态共享的核心机制。它通过自上而下注入数据，并利用底层的 Element 树建立依赖关系。当数据变化时，它通过 <code>updateShouldNotify</code> 方法判断，仅通知依赖它的子组件进行精准重建，避免了全局刷新带来的性能损耗。同时，它也是 Provider 等主流状态管理库的底层实现基础。”</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-comment">// 场景一：纯 setState 方案（自上而下的盲目遍历）</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">_MyPageState</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">MyPage</span>&gt; </span>&#123;<br>  <span class="hljs-built_in">int</span> _count = <span class="hljs-number">0</span>;<br><br>  <span class="hljs-meta">@override</span><br>  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) &#123;<br>    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;🔥 _MyPageState build 执行&#x27;</span>); <span class="hljs-comment">// 每次点击都会打印</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Column</span>(<br>      children: [<br>        <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;计数: <span class="hljs-subst">$_count</span>&#x27;</span>),<br>        <span class="hljs-title class_">ElevatedButton</span>(onPressed: () =&gt; <span class="hljs-title function_">setState</span>(() =&gt; _count++), child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;+1&#x27;</span>)),<br>        <span class="hljs-title class_">HeavyList</span>(), <span class="hljs-comment">// 庞大的列表</span><br>      ],<br>    );<br>  &#125;<br>&#125;<br><span class="hljs-comment">// 场景二：InheritedWidget 方案（精准定向打击）</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">_MyPageState</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">State</span>&lt;<span class="hljs-title">MyPage</span>&gt; </span>&#123;<br>  <span class="hljs-built_in">int</span> _count = <span class="hljs-number">0</span>;<br><br>  <span class="hljs-meta">@override</span><br>  <span class="hljs-title class_">Widget</span> <span class="hljs-title function_">build</span>(<span class="hljs-title class_">BuildContext</span> context) &#123;<br>    <span class="hljs-title function_">print</span>(<span class="hljs-string">&#x27;🔥 _MyPageState build 执行&#x27;</span>); <span class="hljs-comment">// 每次点击也会打印</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-title class_">CounterInherited</span>(<br>      count: _count,<br>      child: <span class="hljs-title class_">Column</span>(<br>        children: [<br>          <span class="hljs-title class_">ShowCount</span>(), <span class="hljs-comment">// 依赖 count</span><br>          <span class="hljs-title class_">ElevatedButton</span>(onPressed: () =&gt; <span class="hljs-title function_">setState</span>(() =&gt; _count++), child: <span class="hljs-title class_">Text</span>(<span class="hljs-string">&#x27;+1&#x27;</span>)),<br>          <span class="hljs-title class_">HeavyList</span>(), <span class="hljs-comment">// 庞大的列表（完全不依赖 count）</span><br>        ],<br>      ),<br>    );<br>  &#125;<br>&#125;<br><br>💡 核心总结<br>普通 setState 的 <span class="hljs-title class_">Diff</span>：像“安检员”。虽然发现 <span class="hljs-title class_">HeavyList</span> 没变可以复用，但安检员依然要把 <span class="hljs-title class_">HeavyList</span> 里面几百个乘客的身份证都核对一遍，确认没带违禁品才放行。<br><span class="hljs-title class_">InheritedWidget</span> 的 <span class="hljs-title class_">Diff</span>：像“狙击手”。它手里有一份名单（_dependents），谁依赖了数据，它就直接打谁。它连看都不看旁边那个巨大的 <span class="hljs-title class_">HeavyList</span>，直接跳过了整个扫描过程。<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-进阶"><a href="#2-进阶" class="headerlink" title="2. 进阶"></a>2. 进阶</h3><h4 id="1-渲染机制三棵树"><a href="#1-渲染机制三棵树" class="headerlink" title="1. 渲染机制三棵树"></a>1. 渲染机制三棵树</h4><h4 id="2-动画"><a href="#2-动画" class="headerlink" title="2. 动画"></a>2. 动画</h4><h4 id="3-状态管理"><a href="#3-状态管理" class="headerlink" title="3. 状态管理"></a>3. 状态管理</h4><h4 id="4-原生交互"><a href="#4-原生交互" class="headerlink" title="4. 原生交互"></a>4. 原生交互</h4><h4 id="5-…"><a href="#5-…" class="headerlink" title="5. …"></a>5. …</h4><h3 id="3-高级"><a href="#3-高级" class="headerlink" title="3. 高级"></a>3. 高级</h3><h4 id="1-性能优化"><a href="#1-性能优化" class="headerlink" title="1. 性能优化"></a>1. 性能优化</h4><h5 id="1-冷启动"><a href="#1-冷启动" class="headerlink" title="1. 冷启动"></a>1. 冷启动</h5><p>开始时间App进程fork，结束时间首帧回调成功。（进程 fork → 原生启动 → Flutter 引擎&#x2F;VM 加载 → 业务代码 Build → 首帧渲染）。理想指标2秒之内。</p>
+<p>优化手段：</p>
+<ol>
+<li><p>代码优化</p>
+<p>通知、埋点、网络延迟加载；</p>
+<p>缓存信息精简和一次读取；</p>
+<p>减少复杂业务逻辑、同步代码、大json解析；</p>
+<p>UI扁平化、减少大图、动画；</p>
+</li>
+<li><p>编译优化</p>
+<p>包混淆、压缩，剔除无效图标和代码；</p>
+<p>导入类精简(import ‘package:flutter&#x2F;material.dart’ show MaterialApp, Scaffold, AppBar, Text, Center; )；</p>
+<p>引擎预热(混合开发使用)；</p>
+</li>
+</ol>
+<h5 id="2-UI卡顿"><a href="#2-UI卡顿" class="headerlink" title="2. UI卡顿"></a>2. UI卡顿</h5><p>​    耗时时间计算：  UI线程耗时：build-layout-paint-compositing; 渲染线程耗时。	</p>
+<p>​    业界标准：</p>
+<ol>
+<li><strong>当前帧耗时 &gt; 前3帧平均耗时 × 2</strong></li>
+<li><strong>当前帧耗时 &gt; 83.3ms</strong>（两帧电影帧耗时，即 1000÷24×2≈83.3ms）</li>
+</ol>
+<p>  若帧耗时进一步超过 <strong>125ms</strong>（三帧电影帧耗时），则判定为 <strong>BigJank（严重卡顿）</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>等级</th>
+<th>判定条件</th>
+<th>处理策略</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>正常</td>
+<td>100帧内 Jank 帧数 &#x3D; 0</td>
+<td>无需关注</td>
+</tr>
+<tr>
+<td>轻微</td>
+<td>100帧内 Jank 帧数 &#x3D; 1</td>
+<td>记录日志，周报汇总观察趋势</td>
+</tr>
+<tr>
+<td>需优化</td>
+<td>100帧内 Jank 帧数 &#x3D; 2~3</td>
+<td>标记为”关注页面”，纳入优化清单</td>
+</tr>
+<tr>
+<td>严重</td>
+<td>100帧内 Jank 帧数 ≥ 4</td>
+<td>高优先级，限期整改</td>
+</tr>
+<tr>
+<td>紧急</td>
+<td>出现 BigJank（单帧 &gt;125ms）</td>
+<td>无论次数，立即排查</td>
+</tr>
+</tbody></table>
+<p> 优化方式：</p>
+<p> <strong>一、UI 线程优化（Dart 代码侧）</strong></p>
+<p>UI 线程负责 Widget 构建、布局计算、业务逻辑。优化核心是<strong>减少无效计算、缩小重建范围、异步化耗时操作</strong>。</p>
+<p> <strong>1. 减少 Widget 重建</strong></p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>用 const 构造函数</strong></td>
+<td align="left">静态子树直接复用实例，父级重建时零开销。<code>const Text(&#39;hello&#39;)</code> vs <code>Text(&#39;hello&#39;)</code>，差距巨大。</td>
+</tr>
+<tr>
+<td align="left"><strong>拆分 StatefulWidget</strong></td>
+<td align="left">把会变化的部分抽成独立子组件，setState 只重建局部，不拖垮整页。</td>
+</tr>
+<tr>
+<td align="left"><strong>精准状态管理</strong></td>
+<td align="left">用 <code>ValueNotifier + ValueListenableBuilder</code> 或 <code>Provider.select()</code> 替代全局 setState，只刷新真正依赖数据的组件。</td>
+</tr>
+<tr>
+<td align="left"><strong>避免在 build 里创建对象</strong></td>
+<td align="left"><code>build()</code> 每帧可能被调用多次，里面不要 new 对象、拼接字符串、解析数据。</td>
+</tr>
+</tbody></table>
+<p> <strong>2. 列表渲染优化</strong></p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>必须用 ListView.builder</strong></td>
+<td align="left">禁止 <code>Column + List.generate</code> 或 <code>ListView(children: ...toList())</code> 一次性构建几百个 item。</td>
+</tr>
+<tr>
+<td align="left"><strong>设置 itemExtent</strong></td>
+<td align="left">固定列表项高度，引擎不用逐帧测量每个 item 的尺寸，布局计算量大幅下降。</td>
+</tr>
+<tr>
+<td align="left"><strong>设置 cacheExtent</strong></td>
+<td align="left">预加载可视区域外的内容，滑动时减少空白和卡顿。</td>
+</tr>
+<tr>
+<td align="left"><strong>Tab&#x2F;PageView 用 AutomaticKeepAliveClientMixin</strong></td>
+<td align="left">保持子页状态，切换时不用重建。</td>
+</tr>
+</tbody></table>
+<p> <strong>3. 异步化耗时操作</strong></p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>compute() &#x2F; Isolate</strong></td>
+<td align="left">JSON 解析、复杂计算、批量数据处理等 CPU 密集型任务，必须移到后台 Isolate，避免阻塞 UI 线程。</td>
+</tr>
+<tr>
+<td align="left"><strong>initState 里异步加载</strong></td>
+<td align="left">文件读取、网络请求放在 <code>initState</code> 里用 <code>Future</code> 处理，配合 <code>FutureBuilder</code> 展示 loading 态，绝不在 build 里同步 IO。</td>
+</tr>
+<tr>
+<td align="left"><strong>高频交互加防抖</strong></td>
+<td align="left">搜索输入等场景用 Debounce（250ms 左右），避免每次按键都触发 setState。</td>
+</tr>
+</tbody></table>
+<p> <strong>4. 布局与绘制优化</strong></p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>简化嵌套层级</strong></td>
+<td align="left">用 <code>Padding</code> 替代 <code>Container(padding:)</code>，用 <code>SizedBox</code> 替代空 <code>Container</code>，减少 Layout 计算。</td>
+</tr>
+<tr>
+<td align="left"><strong>避免 Intrinsic 组件</strong></td>
+<td align="left"><code>IntrinsicHeight</code> &#x2F; <code>IntrinsicWidth</code> 会触发多次布局测量，性能极差。</td>
+</tr>
+<tr>
+<td align="left"><strong>RepaintBoundary 隔离</strong></td>
+<td align="left">动画、视频、实时图表等高频重绘区域，用 <code>RepaintBoundary</code> 包裹，避免牵连父级和兄弟节点重绘。</td>
+</tr>
+</tbody></table>
+<hr>
+<p> <strong>二、Raster 线程优化（GPU 渲染侧）</strong></p>
+<p>Raster 线程负责将 UI 线程产出的 Layer Tree 光栅化为像素并提交 GPU。优化核心是<strong>减少 GPU 负载、避免昂贵的渲染操作</strong>。</p>
+<p> <strong>1. 避免 saveLayer（最关键的 Raster 杀手）</strong></p>
+<p><code>saveLayer</code> 会创建离屏缓冲区，强制 GPU 做额外的合成操作，成本极高。以下 Widget <strong>隐式触发 saveLayer</strong>：</p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">触发源</th>
+<th align="left">优化方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Opacity Widget</strong></td>
+<td align="left">用 <code>Color.withOpacity()</code> 直接给颜色加 alpha，或用 <code>FadeTransition</code> &#x2F; <code>AnimatedOpacity</code> 替代。</td>
+</tr>
+<tr>
+<td align="left"><strong>ShaderMask &#x2F; ColorFilter</strong></td>
+<td align="left">尽量避免在动画中使用，或预渲染为静态图片。</td>
+</tr>
+<tr>
+<td align="left"><strong>BackdropFilter（模糊）</strong></td>
+<td align="left">模糊成本与面积正相关，只用在卡片级小区域，绝不要糊全屏。</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 检测技巧：在 <code>MaterialApp</code> 里加 <code>checkerboardOffscreenLayers: true</code>，所有触发 saveLayer 的区域会以棋盘格闪烁，一目了然。</p>
+</blockquote>
+<p> <strong>2. 图片优化</strong></p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>限制解码尺寸</strong></td>
+<td align="left">用 <code>cacheWidth</code> &#x2F; <code>cacheHeight</code> 按显示尺寸解码，不要让 4000×3000 的原图解码后塞进 200px 的卡片。</td>
+</tr>
+<tr>
+<td align="left"><strong>使用缓存</strong></td>
+<td align="left">网络图片用 <code>cached_network_image</code>，实现内存+磁盘双缓存，避免重复下载和解码。</td>
+</tr>
+<tr>
+<td align="left"><strong>优先 WebP 格式</strong></td>
+<td align="left">体积比 PNG&#x2F;JPG 小 25%~35%，解码更快。</td>
+</tr>
+<tr>
+<td align="left"><strong>控制 ImageCache 大小</strong></td>
+<td align="left">通过 <code>PaintingBinding.instance.imageCache</code> 设置 <code>maximumSize</code> 和 <code>maximumSizeBytes</code>，防止内存膨胀。</td>
+</tr>
+</tbody></table>
+<p> <strong>3. 减少裁剪与阴影</strong></p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>避免 Clip.antiAliasWithSaveLayer</strong></td>
+<td align="left">用默认的 <code>Clip.antiAlias</code> 即可，<code>WithSaveLayer</code> 每次裁剪都开离屏缓冲区。</td>
+</tr>
+<tr>
+<td align="left"><strong>减少 BoxShadow 层级</strong></td>
+<td align="left">多层阴影叠加会显著增加 GPU 填充率，能用边框替代就用边框。</td>
+</tr>
+<tr>
+<td align="left"><strong>动画前预裁剪</strong></td>
+<td align="left">需要在动画中裁剪的图片，提前裁剪好再用，不要在动画过程中实时裁剪。</td>
+</tr>
+</tbody></table>
+<h4 id="2-架构设计、工程化"><a href="#2-架构设计、工程化" class="headerlink" title="2. 架构设计、工程化"></a>2. 架构设计、工程化</h4><h4 id="3-AI"><a href="#3-AI" class="headerlink" title="3. AI"></a>3. AI</h4><h3 id="4-其他"><a href="#4-其他" class="headerlink" title="4. 其他"></a>4. 其他</h3><h4 id="1-自我介绍"><a href="#1-自我介绍" class="headerlink" title="1. 自我介绍"></a>1. 自我介绍</h4><h4 id="2-项目问题解决"><a href="#2-项目问题解决" class="headerlink" title="2. 项目问题解决"></a>2. 项目问题解决</h4><ul>
+<li><strong>一、问题本质</strong></li>
+</ul>
+<p>我在做 AI 流式对话时遇到一个性能问题：大模型通过 SSE 协议流式返回数据，SSE 是基于 HTTP 的长连接，服务端会持续向客户端推送数据块。</p>
+<p>问题在于，SSE 的推送频率是不可控的，短时间内可能连续推送多个 chunk。如果每个 chunk 都直接触发 UI 更新，就会导致 Flutter 在一帧内多次 setState，进而引发频繁 build、diff、layout，甚至导致卡顿。</p>
+<p>同时产品还要输出效果有节奏感——每行由慢到快线性加速显示。这就多了一层复杂度：网络给数据的速度和 UI 展示的速度是两回事，怎么协调？</p>
+<p><strong>二、方案分析</strong></p>
+<p>我的方案分三层处理：</p>
+<p><strong>第一层：网络接收层——控制数据推送频率</strong></p>
+<p>SSE 流式数据过来后，我不会每个 chunk 都直接 setState，而是先做缓冲和合并。按 30ms 的时间窗口数据合并，控制输出流频率。</p>
+<p>这里 30ms 不是随便定的——60fps 下每帧约 16.6ms 的预算，30ms 大约两帧，既能降低高频 setState 带来的 build 压力，又能保持流式显示的连贯性。</p>
+<p><strong>第二层：状态管理层——控制刷新范围</strong></p>
+<p>这一层解决的是”谁该 rebuild、谁不该 rebuild”的问题。</p>
+<p>我会把”正在生成的流式消息”和”已经完成的历史消息”分开管理。历史消息已经稳定，不应该因为当前流式消息更新而反复重建；只有当前正在生成的消息参与高频更新。</p>
+<p>具体实现上，我封装独立的Text StatefulWidget 把每条消息的状态隔离开，里面用ValueNotifier控制刷新范围，确保更新最后一条消息时，只有最后一条 rebuild，历史消息完全不受影响。</p>
+<p><strong>第三层：UI 渲染层——控制显示节奏</strong></p>
+<p>产品希望打字机效果有节奏感，所以我在 UI 层的TextWidget单独做了一个打字机控制器，把网络层合并后的文本放进字符队列，按产品要求的节奏逐字出队显示。</p>
+<p>节奏上我设计了每行独立的线性加速——每行第一个字符 83ms，最后一个字符 30ms，中间线性插值，换行时重置。这样视觉上就是”每行开头稍顿，然后越打越快”，节奏感很强。</p>
+<p><strong>三、代码实现（1 分 30 秒）</strong></p>
+<p>代码上我分三块来做：</p>
+<p><strong>第一块：网络层缓冲合并</strong></p>
+<p>网络层我做了个 30ms 时间窗口的事件合并。具体实现是用变量缓存上一轮的时间戳和累积的 JSON 数据串。每次收到新的 chunk 时，先和缓存的时间戳做差值比较：</p>
+<ul>
+<li>如果差值小于 30ms，说明还在同一个时间窗口内，就把新数据和缓存数据合并，继续等待</li>
+<li>如果差值大于 30ms，说明窗口已过，直接把合并后的数据发送给上一层，同时重置缓存、更新时间戳</li>
+</ul>
+<p>这样 SSE 高频推送的多个 chunk 会被合并成一次更新，避免 UI 更新频率直接等于服务端推送频率。</p>
+<p><strong>第二块：刷新隔离</strong></p>
+<p>正在生成的消息 content 是独立的 RxString，用Obx包裹，TypewriterText 内部用 <code>RxString.listen()</code> 监听，只有当前这条消息在更新。历史消息的 Widget 完全不感知、不 rebuild。</p>
+<p><strong>第三块：打字机效果——行级加速 + 增量测量</strong></p>
+<ul>
+<li><strong>行级线性加速</strong>：每行独立计算，公式是 <code>delay(i) = 83 - 53 * i / (N-1)</code>，N 是这行的字符数。第一个字符 83ms，最后一个字符 30ms，换行时重置。延迟表按字符数缓存，相同字符数直接查表复用</li>
+<li><strong>增量行测量</strong>：每次新内容到达，取「上一个缓存边界 → 文本末尾」这段交给 TextPainter 测量，调用 <code>computeLineMetrics()</code> 获取行信息。已确认的行把边界位置缓存到 <code>_confirmedBoundaries</code> 列表里，永不重测。即使回复几千字，单次测量也只涉及当前行这一小段</li>
+<li><strong>一个工程取舍</strong>：第一行还没换行时，N 是未知的。当前方案用缓冲区长度近似，前几个字符的加速曲线会有轻微偏差，但差异在 13ms 以内，低于感知阈值，体感无影响</li>
+</ul>
+<h3 id="5-Flutter-插件开发原理"><a href="#5-Flutter-插件开发原理" class="headerlink" title="5. Flutter 插件开发原理"></a>5. Flutter 插件开发原理</h3><h4 id="1-插件注册机制（Platform-Channel）"><a href="#1-插件注册机制（Platform-Channel）" class="headerlink" title="1. 插件注册机制（Platform Channel）"></a>1. 插件注册机制（Platform Channel）</h4><p><strong>整体流程：</strong></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-number">1</span>. <span class="hljs-title class_">Flutter</span> <span class="hljs-title class_">App</span> 启动<br>       ↓<br><span class="hljs-number">2</span>. <span class="hljs-title class_">Flutter</span> <span class="hljs-title class_">Engine</span> 初始化<br>       ↓<br><span class="hljs-number">3</span>. <span class="hljs-title class_">Engine</span> 调用 <span class="hljs-title class_">GeneratedPluginRegistrant</span>.<span class="hljs-title function_">registerWith</span>()<br>   （这个文件是 <span class="hljs-title class_">Flutter</span> 构建时自动生成的）<br>       ↓<br><span class="hljs-number">4</span>. 遍历所有注册的插件，逐个调用：<br>   <span class="hljs-title class_">Plugin1021Plugin</span>().<span class="hljs-title function_">onAttachedToEngine</span>(binding)<br>       ↓<br><span class="hljs-number">5</span>. 插件自己的代码创建 <span class="hljs-title class_">MethodChannel</span>：<br>   channel = <span class="hljs-title class_">MethodChannel</span>(binding.binaryMessenger, <span class="hljs-string">&quot;plugin1021&quot;</span>)<br>   channel.<span class="hljs-title function_">setMethodCallHandler</span>(<span class="hljs-keyword">this</span>)<br>       ↓<br><span class="hljs-number">6</span>. <span class="hljs-title class_">Channel</span> 就绪，开始监听 <span class="hljs-title class_">Dart</span> 侧的调用<br></code></pre></td></tr></table></figure>
+
+<p><strong>各角色职责：</strong></p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>做了什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Flutter Engine</td>
+<td>启动时触发插件注册，调用 onAttachedToEngine</td>
+</tr>
+<tr>
+<td>GeneratedPluginRegistrant</td>
+<td>自动生成的”注册表”，把每个插件挂到 Engine 上</td>
+</tr>
+<tr>
+<td>插件自己（你的 Kotlin&#x2F;Swift 代码）</td>
+<td>创建 MethodChannel，绑定 binaryMessenger，设置 Handler</td>
+</tr>
+</tbody></table>
+<h4 id="2-三种-Channel-类型"><a href="#2-三种-Channel-类型" class="headerlink" title="2. 三种 Channel 类型"></a>2. 三种 Channel 类型</h4><table>
+<thead>
+<tr>
+<th>Channel 类型</th>
+<th>通信方式</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MethodChannel</td>
+<td>请求-响应（Dart → Native）</td>
+<td>调用原生 API，如获取电量、调用相机</td>
+</tr>
+<tr>
+<td>EventChannel</td>
+<td>持续流（Native → Dart）</td>
+<td>传感器数据、网络状态变化等持续推送</td>
+</tr>
+<tr>
+<td>BasicMessageChannel</td>
+<td>双向消息传递</td>
+<td>自定义数据格式通信，如 JSON 字符串</td>
+</tr>
+</tbody></table>
+<h4 id="3-插件开发常见问题"><a href="#3-插件开发常见问题" class="headerlink" title="3. 插件开发常见问题"></a>3. 插件开发常见问题</h4><p><strong>问题一：Channel 名称不一致导致通信失败</strong></p>
+<ul>
+<li>现象：Dart 侧调用方法，Native 侧收不到；或者 Native 回调了，Dart 侧没响应</li>
+<li>原因：Dart 端和 Native 端的 Channel Name 拼写不一致</li>
+<li>解决：统一使用常量定义 Channel Name，避免硬编码字符串</li>
+</ul>
+<p><strong>问题二：在 Channel 回调中做耗时操作阻塞主线程</strong></p>
+<ul>
+<li><p>现象：调用 Native 方法后 App 卡顿，甚至 ANR（Android）或卡顿（iOS）</p>
+</li>
+<li><p>原因：MethodChannel 的回调在 <strong>Android 和 iOS 上都运行在主线程</strong>。Android 是 Platform Thread &#x3D; Main Thread，iOS 是 Main Queue。如果在回调中直接做耗时操作（网络请求、文件读写、数据库查询），会阻塞主线程</p>
+</li>
+<li><p>解决：耗时操作必须切到后台线程执行，<code>result</code> 可以在任意线程回调（Flutter 内部保证线程安全）</p>
+<p><strong>Android 示例（Kotlin 协程）：</strong></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">onMethodCall</span><span class="hljs-params">(call: <span class="hljs-type">MethodCall</span>, result: <span class="hljs-type">Result</span>)</span></span> &#123;<br>    <span class="hljs-keyword">when</span> (call.method) &#123;<br>        <span class="hljs-string">&quot;getData&quot;</span> -&gt; &#123;<br>            <span class="hljs-comment">// onMethodCall 已在主线程，耗时操作切到 IO 线程</span><br>            CoroutineScope(Dispatchers.IO).launch &#123;<br>                <span class="hljs-keyword">val</span> <span class="hljs-keyword">data</span> = fetchDataFromNetwork()<br>                result.success(<span class="hljs-keyword">data</span>) <span class="hljs-comment">// 直接回调，无需切回主线程</span><br>            &#125;<br>        &#125;<br>        <span class="hljs-string">&quot;quickMethod&quot;</span> -&gt; &#123;<br>            <span class="hljs-comment">// 轻量操作直接在主线程完成</span><br>            result.success(<span class="hljs-string">&quot;done&quot;</span>)<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>iOS 示例（GCD）：</strong></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs swift"><span class="hljs-keyword">public</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">handle</span>(<span class="hljs-keyword">_</span> <span class="hljs-params">call</span>: <span class="hljs-type">FlutterMethodCall</span>, <span class="hljs-params">result</span>: <span class="hljs-keyword">@escaping</span> <span class="hljs-type">FlutterResult</span>) &#123;<br>    <span class="hljs-keyword">switch</span> call.method &#123;<br>    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;getData&quot;</span>:<br>        <span class="hljs-comment">// handle 已在主线程，耗时操作切到后台队列</span><br>        <span class="hljs-type">DispatchQueue</span>.global(qos: .background).async &#123;<br>            <span class="hljs-keyword">let</span> data <span class="hljs-operator">=</span> fetchDataFromNetwork()<br>            result(data) <span class="hljs-comment">// 直接回调，无需切回主线程</span><br>        &#125;<br>    <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;quickMethod&quot;</span>:<br>        <span class="hljs-comment">// 轻量操作直接在主线程完成</span><br>        result(<span class="hljs-string">&quot;done&quot;</span>)<br>    <span class="hljs-keyword">default</span>:<br>        result(<span class="hljs-type">FlutterMethodNotImplemented</span>)<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>问题三：插件注册时机问题——FlutterFragment&#x2F;FlutterActivity 复用</strong></p>
+<ul>
+<li>现象：页面重建后插件失效，Channel 调用无响应</li>
+<li>原因：FlutterEngine 被复用或重建，但插件没有重新注册</li>
+<li>解决：确保在 <code>onAttachedToEngine</code> 中正确初始化 Channel，在 <code>onDetachedFromEngine</code> 中释放资源</li>
+</ul>
+<p><strong>问题四：异步调用导致返回值丢失</strong></p>
+<ul>
+<li>现象：Dart 调用 Native 方法后一直 pending，不返回</li>
+<li>原因：Native 侧方法有异步操作（如网络请求），但没有在完成后调用 <code>result.success()</code> 或 <code>result.error()</code></li>
+<li>解决：确保所有代码路径都有 <code>result</code> 回调，包括异常分支<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs kotlin"><span class="hljs-keyword">override</span> <span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">onMethodCall</span><span class="hljs-params">(call: <span class="hljs-type">MethodCall</span>, result: <span class="hljs-type">Result</span>)</span></span> &#123;<br>    <span class="hljs-keyword">try</span> &#123;<br>        doAsyncWork &#123; <span class="hljs-keyword">data</span> -&gt;<br>            result.success(<span class="hljs-keyword">data</span>) <span class="hljs-comment">// 必须回调</span><br>        &#125;<br>    &#125; <span class="hljs-keyword">catch</span> (e: Exception) &#123;<br>        result.error(<span class="hljs-string">&quot;ERROR&quot;</span>, e.message, <span class="hljs-literal">null</span>) <span class="hljs-comment">// 异常也要回调</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>问题五：iOS 和 Android 行为不一致</strong></p>
+<ul>
+<li>现象：同一个插件在 Android 正常，iOS 崩溃或无响应</li>
+<li>原因：两端平台线程模型不同，iOS 的 Flutter Engine 绑定在主线程，Android 可能在 Platform Thread</li>
+<li>解决：分别测试两端，注意 iOS 上不要阻塞主线程，Android 上注意线程切换</li>
+</ul>
+<p><strong>问题六：插件依赖冲突</strong></p>
+<ul>
+<li>现象：集成插件后编译失败，报依赖版本冲突</li>
+<li>原因：多个插件依赖了同一个库的不同版本（如 Kotlin 版本、AndroidX 版本）</li>
+<li>解决：使用 <code>resolutionStrategy</code> 强制统一版本，或升级插件到兼容版本</li>
+</ul>
+<p><strong>问题七：热重载后插件状态丢失</strong></p>
+<ul>
+<li>现象：Hot Reload 后 Native 侧状态丢失，需要重新初始化</li>
+<li>原因：热重载不会重新执行 Native 代码，但 Dart 侧状态已重置</li>
+<li>解决：关键状态放在 Native 侧持久化，或通过 <code>setMethodCallHandler</code> 重新绑定</li>
+</ul>
+<h4 id="4-插件开发最佳实践"><a href="#4-插件开发最佳实践" class="headerlink" title="4. 插件开发最佳实践"></a>4. 插件开发最佳实践</h4><table>
+<thead>
+<tr>
+<th>实践</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Channel Name 用包名限定</td>
+<td>如 <code>com.example.plugin/method</code>，避免与其他插件冲突</td>
+</tr>
+<tr>
+<td>定义清晰的接口协议</td>
+<td>方法名、参数类型、返回值都要有文档</td>
+</tr>
+<tr>
+<td>Native 侧做好异常处理</td>
+<td>所有 <code>result</code> 路径都要回调，避免 Dart 侧永远 pending</td>
+</tr>
+<tr>
+<td>资源正确释放</td>
+<td><code>onDetachedFromEngine</code> 中释放 Channel、监听器、线程池</td>
+</tr>
+<tr>
+<td>单元测试覆盖</td>
+<td>Dart 侧用 <code>TestDefaultBinaryMessenger</code> 模拟 Native 回调</td>
+</tr>
+</tbody></table>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E9%9D%A2%E8%AF%95/" class="category-chain-item">面试</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Flutter/" class="print-no-link">#Flutter</a>
+      
+        <a href="/tags/%E9%9D%A2%E8%AF%95/" class="print-no-link">#面试</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>面试Flutter100QA</div>
+      <div>https://crazycoding7.github.io/2026/10/22/面试/面试Flutter100qa/</div>
+    </div>
+    <div class="license-meta">
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年10月22日</div>
+        </div>
+      
+      
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+    
+    
+      <span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
